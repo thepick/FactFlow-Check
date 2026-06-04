@@ -3,7 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FactFlow Check v2.4 - Smart Placement</title>
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="favicon-48x48.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="apple-touch-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="167x167" href="apple-touch-icon-167x167.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <title>FactFlow Check v2.5 - Smart Placement</title>
   <style>
     :root {
       --font-body: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -316,15 +322,15 @@
   (function () {
     'use strict';
 
-    var APP_VERSION = '2.4.0';
+    var APP_VERSION = '2.5.0';
     var RESULTS_KEY = 'factflowCheck.results.v2';
     var ATTEMPTS_KEY = 'factflowCheck.attempts.v2';
     var CONFIG_KEY = 'factflowCheck.config.v2';
     var TIMEOUT_SEC = 10;
-    var MAX_TEST_SEC = 300;
-    var MAX_QUESTIONS = 45;
+    var MAX_TEST_SEC = 400;
+    var MAX_QUESTIONS = 60;
     var MIN_QUESTIONS = 12;
-    var FAST_TRACK_BLOCK_SIZE = 4;
+    var FAST_TRACK_BLOCK_SIZE = 6;
     var FLUENT_MS = 4000;
     var SLOW_MS = 8000;
     var AUTO_SUBMIT_MS = 120;
@@ -350,7 +356,7 @@
       { id: 'E', label: '8s', tables: [8], blockSize: 8, extraSize: 4 },
       { id: 'F', label: '9s', tables: [9], blockSize: 8, extraSize: 4 },
       { id: 'G', label: '11s, 12s', tables: [11, 12], blockSize: 8, extraSize: 4 },
-      { id: 'H', label: 'Mixed 2-12', tables: [2,3,4,5,6,7,8,9,10,11,12], blockSize: 15, extraSize: 0 }
+      { id: 'H', label: 'Mixed 2-12', tables: [2,3,4,5,6,7,8,9,10,11,12], blockSize: 18, extraSize: 0 }
     ];
 
     var el = {};
@@ -710,8 +716,9 @@
     }
 
     function chooseTargets(count, isExtra, band) {
-      if (band.id === 'H') return { easy: 3, core: 7, hard: 5 };
-      if (isExtra || count <= FAST_TRACK_BLOCK_SIZE) return { easy: 1, core: 2, hard: 1 };
+      if (band.id === 'H') return { easy: 4, core: 8, hard: 6 };
+      if (isExtra) return { easy: 1, core: 2, hard: 1 };
+      if (count <= FAST_TRACK_BLOCK_SIZE) return { easy: 1, core: 3, hard: 2 };
       return { easy: 2, core: 4, hard: 2 };
     }
 
@@ -1251,7 +1258,7 @@
       }
       var repeatedWeakness = countRepeatedWeakness(answers);
       if (band.id === 'H') {
-        if (correct >= 13 && fluent >= 10 && timeout <= 2 && repeatedWeakness < 2) return 'pass';
+        if (correct >= Math.ceil(n * 0.85) && fluent >= Math.ceil(n * 0.66) && timeout <= 2 && repeatedWeakness < 2) return 'pass';
         return 'fail';
       }
       if (s && s.fastTrack && s.currentBlockMode === 'gateway' && !hadExtras && n <= FAST_TRACK_BLOCK_SIZE) {

@@ -1,8 +1,8 @@
-# FactFlow Check v2.4
+# FactFlow Check v2.5
 
 FactFlow Check is a separate supervised assessment app for multiplication fact placement. It looks and feels similar to FactFlow, but it does not use regular FactFlow practice progress as proof of mastery.
 
-## What changed in v2.4
+## What changed in v2.5
 
 - Full results now appear automatically when the check finishes.
 - Students do not need a teacher password to see the result screen.
@@ -10,7 +10,7 @@ FactFlow Check is a separate supervised assessment app for multiplication fact p
 - CSV export is not included.
 - Results are meant to be read and recorded directly from the screen.
 - Fast, accurate answers now help strong students climb more efficiently.
-- A strong student can now reach Band H within the 45-question cap.
+- A strong student can now complete the full fast-track path within the 60-question cap.
 - The app checks whether there is enough question budget before starting the next full band.
 - The 10-second question limit remains, but fluency is judged by response speed.
 
@@ -32,18 +32,18 @@ The warm-up has 6 questions. If the student answers the warm-up correctly and fl
 
 In fast-track mode:
 
-- Bands B through G start with 4-question gateway blocks.
+- Bands B through G start with 6-question gateway blocks.
 - A perfect or near-perfect fluent gateway block moves the student up.
 - An unclear gateway block triggers 4 more questions from the same band.
 - A weak gateway block stops the climb.
-- Band H remains a 15-question mixed 2-12 check.
+- Band H uses an 18-question mixed 2-12 check.
 
 This allows a very strong student to complete:
 
 - Warm-up: 6 questions
-- Bands B-G: 6 bands x 4 questions = 24 questions
-- Band H: 15 questions
-- Total: 45 questions
+- Bands B-G: 6 bands x 6 questions = 36 questions
+- Band H: 18 questions
+- Total: 60 questions
 
 ## Standard path
 
