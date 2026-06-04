@@ -1,63 +1,67 @@
-# FactFlow Check v2.3
+# FactFlow Check - Smart Placement
 
-FactFlow Check is a separate supervised assessment app for multiplication fact placement. It is meant to identify the hardest fact band a student can answer accurately and reasonably quickly without using regular FactFlow practice progress.
+FactFlow Check is a separate assessment app for supervised multiplication fact checks. It is designed to look and feel familiar to FactFlow users, but it does not read or write regular FactFlow practice progress.
 
-## What changed in v2.3
+## Version 1.1 features
 
-- Replaces the daily fallback code with a 4-hour rotating student code.
-- Calculates the rotating code using Bangkok time so the classroom code window is predictable.
-- Shows the current 4-hour code and its valid-until time inside Teacher Tools only.
-- Keeps the student page from showing the code.
-- Replaces the separate Back and Lock behavior with one `Exit and Lock` button for Teacher Tools.
-- Removes the separate Lock Teacher Area button because exiting Teacher Tools now locks access automatically.
+- Separate assessment app
+- Teacher setup with assessment name, assessment ID, class name, and teacher code
+- Teacher code generator
+- Student name and student ID entry
+- Local one-time attempt lock using class, assessment ID, student ID, and teacher code
+- Restart detection for interrupted attempts
+- Warm-up calibration
+- Adaptive fact-band placement check
+- Per-question timer
+- Balanced question selection inside each band
+- Missed fact and timeout tracking
+- Verified level and developing level result
+- Recommended next practice focus
+- Local result history for on-screen review
 
-## What changed in v2.2
+## Important note about one-time use
 
-- Adds a teacher access lock before opening Teacher Tools.
-- Locks the teacher result screen behind the same teacher access check.
-- Uses a salted SHA-256 hash check instead of storing the teacher passphrase as plain text.
-- Keeps the student page simple: name/ID, teacher code, and Begin Check.
-- Stops showing the class code on the student page. Students must get the code from the teacher.
-- Accepts only the saved class code or the current 4-hour student code; random code-looking entries are no longer accepted.
-- Removes CSV and JSON export controls from Teacher Tools.
-- Removes the dark theme and theme toggle.
-- Keeps a 15-minute teacher auto-lock.
+Version 1 uses local browser storage. This prevents a completed student from reusing the same assessment code on the same device and browser. It is useful for normal supervised classroom use, but it is not a secure cross-device lock.
 
-## What changed in v2.1
+For stronger control later, add Google Sheet or backend submission so the app can check completed attempts across devices.
 
-- Fixes a runaway retest loop where repeated wrong answers could keep generating reversal retests until the 45-question maximum.
-- Caps reversal retests to four per band and only one retest per fact family per band.
-- Prevents retest questions from creating more retest questions.
-- Adds an early-stop rule for clearly struggling performance inside a band after enough evidence is gathered.
+## Suggested classroom workflow
 
-## What changed in v2
+1. Open the app on student devices.
+2. Set the assessment name, assessment ID, class name, and teacher code.
+3. Write the teacher code on the board.
+4. Students enter their name, student ID, and code.
+5. Students complete the check.
+6. The result screen appears automatically when the check is complete.
+7. The teacher records the result from the screen.
 
-- Tracks and clears the short auto-submit timer so cleared answers cannot submit later as wrong.
-- Checks time/question limits before moving into a new band, avoiding phantom attempted bands.
-- Rebalances single-factor bands such as 6s, 7s, 8s, and 9s so the intended easy/core/hard mix is possible.
-- Adds both Clear and Backspace controls on the on-screen keypad.
-- Uses a slightly longer idle-submit window for 3-digit answers.
-- Saves starting band, highest attempted band, restart count, and full question-level data.
-- Uses a storage event listener so teacher setup and results refresh across tabs when no assessment is active.
-- Keeps history visible without silently clipping older results.
+## Assessment bands
 
-## Deployment
+- Band A: 2s, 5s, 10s
+- Band B: 3s, 4s
+- Band C: 6s
+- Band D: 7s
+- Band E: 8s
+- Band F: 9s
+- Band G: 11s, 12s
+- Band H: Mixed 2-12
 
-Upload `index.html` to the root of a GitHub Pages repository, or upload the entire zip contents to a web host.
+## Result categories
 
-## Classroom workflow
+- Fluent: correct under 4 seconds
+- Known but slow: correct in 4 to 8 seconds
+- Not fluent: correct after 8 seconds
+- Not secure: wrong or timeout
 
-1. Open the app.
-2. Teacher opens Teacher Tools, enters the teacher passphrase, and checks the current 4-hour student code or sets a saved class code.
-3. Teacher gives students the current 4-hour code or saved class code.
-4. Student enters name/ID and the code.
-5. Student completes the adaptive check.
-6. Student shows the teacher the completion screen.
-7. Teacher taps Teacher Result and enters the passphrase if needed.
-8. Teacher reviews the result and can start a new check.
+## Files
 
-## Notes
+- `index.html`: complete app
+- `assets/`: icon files copied from FactFlow
 
-This teacher lock is a classroom barrier, not true backend security. Because this is a static web app, a determined person with developer tools could inspect or bypass client-side code. For Grade 5 classroom use, it keeps the teacher tools out of normal student view.
+## Version 1.1 update
 
-The one-time-per-code lock is local to the device because this version has no backend. A new code or new assessment name allows another assessment later in the year.
+- Full result screen now appears immediately after the check finishes.
+- CSV export was removed.
+- Fast, accurate students now use shorter gateway blocks so they can reach Band H within the 45-question cap.
+- Correct answers are still capped at 10 seconds, but fast answers count as stronger fluency evidence.
+- The app checks the remaining question budget before starting a new block, so it does not begin a band it cannot finish.
