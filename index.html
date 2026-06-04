@@ -43,7 +43,8 @@
     .app { max-width: 920px; margin: 0 auto; padding: 16px; display: grid; gap: 14px; }
     .header { border-radius: var(--radius); padding: 14px 16px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; box-shadow: var(--shadow); display: flex; justify-content: space-between; gap: 12px; align-items: center; }
     .brand { display: flex; align-items: center; gap: 12px; }
-    .logo { width: 42px; height: 42px; border-radius: 50%; background: rgba(255,255,255,0.16); display: grid; place-items: center; font-weight: 800; font-size: 1.25rem; }
+    .logo { width: 42px; height: 42px; display: block; flex: 0 0 42px; }
+    .logo img { display: block; width: 100%; height: 100%; object-fit: contain; }
     .brand h1 { font-size: 1.25rem; line-height: 1.05; }
     .brand .subtitle { display: block; font-size: 0.78rem; font-weight: 500; opacity: 0.86; margin-top: 2px; }
     .header-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
@@ -131,7 +132,7 @@
   <div class="app">
     <header class="header">
       <div class="brand">
-        <div class="logo" aria-hidden="true">FC</div>
+        <div class="logo" aria-hidden="true"><img src="app-logo.png" alt=""></div>
         <div>
           <h1>FactFlow Check <span class="subtitle">Smart placement for multiplication facts</span></h1>
         </div>
@@ -1553,6 +1554,11 @@
         keys[i].addEventListener('click', function () { handleKey(this.getAttribute('data-key')); });
       }
       document.addEventListener('keydown', function (evt) {
+        if (evt.key === 'Enter' && !appState.session && el.entryScreen.classList.contains('active')) {
+          evt.preventDefault();
+          el.beginBtn.click();
+          return;
+        }
         if (!appState.session) return;
         if (/^[0-9]$/.test(evt.key)) { evt.preventDefault(); handleKey(evt.key); }
         else if (evt.key === 'Backspace') { evt.preventDefault(); handleKey('backspace'); }
