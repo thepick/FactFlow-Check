@@ -127,7 +127,7 @@
       <div class="brand">
         <div class="logo" aria-hidden="true">FC</div>
         <div>
-          <h1>FactFlow Check <span class="subtitle">Smart placement for multiplication facts - v2.4</span></h1>
+          <h1>FactFlow Check <span class="subtitle">Smart placement for multiplication facts</span></h1>
         </div>
       </div>
       <div class="header-actions">
@@ -143,12 +143,12 @@
           <div><span class="code-chip" id="studentCodeHint">Code required</span></div>
         </div>
         <div class="field">
-          <label for="studentName">Your name or ID</label>
-          <input id="studentName" type="text" maxlength="48" autocomplete="off" placeholder="Example: Mina or BLUE-19">
+          <label for="studentName">Your name</label>
+          <input id="studentName" type="text" maxlength="48" autocomplete="off" placeholder="Example: Mina">
         </div>
         <div class="field">
           <label for="teacherCode">Teacher code</label>
-          <input id="teacherCode" type="text" maxlength="24" autocomplete="off" placeholder="Example: RIVER-47" style="text-transform:uppercase;letter-spacing:0.05em;">
+          <input id="teacherCode" type="text" maxlength="24" autocomplete="off" placeholder="Example: SAMPLE-00" style="letter-spacing:0.05em;" oninput="this.value = this.value.toUpperCase();">
         </div>
         <div class="error" id="entryError"></div>
         <button class="btn" type="button" id="beginBtn">Begin Check</button>
@@ -265,7 +265,7 @@
             </div>
             <div class="field">
               <label for="customCode">Optional class code</label>
-              <input id="customCode" type="text" maxlength="24" placeholder="Example: RIVER-47" style="text-transform:uppercase;letter-spacing:0.05em;">
+              <input id="customCode" type="text" maxlength="24" placeholder="Leave blank or use Generate Code" style="text-transform:uppercase;letter-spacing:0.05em;">
             </div>
             <div class="row">
               <button class="btn" type="button" id="saveConfigBtn">Save Setup</button>
@@ -335,6 +335,7 @@
     var TEACHER_PASS_SALT = 'ffc-teacher-lock-v1';
     var TEACHER_PASS_HASH = 'c9f18fe32a681cb097b0edca67d97c882e6714903f8306e0a540fcaf74194d97';
     var TEACHER_AUTO_LOCK_MS = 15 * 60 * 1000;
+    var RESERVED_EXAMPLE_CODES = ['SAMPLE-00'];
 
     var WARMUP = [
       makeFact(2, 4), makeFact(5, 6), makeFact(10, 7),
@@ -451,6 +452,14 @@
       return String(code || '').toUpperCase().replace(/\s+/g, '').replace(/[^A-Z0-9-]/g, '');
     }
 
+    function isReservedExampleCode(code) {
+      var clean = normalizeCode(code);
+      for (var i = 0; i < RESERVED_EXAMPLE_CODES.length; i++) {
+        if (clean === RESERVED_EXAMPLE_CODES[i]) return true;
+      }
+      return false;
+    }
+
     function normalizeName(name) {
       return String(name || '').toLowerCase().replace(/\s+/g, ' ').trim();
     }
@@ -505,6 +514,7 @@
       var clean = normalizeCode(code);
       var configured = normalizeCode(appState.config.customCode || '');
       if (!clean) return false;
+      if (isReservedExampleCode(clean)) return false;
       if (configured && clean === configured) return true;
       if (clean === currentStudentCode()) return true;
       return false;
@@ -774,7 +784,7 @@
       clearError();
       var name = String(el.studentName.value || '').trim();
       var code = normalizeCode(el.teacherCode.value);
-      if (!name) { showError('Please enter your name or ID.'); return; }
+      if (!name) { showError('Please enter your name.'); return; }
       if (!isCodeAccepted(code)) { showError('Please check the teacher code.'); return; }
       appState.sessionId = null;
       var key = getAttemptKey(name, code);
@@ -1522,6 +1532,11 @@
       el.saveConfigBtn.addEventListener('click', function () {
         appState.config.assessmentName = String(el.assessmentName.value || 'Multiplication Placement Check').trim();
         appState.config.customCode = normalizeCode(el.customCode.value || '');
+        if (isReservedExampleCode(appState.config.customCode)) {
+          appState.config.customCode = '';
+          el.customCode.value = '';
+          showToast('The sample code is reserved and was not saved.');
+        }
         saveConfig();
       });
       el.generateCodeBtn.addEventListener('click', function () { el.customCode.value = makeRandomCode(); });
