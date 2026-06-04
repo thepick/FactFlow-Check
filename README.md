@@ -1,6 +1,15 @@
-# FactFlow Check v2.2
+# FactFlow Check v2.3
 
 FactFlow Check is a separate supervised assessment app for multiplication fact placement. It is meant to identify the hardest fact band a student can answer accurately and reasonably quickly without using regular FactFlow practice progress.
+
+## What changed in v2.3
+
+- Replaces the daily fallback code with a 4-hour rotating student code.
+- Calculates the rotating code using Bangkok time so the classroom code window is predictable.
+- Shows the current 4-hour code and its valid-until time inside Teacher Tools only.
+- Keeps the student page from showing the code.
+- Replaces the separate Back and Lock behavior with one `Exit and Lock` button for Teacher Tools.
+- Removes the separate Lock Teacher Area button because exiting Teacher Tools now locks access automatically.
 
 ## What changed in v2.2
 
@@ -9,10 +18,10 @@ FactFlow Check is a separate supervised assessment app for multiplication fact p
 - Uses a salted SHA-256 hash check instead of storing the teacher passphrase as plain text.
 - Keeps the student page simple: name/ID, teacher code, and Begin Check.
 - Stops showing the class code on the student page. Students must get the code from the teacher.
-- Accepts only the saved class code or today's fallback code; random code-looking entries are no longer accepted.
+- Accepts only the saved class code or the current 4-hour student code; random code-looking entries are no longer accepted.
 - Removes CSV and JSON export controls from Teacher Tools.
 - Removes the dark theme and theme toggle.
-- Adds a Lock Teacher Area button and a 15-minute teacher auto-lock.
+- Keeps a 15-minute teacher auto-lock.
 
 ## What changed in v2.1
 
@@ -39,8 +48,8 @@ Upload `index.html` to the root of a GitHub Pages repository, or upload the enti
 ## Classroom workflow
 
 1. Open the app.
-2. Teacher opens Teacher Tools, enters the teacher passphrase, and sets or checks the class code.
-3. Teacher gives students the class code.
+2. Teacher opens Teacher Tools, enters the teacher passphrase, and checks the current 4-hour student code or sets a saved class code.
+3. Teacher gives students the current 4-hour code or saved class code.
 4. Student enters name/ID and the code.
 5. Student completes the adaptive check.
 6. Student shows the teacher the completion screen.

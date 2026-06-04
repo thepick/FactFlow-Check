@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FactFlow Check v2.2 - Smart Placement</title>
+  <title>FactFlow Check v2.3 - Smart Placement</title>
   <style>
     :root {
       --font-body: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -127,7 +127,7 @@
       <div class="brand">
         <div class="logo" aria-hidden="true">FC</div>
         <div>
-          <h1>FactFlow Check <span class="subtitle">Smart placement for multiplication facts - v2.2</span></h1>
+          <h1>FactFlow Check <span class="subtitle">Smart placement for multiplication facts - v2.3</span></h1>
         </div>
       </div>
       <div class="header-actions">
@@ -242,7 +242,6 @@
           <div id="bandSummary"></div>
         </div>
         <div class="row" style="justify-content:center;">
-          <button class="btn" type="button" id="copySummaryBtn">Copy Summary</button>
           <button class="btn secondary" type="button" id="studentViewBtn">Student View</button>
           <button class="btn secondary" type="button" id="newCheckBtn">New Check</button>
         </div>
@@ -254,9 +253,9 @@
         <div class="row" style="justify-content:space-between;">
           <div>
             <h2>Teacher Tools</h2>
-            <p class="muted">Set the assessment label, manage the class code, and review saved results on this device.</p>
+            <p class="muted">Set the assessment label, check the current student code, and review saved results on this device.</p>
           </div>
-          <button class="btn secondary" type="button" id="backToEntryBtn">Back</button>
+          <button class="btn secondary" type="button" id="backToEntryBtn">Exit and Lock</button>
         </div>
         <div class="two-col">
           <div class="grid">
@@ -273,16 +272,17 @@
               <button class="btn secondary" type="button" id="generateCodeBtn">Generate Code</button>
             </div>
             <div class="notice">
-              <div class="small muted">Today's fallback code</div>
+              <div class="small muted">Current 4-hour student code</div>
               <div class="code-chip" id="dailyCodeLabel">-</div>
-              <p class="muted small" style="margin-top:8px;">Students may use the saved class code or today's fallback code. Other random-looking codes are not accepted.</p>
+              <p class="muted small" id="codeWindowLabel" style="margin-top:8px;">Valid for the current 4-hour Bangkok-time window.</p>
+              <p class="muted small" style="margin-top:8px;">Students may use the saved class code or the current 4-hour code. Other random-looking codes are not accepted.</p>
             </div>
           </div>
           <div class="grid">
-            <h3>Teacher Access</h3>
-            <button class="btn secondary" type="button" id="lockTeacherBtn">Lock Teacher Area</button>
+            <h3>Device Results</h3>
             <button class="btn danger" type="button" id="clearResultsBtn">Clear Saved Results</button>
-            <p class="muted small">Teacher tools are hidden from students. This is a classroom barrier, not a secure online login.</p>
+            <p class="muted small">Teacher tools are hidden from students. Use Exit and Lock when you are finished.</p>
+            <p class="muted small">This is a classroom barrier, not a secure online login.</p>
           </div>
         </div>
         <div class="grid">
@@ -316,7 +316,7 @@
   (function () {
     'use strict';
 
-    var APP_VERSION = '2.2.0';
+    var APP_VERSION = '2.3.0';
     var RESULTS_KEY = 'factflowCheck.results.v2';
     var ATTEMPTS_KEY = 'factflowCheck.attempts.v2';
     var CONFIG_KEY = 'factflowCheck.config.v2';
@@ -378,9 +378,9 @@
         'studentCodeHint','studentName','teacherCode','entryError','beginBtn','qNumber','qTotal','testStudentLabel',
         'bandTrack','timerFill','problemText','answerInput','statusLine','showTeacherResultBtn','resultMeta',
         'verifiedLevel','verifiedDesc','developingLevel','developingDesc','accuracyStat','fluentStat','slowStat',
-        'missedStat','recommendationText','missedTags','timeoutTags','bandSummary','copySummaryBtn','studentViewBtn',
+        'missedStat','recommendationText','missedTags','timeoutTags','bandSummary','studentViewBtn',
         'newCheckBtn','backToEntryBtn','assessmentName','customCode','saveConfigBtn','generateCodeBtn','dailyCodeLabel',
-        'lockTeacherBtn','clearResultsBtn','historyTable','teacherUnlockModal','teacherPassphrase','teacherUnlockError',
+        'codeWindowLabel','clearResultsBtn','historyTable','teacherUnlockModal','teacherPassphrase','teacherUnlockError',
         'cancelTeacherUnlockBtn','unlockTeacherBtn','toast'
       ];
       for (var i = 0; i < ids.length; i++) el[ids[i]] = document.getElementById(ids[i]);
@@ -424,13 +424,26 @@
       return n < 10 ? '0' + n : String(n);
     }
 
-    function todayCode() {
-      var d = new Date();
-      var seed = d.getFullYear() * 372 + (d.getMonth() + 1) * 31 + d.getDate();
+    function bangkokDate(date) {
+      var d = date || new Date();
+      var utcMs = d.getTime() + (d.getTimezoneOffset() * 60000);
+      return new Date(utcMs + (7 * 60 * 60000));
+    }
+
+    function fourHourCodeInfo(date) {
+      var d = bangkokDate(date || new Date());
+      var block = Math.floor(d.getHours() / 4);
+      var seed = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
       var words = ['RIVER','MAPLE','CHECK','BLUE','NORTH','BRAVE','CLOUD','TIGER','LEAF','STAR','FACT','READY'];
-      var word = words[seed % words.length];
-      var num = ((seed * 17) % 90) + 10;
-      return word + '-' + num;
+      var word = words[(seed + block * 5) % words.length];
+      var num = ((seed * 19 + block * 37) % 90) + 10;
+      var expiresHour = (block + 1) * 4;
+      var expiresLabel = pad2(expiresHour % 24) + ':00';
+      return { code: word + '-' + num, expiresLabel: expiresLabel, block: block };
+    }
+
+    function currentStudentCode() {
+      return fourHourCodeInfo(new Date()).code;
     }
 
     function normalizeCode(code) {
@@ -477,8 +490,11 @@
     }
 
     function renderConfig() {
-      var daily = todayCode();
-      el.dailyCodeLabel.textContent = daily;
+      var codeInfo = fourHourCodeInfo(new Date());
+      el.dailyCodeLabel.textContent = codeInfo.code;
+      if (el.codeWindowLabel) {
+        el.codeWindowLabel.textContent = 'Valid until ' + codeInfo.expiresLabel + ' Bangkok time. A new code is created every 4 hours.';
+      }
       el.assessmentName.value = appState.config.assessmentName || '';
       el.customCode.value = normalizeCode(appState.config.customCode || '');
       el.studentCodeHint.textContent = 'Ask your teacher for the code';
@@ -489,7 +505,7 @@
       var configured = normalizeCode(appState.config.customCode || '');
       if (!clean) return false;
       if (configured && clean === configured) return true;
-      if (clean === todayCode()) return true;
+      if (clean === currentStudentCode()) return true;
       return false;
     }
 
@@ -1411,13 +1427,11 @@
 
     function bindEvents() {
       el.teacherBtn.addEventListener('click', function () { requireTeacherAccess('teacherScreen'); });
-      el.backToEntryBtn.addEventListener('click', function () { showScreen('entryScreen'); });
+      el.backToEntryBtn.addEventListener('click', function () { lockTeacherArea(); });
       el.beginBtn.addEventListener('click', startAssessment);
       el.showTeacherResultBtn.addEventListener('click', function () { requireTeacherAccess('resultScreen'); });
-      el.copySummaryBtn.addEventListener('click', copySummary);
       el.studentViewBtn.addEventListener('click', function () { showScreen('completeScreen'); });
       el.newCheckBtn.addEventListener('click', function () { resetEntryForNewCheck(); });
-      el.lockTeacherBtn.addEventListener('click', lockTeacherArea);
       el.cancelTeacherUnlockBtn.addEventListener('click', closeTeacherUnlock);
       el.unlockTeacherBtn.addEventListener('click', verifyTeacherPassphrase);
       el.teacherPassphrase.addEventListener('keydown', function (evt) {
