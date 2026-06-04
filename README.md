@@ -1,67 +1,27 @@
-# FactFlow Check - Smart Placement
+# FactFlow Check v1.2
 
-FactFlow Check is a separate assessment app for supervised multiplication fact checks. It is designed to look and feel familiar to FactFlow users, but it does not read or write regular FactFlow practice progress.
+FactFlow Check is a separate supervised placement check for multiplication facts. It does not use regular FactFlow practice progress.
 
-## Version 1.1 features
+## Version 1.2 changes
 
-- Separate assessment app
-- Teacher setup with assessment name, assessment ID, class name, and teacher code
-- Teacher code generator
-- Student name and student ID entry
-- Local one-time attempt lock using class, assessment ID, student ID, and teacher code
-- Restart detection for interrupted attempts
-- Warm-up calibration
-- Adaptive fact-band placement check
-- Per-question timer
-- Balanced question selection inside each band
-- Missed fact and timeout tracking
-- Verified level and developing level result
-- Recommended next practice focus
-- Local result history for on-screen review
+- Restored a student-first interface with teacher setup hidden behind the Teacher button.
+- Kept the original FactFlow Check style and result-screen layout.
+- Shows the full result immediately when the check finishes.
+- Removed CSV export from the interface.
+- Added fluency-aware fast-track logic so very fluent students can climb faster.
+- Fixed the 45-question ceiling so strong students can reach the mixed 2-12 band.
+- Prevents the app from starting a band it cannot finish within the question limit.
 
-## Important note about one-time use
+## How to use
 
-Version 1 uses local browser storage. This prevents a completed student from reusing the same assessment code on the same device and browser. It is useful for normal supervised classroom use, but it is not a secure cross-device lock.
+1. Open `index.html`.
+2. Click Teacher.
+3. Set the assessment name, assessment ID, class name, and teacher code.
+4. Click Save Setup.
+5. Click Begin Student Check.
+6. Students enter their name, ID, and teacher code.
+7. The result appears on screen when the check is complete.
 
-For stronger control later, add Google Sheet or backend submission so the app can check completed attempts across devices.
+## One-time use note
 
-## Suggested classroom workflow
-
-1. Open the app on student devices.
-2. Set the assessment name, assessment ID, class name, and teacher code.
-3. Write the teacher code on the board.
-4. Students enter their name, student ID, and code.
-5. Students complete the check.
-6. The result screen appears automatically when the check is complete.
-7. The teacher records the result from the screen.
-
-## Assessment bands
-
-- Band A: 2s, 5s, 10s
-- Band B: 3s, 4s
-- Band C: 6s
-- Band D: 7s
-- Band E: 8s
-- Band F: 9s
-- Band G: 11s, 12s
-- Band H: Mixed 2-12
-
-## Result categories
-
-- Fluent: correct under 4 seconds
-- Known but slow: correct in 4 to 8 seconds
-- Not fluent: correct after 8 seconds
-- Not secure: wrong or timeout
-
-## Files
-
-- `index.html`: complete app
-- `assets/`: icon files copied from FactFlow
-
-## Version 1.1 update
-
-- Full result screen now appears immediately after the check finishes.
-- CSV export was removed.
-- Fast, accurate students now use shorter gateway blocks so they can reach Band H within the 45-question cap.
-- Correct answers are still capped at 10 seconds, but fast answers count as stronger fluency evidence.
-- The app checks the remaining question budget before starting a new block, so it does not begin a band it cannot finish.
+The one-time attempt lock works on the same device and browser. Clearing browser data or using another device can bypass it. A future Google Sheets version would be needed to enforce this across devices.

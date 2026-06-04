@@ -28,8 +28,8 @@
       --color-text-muted: #66655f;
       --color-text-faint: #9a9892;
       --color-text-inverse: #f9f8f4;
-      --color-primary: #01696f;
-      --color-primary-hover: #0c4e54;
+      --color-primary: #2d5790;
+      --color-primary-hover: #254879;
       --color-primary-highlight: #cedcd8;
       --color-success: #437a22;
       --color-success-highlight: #d4dfcc;
@@ -55,8 +55,8 @@
       --color-text-muted: #a6a29a;
       --color-text-faint: #6f6b64;
       --color-text-inverse: #1d1b17;
-      --color-primary: #4f98a3;
-      --color-primary-hover: #227f8b;
+      --color-primary: #2d5790;
+      --color-primary-hover: #254879;
       --color-primary-highlight: #313b3b;
       --color-success: #6daa45;
       --color-success-highlight: #31422b;
@@ -120,6 +120,7 @@
       overflow: hidden;
     }
     .logo img { width: 100%; height: 100%; display: block; }
+    .logo-text { font-weight: 900; letter-spacing: 0.02em; font-size: 1.05rem; color: var(--color-text-inverse); }
     .brand h1 { font-size: 1.12rem; }
     .brand p { color: rgba(255, 255, 255, 0.78); font-size: var(--text-sm); }
     .header-actions { display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap; justify-content: flex-end; }
@@ -135,6 +136,8 @@
       font-size: 1rem;
     }
     .icon-btn:hover { background: rgba(255, 255, 255, 0.22); }
+    .teacher-header-btn { width: auto; min-width: 108px; padding: 0 1.1rem; font-weight: 800; }
+    #headerAssessmentPill { display: none; }
     .screen { display: none; }
     .screen.active { display: block; }
     .panel {
@@ -307,20 +310,21 @@
   <div class="app">
     <header class="header">
       <div class="brand">
-        <div class="logo" aria-hidden="true"><img src="assets/apple-touch-icon.png" alt="" /></div>
+        <div class="logo" aria-hidden="true"><span class="logo-text">FC</span></div>
         <div>
           <h1>FactFlow Check</h1>
-          <p>Smart placement for multiplication facts</p>
+          <p>Smart placement for multiplication facts - v1.2</p>
         </div>
       </div>
       <div class="header-actions">
         <span class="pill" id="headerAssessmentPill">No assessment set</span>
+        <button type="button" class="icon-btn teacher-header-btn" id="teacherHeaderBtn" title="Teacher setup">Teacher</button>
         <button type="button" class="icon-btn" id="themeBtn" title="Toggle theme">Aa</button>
       </div>
     </header>
 
     <main>
-      <section class="screen active" id="setupScreen">
+      <section class="screen" id="setupScreen">
         <div class="grid-2">
           <div class="panel hero-card">
             <div>
@@ -369,19 +373,19 @@
         <div class="panel" style="margin-top:var(--space-4);">
           <div class="result-title">
             <div>
-              <h2>Local Results</h2>
-              <p class="subtle">Recent results are saved on this device only. Recording can be done from the result screen.</p>
+              <h2>Teacher Tools</h2>
+              <p class="subtle">Use these only if a student needs to retake a check on this same device.</p>
             </div>
             <div class="row">
-              <button type="button" class="btn-ghost" id="clearHistoryBtn">Clear History</button>
+              <button type="button" class="btn-ghost" id="clearHistoryBtn">Clear Local Results</button>
               <button type="button" class="btn-ghost" id="clearAttemptsBtn">Clear Attempt Locks</button>
             </div>
           </div>
-          <div class="history-table-wrap" id="historyTableWrap"></div>
+          <div class="history-table-wrap" id="historyTableWrap" style="display:none;"></div>
         </div>
       </section>
 
-      <section class="screen" id="studentScreen">
+      <section class="screen active" id="studentScreen">
         <div class="grid-2">
           <div class="panel hero-card">
             <div>
@@ -409,8 +413,8 @@
                 <input id="studentCodeInput" type="text" autocomplete="off" />
               </label>
               <div class="row end">
-                <button type="button" class="btn-ghost" id="backSetupBtn">Teacher Setup</button>
                 <button type="button" class="btn" id="startCheckBtn">Start Check</button>
+                <button type="button" class="btn-ghost" id="backSetupBtn" style="display:none;">Teacher Setup</button>
               </div>
             </div>
             <div class="status-text" id="studentStatus">Enter the code from your teacher.</div>
@@ -485,43 +489,51 @@
       </section>
 
       <section class="screen" id="resultScreen">
-        <div class="result-grid">
-          <div class="panel">
-            <div class="result-title">
-              <div>
-                <p class="pill good">Check Complete</p>
-                <h2 style="margin-top:0.5rem;">FactFlow Check Result</h2>
-              </div>
-              <div class="row">
-                <button type="button" class="btn-ghost" id="copyResultBtn">Copy Summary</button>
-                <button type="button" class="btn" id="resultNewStudentBtn">New Student</button>
-              </div>
-            </div>
-            <div class="metrics" style="margin-top:var(--space-4);">
-              <div class="stat"><div class="label">Verified</div><div class="value" id="verifiedLevelText">-</div></div>
-              <div class="stat"><div class="label">Developing</div><div class="value" id="developingLevelText">-</div></div>
-              <div class="stat"><div class="label">Accuracy</div><div class="value" id="accuracyText">-</div></div>
-              <div class="stat"><div class="label">Fluent</div><div class="value" id="fluentText">-</div></div>
-            </div>
-            <div class="status-text good" id="recommendationText" style="margin-top:var(--space-4);">Recommendation will appear here.</div>
-            <div class="grid-2" style="margin-top:var(--space-4);">
-              <div>
-                <h3>Missed Facts</h3>
-                <div class="facts-list" id="missedFactsList"></div>
-              </div>
-              <div>
-                <h3>Timed Out Facts</h3>
-                <div class="facts-list" id="timedOutFactsList"></div>
-              </div>
-            </div>
-            <div class="status-text" id="copyStatus">Result saved locally on this device.</div>
+        <div class="panel result-card-old">
+          <div style="text-align:center;">
+            <h2 style="font-size:1.6rem;">FactFlow Check Result</h2>
+            <p class="subtle" id="resultStudentLine" style="margin-top:0.75rem;">Student - Date</p>
           </div>
-          <div class="panel">
-            <h2>Details</h2>
-            <table>
-              <tbody id="resultDetailsBody"></tbody>
-            </table>
+
+          <div class="grid-2" style="margin-top:var(--space-5);">
+            <div class="stat result-level good-level"><div class="label">Verified Level</div><div class="value" id="verifiedLevelText">-</div><div class="subtle" id="verifiedLevelSubtext">-</div></div>
+            <div class="stat result-level warn-level"><div class="label">Developing Level</div><div class="value" id="developingLevelText">-</div><div class="subtle" id="developingLevelSubtext">-</div></div>
           </div>
+
+          <div class="metrics" style="margin-top:var(--space-4);">
+            <div class="stat"><div class="label">Accuracy</div><div class="value" id="accuracyText">-</div></div>
+            <div class="stat"><div class="label">Fluent</div><div class="value" id="fluentText">-</div></div>
+            <div class="stat"><div class="label">Slow</div><div class="value" id="slowText">-</div></div>
+            <div class="stat"><div class="label">Missed</div><div class="value" id="missedText">-</div></div>
+          </div>
+
+          <h3 style="margin-top:var(--space-5);">Recommendation</h3>
+          <div class="status-text" id="recommendationText" style="margin-top:var(--space-3);">Recommendation will appear here.</div>
+
+          <div class="grid-2" style="margin-top:var(--space-5);">
+            <div>
+              <h3>Missed facts</h3>
+              <div class="facts-list" id="missedFactsList"></div>
+            </div>
+            <div>
+              <h3>Timed out facts</h3>
+              <div class="facts-list" id="timedOutFactsList"></div>
+            </div>
+          </div>
+
+          <h3 style="margin-top:var(--space-5);">Band summary</h3>
+          <table style="margin-top:var(--space-3);">
+            <thead><tr><th>Band</th><th>Score</th><th>Fluent</th><th>Timeout</th><th>Verdict</th></tr></thead>
+            <tbody id="resultBandSummaryBody"></tbody>
+          </table>
+          <table style="display:none;"><tbody id="resultDetailsBody"></tbody></table>
+
+          <div class="row" style="justify-content:center;margin-top:var(--space-4);">
+            <button type="button" class="btn-ghost" id="copyResultBtn" style="display:none;">Copy Summary</button>
+            <button type="button" class="btn-ghost" id="studentViewBtn">Student View</button>
+            <button type="button" class="btn" id="resultNewStudentBtn">New Check</button>
+          </div>
+          <div class="status-text" id="copyStatus" style="display:none;">Result saved locally on this device.</div>
         </div>
       </section>
     </main>
@@ -538,7 +550,7 @@
     theme: "factflowCheck.theme.v1"
   };
 
-  var TEST_VERSION = "1.1";
+  var TEST_VERSION = "1.2";
   var MAX_QUESTIONS = 45;
   var MAX_MINUTES = 5;
   var QUESTION_TIMEOUT_SECONDS = 10;
@@ -585,14 +597,14 @@
   function cacheElements() {
     var ids = [
       "setupScreen", "studentScreen", "instructionsScreen", "assessmentScreen", "completeScreen", "resultScreen",
-      "themeBtn", "headerAssessmentPill", "assessmentNameInput", "assessmentIdInput", "classIdInput", "teacherCodeInput",
+      "themeBtn", "teacherHeaderBtn", "headerAssessmentPill", "assessmentNameInput", "assessmentIdInput", "classIdInput", "teacherCodeInput",
       "generateCodeBtn", "loadSavedSetupBtn", "saveSetupBtn", "goStudentBtn", "setupStatus", "historyTableWrap",
       "clearHistoryBtn", "clearAttemptsBtn", "studentAssessmentSummary", "studentNameInput", "studentIdInput",
       "studentCodeInput", "backSetupBtn", "startCheckBtn", "studentStatus", "cancelCheckBtn", "beginQuestionsBtn",
       "questionCountPill", "timerPill", "problemText", "answerInput", "feedbackPill", "keypad", "assessmentStatus",
-      "sideStudentName", "sideAssessmentName", "sideProgressText", "newStudentBtn", "verifiedLevelText",
-      "developingLevelText", "accuracyText", "fluentText", "recommendationText", "missedFactsList", "timedOutFactsList",
-      "resultDetailsBody", "copyResultBtn", "resultNewStudentBtn", "copyStatus"
+      "sideStudentName", "sideAssessmentName", "sideProgressText", "newStudentBtn", "resultStudentLine", "verifiedLevelText",
+      "verifiedLevelSubtext", "developingLevelText", "developingLevelSubtext", "accuracyText", "fluentText", "slowText", "missedText", "recommendationText", "missedFactsList", "timedOutFactsList",
+      "resultBandSummaryBody", "resultDetailsBody", "copyResultBtn", "studentViewBtn", "resultNewStudentBtn", "copyStatus"
     ];
     for (var i = 0; i < ids.length; i += 1) {
       el[ids[i]] = $(ids[i]);
@@ -1608,14 +1620,31 @@
 
   function renderResult(result) {
     if (!result) return;
-    el.verifiedLevelText.textContent = shortResultText(result.verifiedLevel);
-    el.developingLevelText.textContent = shortResultText(result.developingLevel);
+    el.resultStudentLine.textContent = result.studentName + " - " + result.studentId + " - " + formatDate(result.completedAt);
+    var verifiedParts = splitLevel(result.verifiedLevel);
+    var developingParts = splitLevel(result.developingLevel);
+    el.verifiedLevelText.textContent = verifiedParts.main;
+    el.verifiedLevelSubtext.textContent = verifiedParts.sub;
+    el.developingLevelText.textContent = developingParts.main;
+    el.developingLevelSubtext.textContent = developingParts.sub;
     el.accuracyText.textContent = result.correctCount + "/" + result.totalQuestions + " (" + result.accuracyPercent + "%)";
     el.fluentText.textContent = String(result.fluentCount);
+    el.slowText.textContent = String(result.slowCorrectCount);
+    el.missedText.textContent = String(result.wrongCount + result.timeoutCount);
     el.recommendationText.textContent = result.recommendedPractice;
     renderFactChips(el.missedFactsList, result.missedFacts, "No missed facts recorded.");
     renderFactChips(el.timedOutFactsList, result.timedOutFacts, "No timeouts recorded.");
+    renderBandSummary(result);
     renderDetails(result);
+  }
+
+  function splitLevel(text) {
+    if (!text) return { main: "-", sub: "" };
+    if (text.indexOf("Not yet secure") === 0) return { main: "Needs Support", sub: "2s, 5s, 10s" };
+    if (text.indexOf("No next band") === 0) return { main: "None", sub: "" };
+    var match = text.match(/^Band\s+([A-H])\s+-\s+(.+)$/);
+    if (match) return { main: match[1], sub: match[2] };
+    return { main: text, sub: "" };
   }
 
   function shortResultText(text) {
@@ -1637,6 +1666,39 @@
       chip.className = "fact-chip";
       chip.textContent = facts[i];
       container.appendChild(chip);
+    }
+  }
+
+  function renderBandSummary(result) {
+    if (!el.resultBandSummaryBody) return;
+    el.resultBandSummaryBody.innerHTML = "";
+    var meta = result.bandMeta || {};
+    for (var i = 0; i < BANDS.length; i += 1) {
+      var band = BANDS[i];
+      var m = meta[band.id];
+      if (!m) continue;
+      var tr = document.createElement("tr");
+      var values = [
+        band.id + " - " + band.focus,
+        m.correct + "/" + m.questions,
+        String(m.fluent),
+        String(m.timeout),
+        (m.label || "").replace("_", " ")
+      ];
+      for (var c = 0; c < values.length; c += 1) {
+        var td = document.createElement("td");
+        td.textContent = values[c];
+        tr.appendChild(td);
+      }
+      el.resultBandSummaryBody.appendChild(tr);
+    }
+    if (!el.resultBandSummaryBody.children.length) {
+      var row = document.createElement("tr");
+      var cell = document.createElement("td");
+      cell.colSpan = 5;
+      cell.textContent = "No band data recorded.";
+      row.appendChild(cell);
+      el.resultBandSummaryBody.appendChild(row);
     }
   }
 
@@ -1798,6 +1860,7 @@
 
   function bindEvents() {
     el.themeBtn.addEventListener("click", toggleTheme);
+    el.teacherHeaderBtn.addEventListener("click", function () { showScreen("setupScreen"); });
     el.generateCodeBtn.addEventListener("click", function () {
       el.teacherCodeInput.value = generateCode();
       setStatus(el.setupStatus, "New teacher code generated. Save setup before students begin.", "warn");
@@ -1814,6 +1877,7 @@
     el.beginQuestionsBtn.addEventListener("click", beginQuestions);
     el.newStudentBtn.addEventListener("click", resetForNewStudent);
     el.resultNewStudentBtn.addEventListener("click", resetForNewStudent);
+    el.studentViewBtn.addEventListener("click", resetForNewStudent);
     el.copyResultBtn.addEventListener("click", copyResultSummary);
     el.clearHistoryBtn.addEventListener("click", clearHistory);
     el.clearAttemptsBtn.addEventListener("click", clearAttempts);
