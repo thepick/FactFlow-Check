@@ -1,305 +1,123 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FactFlow Check</title>
-  <link rel="icon" href="assets/favicon-32x32.png" sizes="32x32" />
-  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FactFlow Check v2.4 - Smart Placement</title>
   <style>
     :root {
-      --font-body: system-ui, -apple-system, "Segoe UI", sans-serif;
-      --text-xs: 0.72rem;
-      --text-sm: 0.86rem;
-      --text-base: 1rem;
-      --space-1: 0.25rem;
-      --space-2: 0.5rem;
-      --space-3: 0.75rem;
-      --space-4: 1rem;
-      --space-5: 1.25rem;
-      --space-6: 1.5rem;
-      --color-bg: #f7f6f2;
-      --color-surface: #f9f8f5;
-      --color-surface-2: #fbfbf9;
-      --color-surface-offset: #f3f0ec;
-      --color-border: #d4d1ca;
-      --color-divider: #dcd9d5;
-      --color-text: #28251d;
-      --color-text-muted: #66655f;
-      --color-text-faint: #9a9892;
-      --color-text-inverse: #f9f8f4;
-      --color-primary: #01696f;
-      --color-primary-hover: #0c4e54;
-      --color-primary-highlight: #cedcd8;
-      --color-success: #437a22;
-      --color-success-highlight: #d4dfcc;
-      --color-error: #a12c7b;
-      --color-error-highlight: #e0ced7;
-      --color-gold: #d19900;
-      --color-gold-highlight: #e9e0c6;
-      --radius-md: 6px;
-      --radius-lg: 10px;
-      --radius-xl: 14px;
-      --radius-full: 9999px;
-      --shadow-sm: 0 1px 2px rgba(30, 25, 15, 0.06);
-      --shadow-md: 0 4px 12px rgba(30, 25, 15, 0.08);
+      --font-body: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --bg: #f7f6f2;
+      --surface: #fbfaf7;
+      --surface-2: #f0ede8;
+      --border: #d5d0c8;
+      --text: #27231d;
+      --muted: #68635d;
+      --faint: #969088;
+      --primary: #3b6fb6;
+      --primary-dark: #27538f;
+      --primary-soft: #d9e6f8;
+      --success: #437a22;
+      --success-soft: #dcebd2;
+      --warning: #b77900;
+      --warning-soft: #f0e1bf;
+      --danger: #a12c7b;
+      --danger-soft: #ead4e1;
+      --shadow: 0 4px 14px rgba(30, 25, 15, 0.08);
+      --radius: 16px;
     }
-    [data-theme="dark"] {
-      --color-bg: #171614;
-      --color-surface: #1c1b19;
-      --color-surface-2: #201f1d;
-      --color-surface-offset: #22211f;
-      --color-border: #393836;
-      --color-divider: #262523;
-      --color-text: #e0ded8;
-      --color-text-muted: #a6a29a;
-      --color-text-faint: #6f6b64;
-      --color-text-inverse: #1d1b17;
-      --color-primary: #4f98a3;
-      --color-primary-hover: #227f8b;
-      --color-primary-highlight: #313b3b;
-      --color-success: #6daa45;
-      --color-success-highlight: #31422b;
-      --color-error: #d163a7;
-      --color-error-highlight: #4c3d46;
-      --color-gold: #e8af34;
-      --color-gold-highlight: #4d4332;
-      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
-      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
-    }
-    *, *::before, *::after { box-sizing: border-box; }
+    * { box-sizing: border-box; }
     html { -webkit-text-size-adjust: none; text-size-adjust: none; }
-    body {
-      margin: 0;
-      min-height: 100dvh;
-      font-family: var(--font-body);
-      font-size: var(--text-base);
-      line-height: 1.5;
-      color: var(--color-text);
-      background: var(--color-bg);
-    }
-    h1, h2, h3 { line-height: 1.15; margin: 0; }
-    p { margin: 0; color: var(--color-text-muted); }
-    button, input, select { font: inherit; color: inherit; }
-    button { cursor: pointer; border: none; }
-    button, .keypad, .key-btn, .btn, .btn-ghost, .icon-btn {
-      -webkit-tap-highlight-color: transparent;
-      user-select: none;
-      touch-action: manipulation;
-    }
-    input, select {
-      width: 100%;
-      min-height: 42px;
-      border: 1px solid var(--color-border);
-      background: var(--color-surface-2);
-      border-radius: var(--radius-md);
-      padding: 0.65rem 0.8rem;
-    }
-    label { display: grid; gap: 0.25rem; font-weight: 700; font-size: var(--text-sm); }
-    .app { max-width: 1120px; margin: 0 auto; padding: var(--space-4); display: grid; gap: var(--space-4); }
-    .header {
-      background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover));
-      color: var(--color-text-inverse);
-      border-radius: var(--radius-xl);
-      padding: var(--space-3) var(--space-5);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: var(--space-3);
-      box-shadow: var(--shadow-md);
-    }
-    .brand { display: flex; gap: var(--space-3); align-items: center; min-width: 0; }
-    .logo {
-      width: 42px;
-      height: 42px;
-      border-radius: var(--radius-full);
-      background: rgba(255, 255, 255, 0.12);
-      display: grid;
-      place-items: center;
-      flex: 0 0 auto;
-      overflow: hidden;
-    }
-    .logo img { width: 100%; height: 100%; display: block; }
-    .brand h1 { font-size: 1.12rem; }
-    .brand p { color: rgba(255, 255, 255, 0.78); font-size: var(--text-sm); }
-    .header-actions { display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap; justify-content: flex-end; }
-    .icon-btn {
-      width: 40px;
-      height: 40px;
-      display: grid;
-      place-items: center;
-      border-radius: var(--radius-md);
-      background: rgba(255, 255, 255, 0.12);
-      color: var(--color-text-inverse);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      font-size: 1rem;
-    }
-    .icon-btn:hover { background: rgba(255, 255, 255, 0.22); }
+    body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--text); font-family: var(--font-body); line-height: 1.45; }
+    button, input, select, textarea { font: inherit; color: inherit; }
+    button { cursor: pointer; }
+    button:disabled { cursor: not-allowed; opacity: 0.45; }
+    input, select { width: 100%; min-height: 44px; border: 1px solid var(--border); background: var(--surface); border-radius: 10px; padding: 0.65rem 0.8rem; }
+    h1, h2, h3, p { margin: 0; }
+    .app { max-width: 920px; margin: 0 auto; padding: 16px; display: grid; gap: 14px; }
+    .header { border-radius: var(--radius); padding: 14px 16px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; box-shadow: var(--shadow); display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .logo { width: 42px; height: 42px; border-radius: 50%; background: rgba(255,255,255,0.16); display: grid; place-items: center; font-weight: 800; font-size: 1.25rem; }
+    .brand h1 { font-size: 1.25rem; line-height: 1.05; }
+    .brand .subtitle { display: block; font-size: 0.78rem; font-weight: 500; opacity: 0.86; margin-top: 2px; }
+    .header-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
     .screen { display: none; }
     .screen.active { display: block; }
-    .panel {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-xl);
-      padding: var(--space-4);
-      box-shadow: var(--shadow-sm);
-    }
-    .panel h2 { font-size: 1.1rem; margin-bottom: var(--space-1); }
-    .subtle { font-size: var(--text-sm); color: var(--color-text-muted); }
-    .muted { color: var(--color-text-muted); }
-    .tiny { font-size: var(--text-xs); }
-    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); align-items: start; }
-    .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); }
-    .form-grid { display: grid; gap: var(--space-3); margin-top: var(--space-3); }
-    .row { display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: center; }
-    .row.end { justify-content: flex-end; }
-    .btn {
-      padding: 0.75rem 1.2rem;
-      background: var(--color-primary);
-      color: var(--color-text-inverse);
-      border-radius: var(--radius-md);
-      font-weight: 700;
-      min-height: 42px;
-    }
-    .btn:hover { background: var(--color-primary-hover); }
-    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
-    .btn-ghost {
-      padding: 0.75rem 1rem;
-      background: transparent;
-      color: var(--color-text);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-md);
-      font-size: var(--text-sm);
-      min-height: 42px;
-    }
-    .btn-ghost:hover { background: var(--color-surface-offset); }
-    .btn-danger { background: var(--color-error); }
-    .btn-danger:hover { background: #7d235f; }
-    .status-text {
-      margin-top: var(--space-3);
-      padding: 0.75rem 0.85rem;
-      border-radius: var(--radius-md);
-      background: var(--color-surface-offset);
-      color: var(--color-text-muted);
-      font-size: var(--text-sm);
-    }
-    .status-text.good { background: var(--color-success-highlight); color: var(--color-text); }
-    .status-text.warn { background: var(--color-gold-highlight); color: var(--color-text); }
-    .status-text.bad { background: var(--color-error-highlight); color: var(--color-text); }
-    .pill {
-      display: inline-flex;
-      padding: 0.25rem 0.55rem;
-      border-radius: var(--radius-full);
-      background: var(--color-surface-offset);
-      font-size: var(--text-xs);
-      font-weight: 700;
-      white-space: nowrap;
-    }
-    .pill.good { background: var(--color-success-highlight); color: var(--color-success); }
-    .pill.warn { background: var(--color-gold-highlight); color: var(--color-text); }
-    .pill.bad { background: var(--color-error-highlight); color: var(--color-error); }
-    .hero-card { display: grid; gap: var(--space-4); }
-    .hero-title { font-size: clamp(1.8rem, 4vw, 3.2rem); letter-spacing: -0.04em; }
-    .hero-copy { max-width: 680px; }
-    .metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-2); }
-    .stat {
-      padding: var(--space-2) var(--space-3);
-      background: var(--color-surface-2);
-      border: 1px solid var(--color-divider);
-      border-radius: var(--radius-lg);
-    }
-    .stat .label { font-size: var(--text-xs); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
-    .stat .value { margin-top: 0.1rem; font-size: 1.08rem; font-weight: 800; }
-    .assessment-shell { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: var(--space-4); align-items: stretch; }
-    .play-panel { min-height: 520px; display: grid; align-content: start; }
-    .question-top { display: flex; justify-content: space-between; gap: var(--space-2); align-items: center; flex-wrap: wrap; }
-    .timer-pill {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 86px;
-      padding: 0.4rem 0.7rem;
-      border-radius: var(--radius-full);
-      background: var(--color-primary-highlight);
-      color: var(--color-text);
-      font-weight: 800;
-    }
-    .timer-pill.warn { background: var(--color-gold-highlight); }
-    .timer-pill.danger { background: var(--color-error-highlight); color: var(--color-error); }
-    .problem-area { padding: var(--space-5) 0 var(--space-3); text-align: center; position: relative; }
-    .problem-text { font-size: clamp(2.8rem, 8vw, 5.5rem); font-weight: 800; letter-spacing: -0.04em; }
-    .answer-wrap { max-width: 260px; margin: 0 auto; position: relative; }
-    .answer-input {
-      text-align: center;
-      font-size: clamp(1.8rem, 4vw, 2.7rem);
-      font-weight: 800;
-      min-height: 68px;
-    }
-    .answer-input.glow-good { animation: pulseGood 220ms ease; border-color: var(--color-success); background: var(--color-success-highlight); }
-    .answer-input.glow-bad { animation: pulseBad 220ms ease; border-color: var(--color-error); background: var(--color-error-highlight); }
-    @keyframes pulseGood { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
-    @keyframes pulseBad { 0% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } 100% { transform: translateX(0); } }
-    .feedback-pill {
-      position: absolute;
-      right: 0.6rem;
-      top: 50%;
-      transform: translateY(-50%);
-      border-radius: var(--radius-full);
-      padding: 0.3rem 0.55rem;
-      font-size: var(--text-xs);
-      font-weight: 800;
-      opacity: 0;
-      transition: opacity 150ms;
-      pointer-events: none;
-    }
-    .feedback-pill.show { opacity: 1; }
-    .feedback-pill.good { background: var(--color-success-highlight); color: var(--color-success); }
-    .feedback-pill.bad { background: var(--color-error-highlight); color: var(--color-error); }
-    .keypad { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2); margin-top: var(--space-3); }
-    .key-btn {
-      padding: 0.75rem 0.4rem;
-      background: var(--color-surface-2);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-md);
-      font-weight: 800;
-      font-size: 1.08rem;
-      min-height: 48px;
-    }
-    .key-btn:hover { background: var(--color-surface-offset); }
-    .key-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-    .side-list { display: grid; gap: var(--space-2); margin-top: var(--space-3); }
-    .side-item { padding: var(--space-2); border-radius: var(--radius-lg); background: var(--color-surface-2); border: 1px solid var(--color-divider); }
-    .completion-card { text-align: center; display: grid; justify-items: center; gap: var(--space-4); padding: var(--space-6); }
-    .completion-card h2 { font-size: clamp(1.8rem, 4vw, 3rem); }
-    .result-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: var(--space-4); align-items: start; }
-    .result-title { display: flex; justify-content: space-between; align-items: start; gap: var(--space-3); flex-wrap: wrap; }
-    .facts-list { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: var(--space-2); }
-    .fact-chip { padding: 0.28rem 0.55rem; border-radius: var(--radius-full); background: var(--color-surface-offset); font-weight: 700; font-size: var(--text-sm); }
-    table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
-    th, td { text-align: left; padding: 0.55rem; border-bottom: 1px solid var(--color-divider); vertical-align: top; }
-    th { color: var(--color-text-muted); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.05em; }
-    .history-table-wrap { max-height: 340px; overflow: auto; border: 1px solid var(--color-divider); border-radius: var(--radius-lg); margin-top: var(--space-3); }
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; }
+    .grid { display: grid; gap: 14px; }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .field { display: grid; gap: 5px; }
+    .field label { color: var(--muted); font-weight: 700; font-size: 0.78rem; letter-spacing: 0.04em; text-transform: uppercase; }
+    .muted { color: var(--muted); font-size: 0.94rem; }
+    .small { font-size: 0.84rem; }
+    .center { text-align: center; }
+    .btn { border: 0; border-radius: 10px; padding: 0.72rem 1rem; background: var(--primary); color: white; font-weight: 800; min-height: 44px; }
+    .btn:hover { background: var(--primary-dark); }
+    .btn.secondary { background: transparent; color: var(--text); border: 1px solid var(--border); }
+    .btn.secondary:hover { background: var(--surface-2); }
+    .btn.warning { background: var(--warning); color: #1e1605; }
+    .btn.danger { background: var(--danger); }
+    .notice { border-radius: 12px; padding: 12px; background: var(--primary-soft); color: var(--text); border: 1px solid color-mix(in srgb, var(--primary) 35%, transparent); }
+    .error { display: none; border-radius: 12px; padding: 10px 12px; background: var(--danger-soft); color: var(--danger); font-weight: 800; }
+    .error.show { display: block; }
+    .entry-card { max-width: 520px; margin: 0 auto; }
+    .code-chip { display: inline-flex; align-items: center; justify-content: center; min-height: 34px; padding: 0.2rem 0.75rem; border-radius: 999px; font-weight: 900; letter-spacing: 0.08em; color: var(--primary); background: var(--primary-soft); border: 1px solid color-mix(in srgb, var(--primary) 35%, transparent); }
+    .test-meta { display: flex; justify-content: space-between; gap: 10px; align-items: center; color: var(--muted); font-size: 0.82rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; }
+    .band-track { display: flex; justify-content: center; gap: 5px; margin: 10px 0 6px; }
+    .band-dot { width: 11px; height: 11px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); }
+    .band-dot.passed { background: var(--success); border-color: var(--success); }
+    .band-dot.current { background: var(--primary); border-color: var(--primary); transform: scale(1.28); }
+    .band-dot.failed { background: var(--danger); border-color: var(--danger); }
+    .problem-area { text-align: center; padding: 16px 0 10px; }
+    .problem-text { font-size: clamp(2.6rem, 9vw, 5.2rem); font-weight: 900; letter-spacing: -0.04em; }
+    .answer-wrap { max-width: 280px; margin: 0 auto; }
+    .answer-input { text-align: center; font-size: clamp(1.7rem, 6vw, 3rem); font-weight: 900; min-height: 70px; background: var(--surface); }
+    .answer-input.good { border-color: var(--success); box-shadow: 0 0 0 8px color-mix(in srgb, var(--success) 22%, transparent); }
+    .answer-input.bad { border-color: var(--danger); box-shadow: 0 0 0 8px color-mix(in srgb, var(--danger) 20%, transparent); }
+    .answer-input.warn { border-color: var(--warning); box-shadow: 0 0 0 8px color-mix(in srgb, var(--warning) 22%, transparent); }
+    .keypad { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; max-width: 420px; margin: 14px auto 0; }
+    .key-btn { min-height: 52px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface-2); font-weight: 900; font-size: 1.12rem; user-select: none; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+    .key-btn:hover { filter: brightness(0.98); }
+    .key-btn.action { color: var(--primary); background: var(--primary-soft); font-size: 0.95rem; }
+    .timer-bar { height: 8px; border-radius: 999px; overflow: hidden; background: var(--surface-2); border: 1px solid var(--border); margin-top: 12px; }
+    .timer-fill { height: 100%; width: 100%; background: var(--primary); transform-origin: left center; transition: width 180ms linear, background 180ms linear; }
+    .timer-fill.warn { background: var(--warning); }
+    .timer-fill.danger { background: var(--danger); }
+    .status-line { min-height: 26px; text-align: center; margin-top: 10px; font-weight: 800; color: var(--muted); }
+    .status-line.good { color: var(--success); }
+    .status-line.bad { color: var(--danger); }
+    .status-line.warn { color: var(--warning); }
+    .result-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .result-card { border-radius: 14px; border: 1px solid var(--border); background: var(--surface-2); padding: 14px; text-align: center; }
+    .result-card .label { color: var(--muted); font-size: 0.76rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; }
+    .result-card .value { font-size: 1.4rem; font-weight: 900; margin-top: 3px; }
+    .result-card.verified { border-color: color-mix(in srgb, var(--success) 45%, var(--border)); background: var(--success-soft); }
+    .result-card.developing { border-color: color-mix(in srgb, var(--warning) 45%, var(--border)); background: var(--warning-soft); }
+    .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .stat { border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2); padding: 9px; text-align: center; }
+    .stat .label { color: var(--muted); font-size: 0.72rem; font-weight: 800; text-transform: uppercase; }
+    .stat .value { font-weight: 900; }
+    .tag-list { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag { border-radius: 999px; padding: 0.25rem 0.55rem; font-weight: 900; font-size: 0.78rem; background: var(--surface-2); border: 1px solid var(--border); }
+    .tag.bad { background: var(--danger-soft); color: var(--danger); border-color: color-mix(in srgb, var(--danger) 35%, var(--border)); }
+    .tag.warn { background: var(--warning-soft); color: var(--warning); border-color: color-mix(in srgb, var(--warning) 35%, var(--border)); }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    th, td { text-align: left; border-bottom: 1px solid var(--border); padding: 0.48rem 0.35rem; vertical-align: top; }
+    th { color: var(--muted); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    .history-wrap { overflow-x: auto; max-height: 420px; overflow-y: auto; border: 1px solid var(--border); border-radius: 12px; }
+    .toast { position: fixed; top: 14px; left: 50%; transform: translateX(-50%) translateY(-8px); opacity: 0; transition: opacity 180ms, transform 180ms; z-index: 10; padding: 0.65rem 1rem; border-radius: 999px; background: var(--text); color: var(--bg); font-weight: 900; box-shadow: var(--shadow); pointer-events: none; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
     .hidden { display: none !important; }
-    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
-    @media (max-width: 860px) {
-      .grid-2, .grid-3, .assessment-shell, .result-grid { grid-template-columns: 1fr; }
-      .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .side-panel { order: -1; }
-      .play-panel { min-height: auto; }
-    }
-    @media (max-width: 620px) {
-      .app { padding: var(--space-2); gap: var(--space-2); }
-      .header { padding: var(--space-3); align-items: flex-start; }
-      .brand h1 { font-size: 1rem; }
-      .brand p { display: none; }
-      .logo { width: 36px; height: 36px; }
-      .panel { padding: var(--space-3); }
-      .metrics { grid-template-columns: 1fr 1fr; }
-      .problem-area { padding: var(--space-4) 0 var(--space-2); }
-      .problem-text { font-size: clamp(2.7rem, 15vw, 4rem); }
-      .answer-input { min-height: 58px; font-size: 2.1rem; }
-      .keypad { gap: 0.45rem; }
-      .key-btn { min-height: 46px; padding: 0.6rem 0.35rem; }
+    .modal-backdrop { position: fixed; inset: 0; z-index: 20; background: rgba(0, 0, 0, 0.38); display: grid; place-items: center; padding: 16px; }
+    .modal-card { width: min(420px, 100%); background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; }
+    @media (max-width: 720px) {
+      .app { padding: 10px; }
+      .header { align-items: flex-start; }
+      .two-col, .result-cards { grid-template-columns: 1fr; }
+      .stat-row { grid-template-columns: repeat(2, 1fr); }
+      .header-actions .btn { padding: 0.55rem 0.7rem; font-size: 0.84rem; }
+      .key-btn { min-height: 48px; }
     }
   </style>
 </head>
@@ -307,1547 +125,1472 @@
   <div class="app">
     <header class="header">
       <div class="brand">
-        <div class="logo" aria-hidden="true"><img src="assets/apple-touch-icon.png" alt="" /></div>
+        <div class="logo" aria-hidden="true">FC</div>
         <div>
-          <h1>FactFlow Check</h1>
-          <p>Smart placement for multiplication facts</p>
+          <h1>FactFlow Check <span class="subtitle">Smart placement for multiplication facts - v2.4</span></h1>
         </div>
       </div>
       <div class="header-actions">
-        <span class="pill" id="headerAssessmentPill">No assessment set</span>
-        <button type="button" class="icon-btn" id="themeBtn" title="Toggle theme">Aa</button>
+        <button class="btn secondary" type="button" id="teacherBtn">Teacher</button>
       </div>
     </header>
 
-    <main>
-      <section class="screen active" id="setupScreen">
-        <div class="grid-2">
-          <div class="panel hero-card">
-            <div>
-              <p class="pill good">Version 1</p>
-              <h2 class="hero-title" style="margin-top:0.75rem;">Set up a supervised check</h2>
-              <p class="hero-copy">Students enter the teacher code, complete a short adaptive check, and then show you the result. This app does not use regular FactFlow practice progress.</p>
-            </div>
-            <div class="metrics">
-              <div class="stat"><div class="label">Purpose</div><div class="value">Placement</div></div>
-              <div class="stat"><div class="label">Length</div><div class="value">12-45</div></div>
-              <div class="stat"><div class="label">Timer</div><div class="value">10 sec</div></div>
-              <div class="stat"><div class="label">Data</div><div class="value">Local</div></div>
-            </div>
-            <div class="status-text warn">One-time use in Version 1 works on the same device and browser. A future Google Sheet version can enforce this across devices.</div>
-          </div>
+    <section class="screen active" id="entryScreen">
+      <div class="panel entry-card grid">
+        <div class="center grid">
+          <h2>Welcome to FactFlow Check</h2>
+          <p class="muted">Answer each fact as quickly and accurately as you can. When you finish, your result will appear on the screen.</p>
+          <div><span class="code-chip" id="studentCodeHint">Code required</span></div>
+        </div>
+        <div class="field">
+          <label for="studentName">Your name or ID</label>
+          <input id="studentName" type="text" maxlength="48" autocomplete="off" placeholder="Example: Mina or BLUE-19">
+        </div>
+        <div class="field">
+          <label for="teacherCode">Teacher code</label>
+          <input id="teacherCode" type="text" maxlength="24" autocomplete="off" placeholder="Example: RIVER-47" style="text-transform:uppercase;letter-spacing:0.05em;">
+        </div>
+        <div class="error" id="entryError"></div>
+        <button class="btn" type="button" id="beginBtn">Begin Check</button>
+        <p class="muted small center">This check uses a one-code-per-student lock on this device. Restarted attempts are marked on the result screen.</p>
+      </div>
+    </section>
 
-          <div class="panel">
-            <h2>Teacher Setup</h2>
-            <p class="subtle">Use a new assessment ID for each check during the year.</p>
-            <div class="form-grid">
-              <label>Assessment name
-                <input id="assessmentNameInput" type="text" value="Beginning of Year Placement" autocomplete="off" />
-              </label>
-              <label>Assessment ID
-                <input id="assessmentIdInput" type="text" value="2026-Q1-Placement" autocomplete="off" />
-              </label>
-              <label>Class name
-                <input id="classIdInput" type="text" value="5A" autocomplete="off" />
-              </label>
-              <label>Teacher code
-                <div class="row" style="align-items:stretch;">
-                  <input id="teacherCodeInput" type="text" value="RIVER-47" autocomplete="off" style="flex:1 1 160px;" />
-                  <button type="button" class="btn-ghost" id="generateCodeBtn">Generate</button>
-                </div>
-              </label>
-              <div class="row end">
-                <button type="button" class="btn-ghost" id="loadSavedSetupBtn">Load Saved</button>
-                <button type="button" class="btn" id="saveSetupBtn">Save Setup</button>
-                <button type="button" class="btn" id="goStudentBtn">Begin Student Check</button>
-              </div>
-            </div>
-            <div class="status-text" id="setupStatus">Ready to set up the check.</div>
+    <section class="screen" id="testScreen">
+      <div class="panel">
+        <div class="test-meta">
+          <span>Question <span id="qNumber">1</span><span id="qTotal"></span></span>
+          <span id="testStudentLabel">Student</span>
+        </div>
+        <div class="band-track" id="bandTrack" aria-hidden="true"></div>
+        <div class="timer-bar" aria-hidden="true"><div class="timer-fill" id="timerFill"></div></div>
+        <div class="problem-area" aria-live="polite">
+          <div class="problem-text" id="problemText">Ready?</div>
+        </div>
+        <div class="answer-wrap">
+          <input id="answerInput" class="answer-input" inputmode="none" readonly autocomplete="off" maxlength="3" placeholder="?" aria-label="Answer">
+        </div>
+        <div class="keypad" aria-label="Number keypad">
+          <button class="key-btn" type="button" data-key="1">1</button>
+          <button class="key-btn" type="button" data-key="2">2</button>
+          <button class="key-btn" type="button" data-key="3">3</button>
+          <button class="key-btn" type="button" data-key="4">4</button>
+          <button class="key-btn" type="button" data-key="5">5</button>
+          <button class="key-btn" type="button" data-key="6">6</button>
+          <button class="key-btn" type="button" data-key="7">7</button>
+          <button class="key-btn" type="button" data-key="8">8</button>
+          <button class="key-btn" type="button" data-key="9">9</button>
+          <button class="key-btn action" type="button" data-key="clear">Clear</button>
+          <button class="key-btn" type="button" data-key="0">0</button>
+          <button class="key-btn action" type="button" data-key="backspace">Back</button>
+        </div>
+        <div class="status-line" id="statusLine" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="screen" id="completeScreen">
+      <div class="panel center grid">
+        <h2>Check complete</h2>
+        <p class="muted">Please show your teacher.</p>
+        <div class="notice"><strong>Raise your hand and wait quietly.</strong></div>
+        <div class="row" style="justify-content:center;">
+          <button class="btn" type="button" id="showTeacherResultBtn">Teacher Result</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="resultScreen">
+      <div class="panel grid">
+        <div class="center grid">
+          <h2>FactFlow Check Result</h2>
+          <p class="muted" id="resultMeta">Student - Code - Date</p>
+        </div>
+        <div class="result-cards">
+          <div class="result-card verified">
+            <div class="label">Verified Level</div>
+            <div class="value" id="verifiedLevel">-</div>
+            <p class="muted small" id="verifiedDesc"></p>
+          </div>
+          <div class="result-card developing">
+            <div class="label">Developing Level</div>
+            <div class="value" id="developingLevel">-</div>
+            <p class="muted small" id="developingDesc"></p>
           </div>
         </div>
+        <div class="stat-row">
+          <div class="stat"><div class="label">Accuracy</div><div class="value" id="accuracyStat">-</div></div>
+          <div class="stat"><div class="label">Fluent</div><div class="value" id="fluentStat">-</div></div>
+          <div class="stat"><div class="label">Slow</div><div class="value" id="slowStat">-</div></div>
+          <div class="stat"><div class="label">Missed</div><div class="value" id="missedStat">-</div></div>
+        </div>
+        <div class="grid">
+          <h3>Recommendation</h3>
+          <div class="notice" id="recommendationText">-</div>
+        </div>
+        <div class="two-col">
+          <div class="grid">
+            <h3>Missed facts</h3>
+            <div class="tag-list" id="missedTags"></div>
+          </div>
+          <div class="grid">
+            <h3>Timed out facts</h3>
+            <div class="tag-list" id="timeoutTags"></div>
+          </div>
+        </div>
+        <div class="grid">
+          <h3>Band summary</h3>
+          <div id="bandSummary"></div>
+        </div>
+        <div class="row" style="justify-content:center;">
+          <button class="btn secondary" type="button" id="studentViewBtn">Back to Start</button>
+          <button class="btn secondary" type="button" id="newCheckBtn">New Check</button>
+        </div>
+      </div>
+    </section>
 
-        <div class="panel" style="margin-top:var(--space-4);">
-          <div class="result-title">
-            <div>
-              <h2>Local Results</h2>
-              <p class="subtle">Results saved on this device only.</p>
+    <section class="screen" id="teacherScreen">
+      <div class="panel grid">
+        <div class="row" style="justify-content:space-between;">
+          <div>
+            <h2>Teacher Tools</h2>
+            <p class="muted">Set the assessment label, check the current student code, and review saved results on this device.</p>
+          </div>
+          <button class="btn secondary" type="button" id="backToEntryBtn">Exit and Lock</button>
+        </div>
+        <div class="two-col">
+          <div class="grid">
+            <div class="field">
+              <label for="assessmentName">Assessment name</label>
+              <input id="assessmentName" type="text" maxlength="60" placeholder="Example: Term 1 Multiplication Check">
+            </div>
+            <div class="field">
+              <label for="customCode">Optional class code</label>
+              <input id="customCode" type="text" maxlength="24" placeholder="Example: RIVER-47" style="text-transform:uppercase;letter-spacing:0.05em;">
             </div>
             <div class="row">
-              <button type="button" class="btn-ghost" id="clearHistoryBtn">Clear History</button>
-              <button type="button" class="btn-ghost" id="clearAttemptsBtn">Clear Attempt Locks</button>
+              <button class="btn" type="button" id="saveConfigBtn">Save Setup</button>
+              <button class="btn secondary" type="button" id="generateCodeBtn">Generate Code</button>
+            </div>
+            <div class="notice">
+              <div class="small muted">Current 4-hour student code</div>
+              <div class="code-chip" id="dailyCodeLabel">-</div>
+              <p class="muted small" id="codeWindowLabel" style="margin-top:8px;">Valid for the current 4-hour Bangkok-time window.</p>
+              <p class="muted small" style="margin-top:8px;">Students may use the saved class code or the current 4-hour code. Other random-looking codes are not accepted.</p>
             </div>
           </div>
-          <div class="history-table-wrap" id="historyTableWrap"></div>
-        </div>
-      </section>
-
-      <section class="screen" id="studentScreen">
-        <div class="grid-2">
-          <div class="panel hero-card">
-            <div>
-              <p class="pill good">Student Check</p>
-              <h2 class="hero-title" style="margin-top:0.75rem;">Show what you know</h2>
-              <p class="hero-copy">Answer each fact by yourself. Try your best. If you do not know one, keep going.</p>
-            </div>
-            <div class="side-list">
-              <div class="side-item"><strong>1.</strong> Enter your name, student ID, and teacher code.</div>
-              <div class="side-item"><strong>2.</strong> Complete the check by yourself.</div>
-              <div class="side-item"><strong>3.</strong> Show your teacher when you are finished.</div>
-            </div>
-          </div>
-          <div class="panel">
-            <h2>Student Entry</h2>
-            <p class="subtle" id="studentAssessmentSummary">Assessment not loaded.</p>
-            <div class="form-grid">
-              <label>First name
-                <input id="studentNameInput" type="text" autocomplete="off" />
-              </label>
-              <label>Student ID or number
-                <input id="studentIdInput" type="text" autocomplete="off" />
-              </label>
-              <label>Teacher code
-                <input id="studentCodeInput" type="text" autocomplete="off" />
-              </label>
-              <div class="row end">
-                <button type="button" class="btn-ghost" id="backSetupBtn">Teacher Setup</button>
-                <button type="button" class="btn" id="startCheckBtn">Start Check</button>
-              </div>
-            </div>
-            <div class="status-text" id="studentStatus">Enter the code from your teacher.</div>
+          <div class="grid">
+            <h3>Device Results</h3>
+            <button class="btn danger" type="button" id="clearResultsBtn">Clear Saved Results</button>
+            <p class="muted small">Teacher tools are hidden from students. Use Exit and Lock when you are finished.</p>
+            <p class="muted small">This is a classroom barrier, not a secure online login.</p>
           </div>
         </div>
-      </section>
-
-      <section class="screen" id="instructionsScreen">
-        <div class="panel completion-card">
-          <p class="pill good">Ready</p>
-          <h2>Answer by yourself</h2>
-          <p>Try your best. The check will stop when it has enough information.</p>
-          <div class="row">
-            <button type="button" class="btn-ghost" id="cancelCheckBtn">Cancel</button>
-            <button type="button" class="btn" id="beginQuestionsBtn">Start</button>
-          </div>
+        <div class="grid">
+          <h3>Saved results</h3>
+          <div class="history-wrap"><table id="historyTable"></table></div>
         </div>
-      </section>
-
-      <section class="screen" id="assessmentScreen">
-        <div class="assessment-shell">
-          <div class="panel play-panel">
-            <div class="question-top">
-              <span class="pill" id="questionCountPill">Question 1</span>
-              <span class="timer-pill" id="timerPill">10</span>
-            </div>
-            <div class="problem-area" aria-live="polite">
-              <div class="problem-text" id="problemText">Ready?</div>
-            </div>
-            <div class="answer-wrap">
-              <label class="sr-only" for="answerInput">Type answer</label>
-              <input id="answerInput" class="answer-input" inputmode="none" autocomplete="off" placeholder="?" maxlength="3" readonly />
-              <div class="feedback-pill" id="feedbackPill">Correct</div>
-            </div>
-            <div class="keypad" aria-label="Number keypad" id="keypad">
-              <button type="button" class="key-btn" data-key="1">1</button>
-              <button type="button" class="key-btn" data-key="2">2</button>
-              <button type="button" class="key-btn" data-key="3">3</button>
-              <button type="button" class="key-btn" data-key="4">4</button>
-              <button type="button" class="key-btn" data-key="5">5</button>
-              <button type="button" class="key-btn" data-key="6">6</button>
-              <button type="button" class="key-btn" data-key="7">7</button>
-              <button type="button" class="key-btn" data-key="8">8</button>
-              <button type="button" class="key-btn" data-key="9">9</button>
-              <button type="button" class="key-btn" data-key="clear">Clear</button>
-              <button type="button" class="key-btn" data-key="0">0</button>
-              <button type="button" class="key-btn" data-key="enter">Enter</button>
-            </div>
-            <div class="status-text" id="assessmentStatus">Answer the fact shown.</div>
-          </div>
-          <aside class="panel side-panel">
-            <h2>Check Status</h2>
-            <p class="subtle">The band and score are hidden during the check.</p>
-            <div class="side-list">
-              <div class="side-item"><strong>Student:</strong> <span id="sideStudentName">-</span></div>
-              <div class="side-item"><strong>Assessment:</strong> <span id="sideAssessmentName">-</span></div>
-              <div class="side-item"><strong>Progress:</strong> <span id="sideProgressText">Starting</span></div>
-            </div>
-          </aside>
-        </div>
-      </section>
-
-      <section class="screen" id="completeScreen">
-        <div class="panel completion-card">
-          <p class="pill good">Check complete</p>
-          <h2>Please show your teacher.</h2>
-          <p>The teacher can open the result below.</p>
-          <div class="row">
-            <button type="button" class="btn-ghost" id="newStudentBtn">New Student</button>
-            <button type="button" class="btn" id="showResultBtn">Show Teacher Result</button>
-          </div>
-        </div>
-      </section>
-
-      <section class="screen" id="resultScreen">
-        <div class="result-grid">
-          <div class="panel">
-            <div class="result-title">
-              <div>
-                <p class="pill good">Check Result</p>
-                <h2 style="margin-top:0.5rem;">FactFlow Check Result</h2>
-              </div>
-              <div class="row">
-                <button type="button" class="btn-ghost" id="copyResultBtn">Copy Summary</button>
-                <button type="button" class="btn" id="resultNewStudentBtn">New Student</button>
-              </div>
-            </div>
-            <div class="metrics" style="margin-top:var(--space-4);">
-              <div class="stat"><div class="label">Verified</div><div class="value" id="verifiedLevelText">-</div></div>
-              <div class="stat"><div class="label">Developing</div><div class="value" id="developingLevelText">-</div></div>
-              <div class="stat"><div class="label">Accuracy</div><div class="value" id="accuracyText">-</div></div>
-              <div class="stat"><div class="label">Fluent</div><div class="value" id="fluentText">-</div></div>
-            </div>
-            <div class="status-text good" id="recommendationText" style="margin-top:var(--space-4);">Recommendation will appear here.</div>
-            <div class="grid-2" style="margin-top:var(--space-4);">
-              <div>
-                <h3>Missed Facts</h3>
-                <div class="facts-list" id="missedFactsList"></div>
-              </div>
-              <div>
-                <h3>Timed Out Facts</h3>
-                <div class="facts-list" id="timedOutFactsList"></div>
-              </div>
-            </div>
-            <div class="status-text" id="copyStatus">Result saved locally on this device.</div>
-          </div>
-          <div class="panel">
-            <h2>Details</h2>
-            <table>
-              <tbody id="resultDetailsBody"></tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-    </main>
+      </div>
+    </section>
   </div>
 
+  <div class="modal-backdrop hidden" id="teacherUnlockModal" role="dialog" aria-modal="true" aria-labelledby="teacherUnlockTitle">
+    <div class="modal-card grid">
+      <div>
+        <h2 id="teacherUnlockTitle">Teacher Access</h2>
+        <p class="muted">Enter the teacher passphrase to open the teacher area.</p>
+      </div>
+      <div class="field">
+        <label for="teacherPassphrase">Teacher passphrase</label>
+        <input id="teacherPassphrase" type="password" maxlength="64" autocomplete="off">
+      </div>
+      <div class="error" id="teacherUnlockError"></div>
+      <div class="row" style="justify-content:flex-end;">
+        <button class="btn secondary" type="button" id="cancelTeacherUnlockBtn">Cancel</button>
+        <button class="btn" type="button" id="unlockTeacherBtn">Unlock</button>
+      </div>
+    </div>
+  </div>
+  <div class="toast" id="toast" aria-live="polite"></div>
+
   <script>
-(function () {
-  "use strict";
+  (function () {
+    'use strict';
 
-  var STORAGE = {
-    config: "factflowCheck.config.v1",
-    attempts: "factflowCheck.attempts.v1",
-    results: "factflowCheck.results.v1",
-    theme: "factflowCheck.theme.v1"
-  };
+    var APP_VERSION = '2.4.0';
+    var RESULTS_KEY = 'factflowCheck.results.v2';
+    var ATTEMPTS_KEY = 'factflowCheck.attempts.v2';
+    var CONFIG_KEY = 'factflowCheck.config.v2';
+    var TIMEOUT_SEC = 10;
+    var MAX_TEST_SEC = 300;
+    var MAX_QUESTIONS = 45;
+    var MIN_QUESTIONS = 12;
+    var FAST_TRACK_BLOCK_SIZE = 4;
+    var FLUENT_MS = 4000;
+    var SLOW_MS = 8000;
+    var AUTO_SUBMIT_MS = 120;
+    var IDLE_SUBMIT_SHORT_MS = 800;
+    var IDLE_SUBMIT_LONG_MS = 1100;
+    var MAX_RETESTS_PER_BAND = 4;
+    var EARLY_FAIL_MIN_BAND_ANSWERS = 6;
+    var TEACHER_PASS_SALT = 'ffc-teacher-lock-v1';
+    var TEACHER_PASS_HASH = 'c9f18fe32a681cb097b0edca67d97c882e6714903f8306e0a540fcaf74194d97';
+    var TEACHER_AUTO_LOCK_MS = 15 * 60 * 1000;
 
-  var TEST_VERSION = "1.0";
-  var MAX_QUESTIONS = 45;
-  var MAX_MINUTES = 5;
-  var QUESTION_TIMEOUT_SECONDS = 10;
-  var IDLE_SUBMIT_MS = 500;
-
-  var BANDS = [
-    { id: "A", label: "Band A - 2s, 5s, 10s", shortLabel: "Band A", factors: [2, 5, 10], focus: "2s, 5s, and 10s" },
-    { id: "B", label: "Band B - 3s and 4s", shortLabel: "Band B", factors: [3, 4], focus: "3s and 4s" },
-    { id: "C", label: "Band C - 6s", shortLabel: "Band C", factors: [6], focus: "6s" },
-    { id: "D", label: "Band D - 7s", shortLabel: "Band D", factors: [7], focus: "7s" },
-    { id: "E", label: "Band E - 8s", shortLabel: "Band E", factors: [8], focus: "8s" },
-    { id: "F", label: "Band F - 9s", shortLabel: "Band F", factors: [9], focus: "9s" },
-    { id: "G", label: "Band G - 11s and 12s", shortLabel: "Band G", factors: [11, 12], focus: "11s and 12s" },
-    { id: "H", label: "Band H - Mixed 2-12", shortLabel: "Band H", factors: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], focus: "mixed 2-12" }
-  ];
-
-  var WARMUP = [
-    makeFact(2, 4, "warmup"),
-    makeFact(5, 6, "warmup"),
-    makeFact(10, 7, "warmup"),
-    makeFact(3, 3, "warmup"),
-    makeFact(4, 2, "warmup"),
-    makeFact(2, 9, "warmup")
-  ];
-
-  var WORDS = ["RIVER", "MANGO", "TIGER", "LOTUS", "COBRA", "PANDA", "OCEAN", "BAMBOO", "ROCKET", "SUNNY", "CORAL", "EAGLE", "STAR", "MAPLE", "LION", "PEARL"];
-
-  var el = {};
-  var appState = {
-    config: null,
-    session: null,
-    currentQuestion: null,
-    questionStartedAt: 0,
-    timerId: null,
-    idleSubmitId: null,
-    lockedInput: false,
-    latestResult: null
-  };
-
-  function $(id) {
-    return document.getElementById(id);
-  }
-
-  function cacheElements() {
-    var ids = [
-      "setupScreen", "studentScreen", "instructionsScreen", "assessmentScreen", "completeScreen", "resultScreen",
-      "themeBtn", "headerAssessmentPill", "assessmentNameInput", "assessmentIdInput", "classIdInput", "teacherCodeInput",
-      "generateCodeBtn", "loadSavedSetupBtn", "saveSetupBtn", "goStudentBtn", "setupStatus", "historyTableWrap",
-      "clearHistoryBtn", "clearAttemptsBtn", "studentAssessmentSummary", "studentNameInput", "studentIdInput",
-      "studentCodeInput", "backSetupBtn", "startCheckBtn", "studentStatus", "cancelCheckBtn", "beginQuestionsBtn",
-      "questionCountPill", "timerPill", "problemText", "answerInput", "feedbackPill", "keypad", "assessmentStatus",
-      "sideStudentName", "sideAssessmentName", "sideProgressText", "newStudentBtn", "showResultBtn", "verifiedLevelText",
-      "developingLevelText", "accuracyText", "fluentText", "recommendationText", "missedFactsList", "timedOutFactsList",
-      "resultDetailsBody", "copyResultBtn", "resultNewStudentBtn", "copyStatus"
+    var WARMUP = [
+      makeFact(2, 4), makeFact(5, 6), makeFact(10, 7),
+      makeFact(3, 3), makeFact(4, 2), makeFact(2, 9)
     ];
-    for (var i = 0; i < ids.length; i += 1) {
-      el[ids[i]] = $(ids[i]);
-    }
-  }
 
-  function showScreen(name) {
-    var screens = ["setupScreen", "studentScreen", "instructionsScreen", "assessmentScreen", "completeScreen", "resultScreen"];
-    for (var i = 0; i < screens.length; i += 1) {
-      if (el[screens[i]]) {
-        el[screens[i]].classList.toggle("active", screens[i] === name);
+    var BANDS = [
+      { id: 'A', label: '2s, 5s, 10s', tables: [2, 5, 10], blockSize: 8, extraSize: 4 },
+      { id: 'B', label: '3s, 4s', tables: [3, 4], blockSize: 8, extraSize: 4 },
+      { id: 'C', label: '6s', tables: [6], blockSize: 8, extraSize: 4 },
+      { id: 'D', label: '7s', tables: [7], blockSize: 8, extraSize: 4 },
+      { id: 'E', label: '8s', tables: [8], blockSize: 8, extraSize: 4 },
+      { id: 'F', label: '9s', tables: [9], blockSize: 8, extraSize: 4 },
+      { id: 'G', label: '11s, 12s', tables: [11, 12], blockSize: 8, extraSize: 4 },
+      { id: 'H', label: 'Mixed 2-12', tables: [2,3,4,5,6,7,8,9,10,11,12], blockSize: 15, extraSize: 0 }
+    ];
+
+    var el = {};
+    var appState = {
+      config: null,
+      results: [],
+      attempts: {},
+      session: null,
+      currentQuestion: null,
+      questionStartedAt: 0,
+      inputLocked: false,
+      finishing: false,
+      autoSubmitId: null,
+      idleSubmitId: null,
+      questionTimerId: null,
+      nextQuestionId: null,
+      timerIntervalId: null,
+      latestResult: null,
+      teacherUnlocked: false,
+      teacherLockTimerId: null,
+      pendingTeacherTarget: ''
+    };
+
+    function cacheDom() {
+      var ids = [
+        'entryScreen','testScreen','completeScreen','resultScreen','teacherScreen','teacherBtn',
+        'studentCodeHint','studentName','teacherCode','entryError','beginBtn','qNumber','qTotal','testStudentLabel',
+        'bandTrack','timerFill','problemText','answerInput','statusLine','showTeacherResultBtn','resultMeta',
+        'verifiedLevel','verifiedDesc','developingLevel','developingDesc','accuracyStat','fluentStat','slowStat',
+        'missedStat','recommendationText','missedTags','timeoutTags','bandSummary','studentViewBtn',
+        'newCheckBtn','backToEntryBtn','assessmentName','customCode','saveConfigBtn','generateCodeBtn','dailyCodeLabel',
+        'codeWindowLabel','clearResultsBtn','historyTable','teacherUnlockModal','teacherPassphrase','teacherUnlockError',
+        'cancelTeacherUnlockBtn','unlockTeacherBtn','toast'
+      ];
+      for (var i = 0; i < ids.length; i++) el[ids[i]] = document.getElementById(ids[i]);
+    }
+
+    function makeFact(a, b) {
+      var left = parseInt(a, 10);
+      var right = parseInt(b, 10);
+      return {
+        a: left,
+        b: right,
+        answer: left * right,
+        familyKey: makeFamilyKey(left, right),
+        display: left + ' x ' + right
+      };
+    }
+
+    function makeFamilyKey(a, b) {
+      var x = parseInt(a, 10);
+      var y = parseInt(b, 10);
+      if (x <= y) return x + 'x' + y;
+      return y + 'x' + x;
+    }
+
+    function reverseFact(fact) {
+      return makeFact(fact.b, fact.a);
+    }
+
+    function cloneFact(fact) {
+      return makeFact(fact.a, fact.b);
+    }
+
+    function containsNumber(list, value) {
+      for (var i = 0; i < list.length; i++) {
+        if (list[i] === value) return true;
       }
-    }
-    if (name !== "assessmentScreen") {
-      stopQuestionTimer();
-      clearIdleSubmit();
-    }
-  }
-
-  function setStatus(node, text, kind) {
-    if (!node) return;
-    node.textContent = text;
-    node.className = "status-text" + (kind ? " " + kind : "");
-  }
-
-  function normalizeText(value) {
-    return String(value || "").replace(/^\s+|\s+$/g, "");
-  }
-
-  function normalizeKey(value) {
-    return normalizeText(value).toUpperCase().replace(/\s+/g, " ");
-  }
-
-  function slug(value) {
-    return normalizeKey(value).replace(/[^A-Z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-  }
-
-  function readJson(key, fallback) {
-    try {
-      var raw = localStorage.getItem(key);
-      if (!raw) return fallback;
-      return JSON.parse(raw);
-    } catch (e) {
-      return fallback;
-    }
-  }
-
-  function writeJson(key, value) {
-    try {
-      localStorage.setItem(key, JSON.stringify(value));
-      return true;
-    } catch (e) {
       return false;
     }
-  }
 
-  function saveConfig() {
-    var config = {
-      assessmentName: normalizeText(el.assessmentNameInput.value) || "Multiplication Placement Check",
-      assessmentId: slug(el.assessmentIdInput.value) || "ASSESSMENT-1",
-      classId: slug(el.classIdInput.value) || "CLASS",
-      teacherCode: slug(el.teacherCodeInput.value) || generateCode(),
-      testVersion: TEST_VERSION,
-      maxQuestions: MAX_QUESTIONS,
-      maxMinutes: MAX_MINUTES,
-      questionTimeoutSeconds: QUESTION_TIMEOUT_SECONDS,
-      savedAt: new Date().toISOString()
-    };
-    appState.config = config;
-    el.assessmentNameInput.value = config.assessmentName;
-    el.assessmentIdInput.value = config.assessmentId;
-    el.classIdInput.value = config.classId;
-    el.teacherCodeInput.value = config.teacherCode;
-    writeJson(STORAGE.config, config);
-    updateHeader();
-    updateStudentSummary();
-    setStatus(el.setupStatus, "Setup saved. Students can now enter the teacher code.", "good");
-    renderHistory();
-    return config;
-  }
-
-  function loadConfig() {
-    var saved = readJson(STORAGE.config, null);
-    if (!saved) {
-      appState.config = saveConfig();
-      return appState.config;
-    }
-    appState.config = saved;
-    el.assessmentNameInput.value = saved.assessmentName || "Multiplication Placement Check";
-    el.assessmentIdInput.value = saved.assessmentId || "ASSESSMENT-1";
-    el.classIdInput.value = saved.classId || "CLASS";
-    el.teacherCodeInput.value = saved.teacherCode || "RIVER-47";
-    updateHeader();
-    updateStudentSummary();
-    renderHistory();
-    setStatus(el.setupStatus, "Saved setup loaded.", "good");
-    return saved;
-  }
-
-  function updateHeader() {
-    if (!appState.config) {
-      el.headerAssessmentPill.textContent = "No assessment set";
-      return;
-    }
-    el.headerAssessmentPill.textContent = appState.config.assessmentId + " | " + appState.config.teacherCode;
-  }
-
-  function updateStudentSummary() {
-    if (!appState.config) {
-      el.studentAssessmentSummary.textContent = "Assessment not loaded.";
-      return;
-    }
-    el.studentAssessmentSummary.textContent = appState.config.assessmentName + " - Code required";
-  }
-
-  function generateCode() {
-    var word = WORDS[Math.floor(Math.random() * WORDS.length)];
-    var number = Math.floor(Math.random() * 90) + 10;
-    return word + "-" + number;
-  }
-
-  function makeAttemptKey(config, studentId) {
-    return [config.classId, config.assessmentId, slug(studentId), config.teacherCode].join("|");
-  }
-
-  function getAttempts() {
-    return readJson(STORAGE.attempts, {});
-  }
-
-  function saveAttempts(attempts) {
-    writeJson(STORAGE.attempts, attempts);
-  }
-
-  function getResults() {
-    var results = readJson(STORAGE.results, []);
-    if (!Array.isArray(results)) return [];
-    return results;
-  }
-
-  function saveResults(results) {
-    writeJson(STORAGE.results, results);
-  }
-
-  function makeSession(studentName, studentId, restartCount) {
-    var config = appState.config;
-    var now = new Date().toISOString();
-    return {
-      sessionId: "S" + Date.now() + "-" + Math.floor(Math.random() * 100000),
-      attemptKey: makeAttemptKey(config, studentId),
-      studentName: studentName,
-      studentId: studentId,
-      assessmentId: config.assessmentId,
-      assessmentName: config.assessmentName,
-      classId: config.classId,
-      teacherCode: config.teacherCode,
-      testVersion: TEST_VERSION,
-      status: "in_progress",
-      startedAt: now,
-      completedAt: null,
-      currentPhase: "warmup",
-      currentBandIndex: -1,
-      fastTrack: false,
-      highestAttemptedBand: null,
-      verifiedBandIndex: -1,
-      developingBandIndex: -1,
-      finalReason: "",
-      restartCount: restartCount || 0,
-      questionResults: [],
-      blockQueue: WARMUP.slice(0),
-      blockType: "warmup",
-      blockTargetCount: WARMUP.length,
-      blockHadExtras: false,
-      bandMeta: {},
-      recentFamilies: [],
-      retestQueue: [],
-      totalStartedAt: Date.now()
-    };
-  }
-
-  function startStudentCheck() {
-    var config = appState.config || saveConfig();
-    var studentName = normalizeText(el.studentNameInput.value);
-    var studentId = normalizeText(el.studentIdInput.value);
-    var code = slug(el.studentCodeInput.value);
-    if (!studentName) {
-      setStatus(el.studentStatus, "Please enter your first name.", "bad");
-      return;
-    }
-    if (!studentId) {
-      setStatus(el.studentStatus, "Please enter your student ID or number.", "bad");
-      return;
-    }
-    if (code !== config.teacherCode) {
-      setStatus(el.studentStatus, "The teacher code does not match. Please check the board.", "bad");
-      return;
+    function pad2(n) {
+      return n < 10 ? '0' + n : String(n);
     }
 
-    var attempts = getAttempts();
-    var key = makeAttemptKey(config, studentId);
-    var existing = attempts[key];
-    if (existing && existing.status === "completed") {
-      setStatus(el.studentStatus, "This check has already been completed. Please show your teacher.", "warn");
-      return;
+    function bangkokDate(date) {
+      var d = date || new Date();
+      var utcMs = d.getTime() + (d.getTimezoneOffset() * 60000);
+      return new Date(utcMs + (7 * 60 * 60000));
     }
 
-    var restartCount = 0;
-    if (existing && existing.status === "in_progress") {
-      restartCount = (existing.restartCount || 0) + 1;
+    function fourHourCodeInfo(date) {
+      var d = bangkokDate(date || new Date());
+      var block = Math.floor(d.getHours() / 4);
+      var seed = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+      var words = ['RIVER','MAPLE','CHECK','BLUE','NORTH','BRAVE','CLOUD','TIGER','LEAF','STAR','FACT','READY'];
+      var word = words[(seed + block * 5) % words.length];
+      var num = ((seed * 19 + block * 37) % 90) + 10;
+      var expiresHour = (block + 1) * 4;
+      var expiresLabel = pad2(expiresHour % 24) + ':00';
+      return { code: word + '-' + num, expiresLabel: expiresLabel, block: block };
     }
 
-    appState.session = makeSession(studentName, studentId, restartCount);
-    attempts[key] = {
-      attemptKey: key,
-      studentName: studentName,
-      studentId: studentId,
-      assessmentId: config.assessmentId,
-      classId: config.classId,
-      teacherCode: config.teacherCode,
-      status: "in_progress",
-      startedAt: appState.session.startedAt,
-      completedAt: null,
-      restartCount: restartCount
-    };
-    saveAttempts(attempts);
-    setStatus(el.studentStatus, "Ready to begin.", "good");
-    showScreen("instructionsScreen");
-  }
-
-  function beginQuestions() {
-    if (!appState.session) return;
-    el.sideStudentName.textContent = appState.session.studentName;
-    el.sideAssessmentName.textContent = appState.session.assessmentName;
-    el.sideProgressText.textContent = "Starting";
-    setStatus(el.assessmentStatus, "Answer the fact shown.", "");
-    showScreen("assessmentScreen");
-    presentNextQuestion();
-  }
-
-  function makeFact(a, b, bandId) {
-    return {
-      a: a,
-      b: b,
-      bandId: bandId || null,
-      answer: a * b,
-      familyKey: familyKey(a, b),
-      displayed: a + " x " + b
-    };
-  }
-
-  function familyKey(a, b) {
-    var low = Math.min(a, b);
-    var high = Math.max(a, b);
-    return low + "x" + high;
-  }
-
-  function containsNumber(list, value) {
-    for (var i = 0; i < list.length; i += 1) {
-      if (list[i] === value) return true;
+    function currentStudentCode() {
+      return fourHourCodeInfo(new Date()).code;
     }
-    return false;
-  }
 
-  function generateBandPool(band) {
-    var seen = {};
-    var facts = [];
-    var other;
-    var i;
-    if (band.id === "H") {
-      for (var a = 2; a <= 12; a += 1) {
-        for (var b = a; b <= 12; b += 1) {
-          facts.push(makeFact(a, b, band.id));
-        }
-      }
-      return facts;
+    function normalizeCode(code) {
+      return String(code || '').toUpperCase().replace(/\s+/g, '').replace(/[^A-Z0-9-]/g, '');
     }
-    for (i = 0; i < band.factors.length; i += 1) {
-      var factor = band.factors[i];
-      for (other = 2; other <= 12; other += 1) {
-        var key = familyKey(factor, other);
-        if (!seen[key]) {
-          seen[key] = true;
-          facts.push(makeFact(factor, other, band.id));
-        }
+
+    function normalizeName(name) {
+      return String(name || '').toLowerCase().replace(/\s+/g, ' ').trim();
+    }
+
+    function safeJsonParse(value, fallback) {
+      try { return JSON.parse(value); } catch (e) { return fallback; }
+    }
+
+    function loadJson(key, fallback) {
+      try {
+        var raw = localStorage.getItem(key);
+        if (!raw) return fallback;
+        return safeJsonParse(raw, fallback);
+      } catch (e) {
+        return fallback;
       }
     }
-    return facts;
-  }
 
-  function difficultyBucket(fact, band) {
-    var a = fact.a;
-    var b = fact.b;
-    var other = containsNumber(band.factors, a) ? b : a;
-    if (band.id === "H") {
-      if (a <= 5 || b <= 5 || a === 10 || b === 10 || a === 11 || b === 11) return "easy";
-      if ((a >= 7 && b >= 7) || a === 12 || b === 12) return "hard";
-      return "core";
+    function saveJson(key, value) {
+      try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { showToast('Could not save locally.'); }
     }
-    if (other === 2 || other === 5 || other === 10 || other === 11) return "easy";
-    if (other === 6 || other === 7 || other === 8 || other === 9 || other === 12 || other === a) return "hard";
-    return "core";
-  }
 
-  function shuffle(list) {
-    var arr = list.slice(0);
-    for (var i = arr.length - 1; i > 0; i -= 1) {
-      var j = Math.floor(Math.random() * (i + 1));
-      var temp = arr[i];
-      arr[i] = arr[j];
-      arr[j] = temp;
-    }
-    return arr;
-  }
-
-  function chooseFromPool(pool, count, usedFamilies, recentFamilies) {
-    var chosen = [];
-    var shuffled = shuffle(pool);
-    var i;
-    for (i = 0; i < shuffled.length && chosen.length < count; i += 1) {
-      var fact = shuffled[i];
-      if (usedFamilies[fact.familyKey]) continue;
-      if (recentFamilies && recentFamilies.length && recentFamilies[recentFamilies.length - 1] === fact.familyKey) continue;
-      usedFamilies[fact.familyKey] = true;
-      chosen.push(fact);
-    }
-    for (i = 0; i < shuffled.length && chosen.length < count; i += 1) {
-      var fallback = shuffled[i];
-      if (usedFamilies[fallback.familyKey]) continue;
-      usedFamilies[fallback.familyKey] = true;
-      chosen.push(fallback);
-    }
-    return chosen;
-  }
-
-  function orientFact(fact, band) {
-    var a = fact.a;
-    var b = fact.b;
-    var shouldSwap = false;
-    if (fact.forceReversal) {
-      var forced = makeFact(a, b, fact.bandId);
-      forced.wasReversalRetest = true;
-      return forced;
-    } else if (band && band.id === "H") {
-      shouldSwap = Math.random() < 0.5;
-    } else {
-      shouldSwap = Math.random() < 0.25;
-    }
-    if (shouldSwap) {
-      return makeFact(b, a, fact.bandId);
-    }
-    return makeFact(a, b, fact.bandId);
-  }
-
-  function takeDueRetests(band, count, usedFamilies) {
-    var session = appState.session;
-    var due = [];
-    var keep = [];
-    var qNum = session.questionResults.length + 1;
-    for (var i = 0; i < session.retestQueue.length; i += 1) {
-      var item = session.retestQueue[i];
-      if (item.bandId === band.id && item.dueAfter <= qNum && !usedFamilies[item.fact.familyKey] && due.length < count) {
-        usedFamilies[item.fact.familyKey] = true;
-        due.push(item.fact);
-      } else {
-        keep.push(item);
+    function loadConfig() {
+      var cfg = loadJson(CONFIG_KEY, null);
+      if (!cfg || typeof cfg !== 'object') {
+        cfg = { assessmentName: 'Multiplication Placement Check', customCode: '', updatedAt: new Date().toISOString() };
       }
+      if (!cfg.assessmentName) cfg.assessmentName = 'Multiplication Placement Check';
+      if (!cfg.customCode) cfg.customCode = '';
+      return cfg;
     }
-    session.retestQueue = keep;
-    return due;
-  }
 
-  function selectBandQuestions(band, count, includeRetests) {
-    var pool = generateBandPool(band);
-    var groups = { easy: [], core: [], hard: [] };
-    var usedFamilies = {};
-    var recentFamilies = appState.session ? appState.session.recentFamilies : [];
-    var selected = [];
-    var i;
-    if (includeRetests) {
-      selected = selected.concat(takeDueRetests(band, Math.min(2, count), usedFamilies));
+    function saveConfig() {
+      appState.config.updatedAt = new Date().toISOString();
+      saveJson(CONFIG_KEY, appState.config);
+      renderConfig();
+      showToast('Setup saved.');
     }
-    for (i = 0; i < pool.length; i += 1) {
-      var fact = pool[i];
-      var bucket = difficultyBucket(fact, band);
-      groups[bucket].push(fact);
-    }
-    var targets;
-    if (count === 4) {
-      targets = { easy: 1, core: 2, hard: 1 };
-    } else if (band.id === "H") {
-      targets = { easy: 3, core: 7, hard: 5 };
-      count = 15;
-    } else {
-      targets = { easy: 2, core: 4, hard: 2 };
-    }
-    selected = selected.concat(chooseFromPool(groups.easy, Math.max(0, targets.easy - countBucket(selected, band, "easy")), usedFamilies, recentFamilies));
-    selected = selected.concat(chooseFromPool(groups.core, Math.max(0, targets.core - countBucket(selected, band, "core")), usedFamilies, recentFamilies));
-    selected = selected.concat(chooseFromPool(groups.hard, Math.max(0, targets.hard - countBucket(selected, band, "hard")), usedFamilies, recentFamilies));
-    if (selected.length < count) {
-      selected = selected.concat(chooseFromPool(pool, count - selected.length, usedFamilies, recentFamilies));
-    }
-    selected = shuffle(selected).slice(0, count);
-    for (i = 0; i < selected.length; i += 1) {
-      selected[i] = orientFact(selected[i], band);
-      selected[i].bandId = band.id;
-    }
-    return selected;
-  }
 
-  function countBucket(list, band, bucket) {
-    var count = 0;
-    for (var i = 0; i < list.length; i += 1) {
-      if (difficultyBucket(list[i], band) === bucket) count += 1;
-    }
-    return count;
-  }
-
-  function presentNextQuestion() {
-    var session = appState.session;
-    if (!session) return;
-    if (!session.blockQueue.length) {
-      completeCurrentBlock();
-      return;
-    }
-    if (shouldFinishForLimits()) {
-      finishAssessment("Question or time limit reached.");
-      return;
-    }
-    var q = session.blockQueue.shift();
-    appState.currentQuestion = q;
-    appState.questionStartedAt = Date.now();
-    appState.lockedInput = false;
-    el.answerInput.value = "";
-    el.answerInput.classList.remove("glow-good");
-    el.answerInput.classList.remove("glow-bad");
-    el.feedbackPill.className = "feedback-pill";
-    el.problemText.textContent = q.displayed;
-    el.questionCountPill.textContent = "Question " + (session.questionResults.length + 1);
-    el.sideProgressText.textContent = "Question " + (session.questionResults.length + 1);
-    setStatus(el.assessmentStatus, "Answer the fact shown.", "");
-    updateTimerPill(QUESTION_TIMEOUT_SECONDS);
-    startQuestionTimer();
-  }
-
-  function shouldFinishForLimits() {
-    var session = appState.session;
-    if (!session) return false;
-    if (session.questionResults.length >= MAX_QUESTIONS) return true;
-    var elapsedMs = Date.now() - session.totalStartedAt;
-    return elapsedMs >= MAX_MINUTES * 60 * 1000;
-  }
-
-  function startQuestionTimer() {
-    stopQuestionTimer();
-    appState.timerId = window.setInterval(function () {
-      var elapsed = (Date.now() - appState.questionStartedAt) / 1000;
-      var left = Math.max(0, QUESTION_TIMEOUT_SECONDS - elapsed);
-      updateTimerPill(left);
-      if (left <= 0) {
-        submitAnswer(true);
+    function renderConfig() {
+      var codeInfo = fourHourCodeInfo(new Date());
+      el.dailyCodeLabel.textContent = codeInfo.code;
+      if (el.codeWindowLabel) {
+        el.codeWindowLabel.textContent = 'Valid until ' + codeInfo.expiresLabel + ' Bangkok time. A new code is created every 4 hours.';
       }
-    }, 100);
-  }
-
-  function stopQuestionTimer() {
-    if (appState.timerId) {
-      window.clearInterval(appState.timerId);
-      appState.timerId = null;
+      el.assessmentName.value = appState.config.assessmentName || '';
+      el.customCode.value = normalizeCode(appState.config.customCode || '');
+      el.studentCodeHint.textContent = 'Ask your teacher for the code';
     }
-  }
 
-  function updateTimerPill(left) {
-    var display = Math.ceil(left);
-    el.timerPill.textContent = String(display);
-    el.timerPill.className = "timer-pill" + (left <= 3 ? " danger" : (left <= 5 ? " warn" : ""));
-  }
-
-  function handleKey(value) {
-    if (!appState.currentQuestion || appState.lockedInput) return;
-    if (value === "clear") {
-      el.answerInput.value = "";
-      clearIdleSubmit();
-      return;
+    function isCodeAccepted(code) {
+      var clean = normalizeCode(code);
+      var configured = normalizeCode(appState.config.customCode || '');
+      if (!clean) return false;
+      if (configured && clean === configured) return true;
+      if (clean === currentStudentCode()) return true;
+      return false;
     }
-    if (value === "enter") {
-      if (el.answerInput.value.length > 0) submitAnswer(false);
-      return;
+
+    function getAttemptKey(name, code) {
+      return normalizeName(name) + '|' + normalizeCode(code) + '|' + String(appState.config.assessmentName || '').toLowerCase();
     }
-    if (!/^[0-9]$/.test(value)) return;
-    if (el.answerInput.value.length >= 3) return;
-    el.answerInput.value += value;
-    scheduleAutoSubmit();
-  }
 
-  function scheduleAutoSubmit() {
-    clearIdleSubmit();
-    var input = el.answerInput.value;
-    var correct = String(appState.currentQuestion.answer);
-    if (!input) return;
-    if (input.length >= correct.length) {
-      window.setTimeout(function () {
-        if (!appState.lockedInput) submitAnswer(false);
-      }, 40);
-      return;
+    function openTeacherUnlock(targetScreen) {
+      appState.pendingTeacherTarget = targetScreen || 'teacherScreen';
+      el.teacherUnlockError.textContent = '';
+      el.teacherUnlockError.classList.remove('show');
+      el.teacherPassphrase.value = '';
+      el.teacherUnlockModal.classList.remove('hidden');
+      window.setTimeout(function () { el.teacherPassphrase.focus(); }, 30);
     }
-    if (correct.indexOf(input) !== 0) {
-      appState.idleSubmitId = window.setTimeout(function () {
-        if (!appState.lockedInput && el.answerInput.value) submitAnswer(false);
-      }, IDLE_SUBMIT_MS);
+
+    function closeTeacherUnlock() {
+      el.teacherUnlockModal.classList.add('hidden');
+      el.teacherPassphrase.value = '';
+      el.teacherUnlockError.textContent = '';
+      el.teacherUnlockError.classList.remove('show');
     }
-  }
 
-  function clearIdleSubmit() {
-    if (appState.idleSubmitId) {
-      window.clearTimeout(appState.idleSubmitId);
-      appState.idleSubmitId = null;
+    function showTeacherUnlockError(message) {
+      el.teacherUnlockError.textContent = message;
+      el.teacherUnlockError.classList.add('show');
     }
-  }
 
-  function submitAnswer(wasTimeout) {
-    var session = appState.session;
-    var q = appState.currentQuestion;
-    if (!session || !q || appState.lockedInput) return;
-    appState.lockedInput = true;
-    clearIdleSubmit();
-    stopQuestionTimer();
-    var responseTimeMs = Date.now() - appState.questionStartedAt;
-    var rawAnswer = wasTimeout ? "" : el.answerInput.value;
-    var numericAnswer = parseInt(rawAnswer, 10);
-    var isCorrect = !wasTimeout && !isNaN(numericAnswer) && numericAnswer === q.answer;
-    var category = categorizeResponse(isCorrect, wasTimeout, responseTimeMs);
-    var result = {
-      questionNumber: session.questionResults.length + 1,
-      phase: session.currentPhase,
-      band: q.bandId,
-      factorA: q.a,
-      factorB: q.b,
-      displayed: q.displayed,
-      factFamilyKey: q.familyKey,
-      studentAnswer: rawAnswer,
-      correctAnswer: q.answer,
-      isCorrect: isCorrect,
-      timedOut: !!wasTimeout,
-      responseTimeMs: responseTimeMs,
-      responseCategory: category,
-      wasReversalRetest: !!q.wasReversalRetest,
-      createdAt: new Date().toISOString()
-    };
-    session.questionResults.push(result);
-    rememberRecentFamily(q.familyKey);
-    if (!isCorrect || wasTimeout || responseTimeMs > 8000) {
-      queueReversalRetest(q);
-    }
-    showAnswerFeedback(isCorrect, wasTimeout);
-    window.setTimeout(function () {
-      presentNextQuestion();
-    }, wasTimeout ? 260 : 220);
-  }
-
-  function categorizeResponse(isCorrect, wasTimeout, responseTimeMs) {
-    if (wasTimeout) return "not_secure";
-    if (!isCorrect) return "not_secure";
-    if (responseTimeMs < 4000) return "fluent";
-    if (responseTimeMs <= 8000) return "known_slow";
-    return "not_fluent";
-  }
-
-  function rememberRecentFamily(key) {
-    var arr = appState.session.recentFamilies;
-    arr.push(key);
-    while (arr.length > 4) arr.shift();
-  }
-
-  function queueReversalRetest(fact) {
-    var session = appState.session;
-    if (!session || !fact || !fact.bandId || fact.bandId === "warmup") return;
-    var exists = false;
-    for (var i = 0; i < session.retestQueue.length; i += 1) {
-      if (session.retestQueue[i].fact.familyKey === fact.familyKey && session.retestQueue[i].bandId === fact.bandId) {
-        exists = true;
-        break;
+    function hexFromBuffer(buffer) {
+      var bytes = new Uint8Array(buffer);
+      var out = '';
+      for (var i = 0; i < bytes.length; i++) {
+        var hex = bytes[i].toString(16);
+        if (hex.length < 2) hex = '0' + hex;
+        out += hex;
       }
+      return out;
     }
-    if (exists) return;
-    var reversal = makeFact(fact.b, fact.a, fact.bandId);
-    reversal.forceReversal = true;
-    reversal.wasReversalRetest = true;
-    session.retestQueue.push({
-      bandId: fact.bandId,
-      dueAfter: session.questionResults.length + 2,
-      fact: reversal
-    });
-  }
 
-  function showAnswerFeedback(isCorrect, wasTimeout) {
-    var cls = isCorrect ? "good" : "bad";
-    el.answerInput.classList.add(isCorrect ? "glow-good" : "glow-bad");
-    el.feedbackPill.textContent = wasTimeout ? "Time" : (isCorrect ? "OK" : "Next");
-    el.feedbackPill.className = "feedback-pill show " + cls;
-    if (wasTimeout) {
-      setStatus(el.assessmentStatus, "Time. Keep going.", "warn");
-    } else if (isCorrect) {
-      setStatus(el.assessmentStatus, "Keep going.", "good");
-    } else {
-      setStatus(el.assessmentStatus, "Keep going.", "bad");
-    }
-  }
-
-  function completeCurrentBlock() {
-    var session = appState.session;
-    if (!session) return;
-    if (session.currentPhase === "warmup") {
-      if (warmupQualifiesForFastTrack()) {
-        session.fastTrack = true;
-        session.verifiedBandIndex = 0;
-        session.bandMeta.A = buildWarmupBandMeta();
-        beginBand(1, false);
-      } else {
-        beginBand(0, false);
+    function hashTeacherPassphrase(passphrase) {
+      if (!window.crypto || !window.crypto.subtle || typeof TextEncoder === 'undefined') {
+        return Promise.reject(new Error('Crypto unavailable'));
       }
-      return;
-    }
-    var band = BANDS[session.currentBandIndex];
-    var evaluation = evaluateBand(band.id);
-    session.bandMeta[band.id] = evaluation;
-    if (band.id === "H") {
-      if (evaluation.label === "pass") {
-        session.verifiedBandIndex = session.currentBandIndex;
-      } else if (session.developingBandIndex < 0) {
-        session.developingBandIndex = session.currentBandIndex;
-      }
-      finishAssessment("Mixed fluency check complete.");
-      return;
-    }
-    if (evaluation.label === "pass") {
-      session.verifiedBandIndex = session.currentBandIndex;
-      if (session.currentBandIndex >= BANDS.length - 1) {
-        finishAssessment("Highest band completed.");
-      } else {
-        beginBand(session.currentBandIndex + 1, false);
-      }
-      return;
-    }
-    if (evaluation.label === "almost" && !session.blockHadExtras && canAskMoreQuestions(4)) {
-      session.blockHadExtras = true;
-      session.blockQueue = selectBandQuestions(band, 4, true);
-      session.blockType = "extra";
-      session.blockTargetCount = 4;
-      setStatus(el.assessmentStatus, "A few more questions.", "warn");
-      presentNextQuestion();
-      return;
-    }
-    session.developingBandIndex = session.currentBandIndex;
-    finishAssessment("The check has enough information.");
-  }
-
-  function warmupQualifiesForFastTrack() {
-    var session = appState.session;
-    if (!session) return false;
-    var results = [];
-    var all = session.questionResults;
-    var correct = 0;
-    var fluent = 0;
-    for (var i = 0; i < all.length; i += 1) {
-      if (all[i].phase === "warmup") {
-        results.push(all[i]);
-        if (all[i].isCorrect) correct += 1;
-        if (all[i].responseCategory === "fluent") fluent += 1;
-      }
-    }
-    return results.length === WARMUP.length && correct === WARMUP.length && fluent >= 5;
-  }
-
-  function buildWarmupBandMeta() {
-    return {
-      bandId: "A",
-      questions: WARMUP.length,
-      correct: WARMUP.length,
-      fluent: WARMUP.length,
-      slow: 0,
-      notFluent: 0,
-      wrong: 0,
-      timeout: 0,
-      repeatedWeakness: 0,
-      label: "pass",
-      inferredFromWarmup: true
-    };
-  }
-
-  function getInitialBandQuestionCount(band, index) {
-    var session = appState.session;
-    if (band.id === "H") return 15;
-    if (session && session.fastTrack && index >= 1 && index <= 6) return 4;
-    return 8;
-  }
-
-  function canAskMoreQuestions(count) {
-    var session = appState.session;
-    if (!session) return false;
-    return (MAX_QUESTIONS - session.questionResults.length) >= count;
-  }
-
-  function beginBand(index, includeRetests) {
-    var session = appState.session;
-    var band = BANDS[index];
-    var questionCount = getInitialBandQuestionCount(band, index);
-    if (!canAskMoreQuestions(questionCount)) {
-      if (session.verifiedBandIndex + 1 < BANDS.length && session.developingBandIndex < 0) {
-        session.developingBandIndex = session.verifiedBandIndex + 1;
-      }
-      finishAssessment("Question limit reached before the next complete band.");
-      return;
-    }
-    session.currentPhase = "band";
-    session.currentBandIndex = index;
-    session.highestAttemptedBand = band.id;
-    session.blockHadExtras = false;
-    session.blockQueue = selectBandQuestions(band, questionCount, !!includeRetests);
-    session.blockType = questionCount === 4 ? "gateway" : "band";
-    session.blockTargetCount = session.blockQueue.length;
-    presentNextQuestion();
-  }
-
-  function getBandResults(bandId) {
-    var results = [];
-    var all = appState.session.questionResults;
-    for (var i = 0; i < all.length; i += 1) {
-      if (all[i].band === bandId) results.push(all[i]);
-    }
-    return results;
-  }
-
-  function evaluateBand(bandId) {
-    var results = getBandResults(bandId);
-    var count = results.length;
-    var correct = 0;
-    var fluent = 0;
-    var slow = 0;
-    var notFluent = 0;
-    var wrong = 0;
-    var timeout = 0;
-    var weakFamilies = {};
-    var repeatedWeakness = 0;
-    for (var i = 0; i < results.length; i += 1) {
-      var r = results[i];
-      if (r.isCorrect) correct += 1;
-      if (r.responseCategory === "fluent") fluent += 1;
-      if (r.responseCategory === "known_slow") slow += 1;
-      if (r.responseCategory === "not_fluent") notFluent += 1;
-      if (!r.isCorrect && !r.timedOut) wrong += 1;
-      if (r.timedOut) timeout += 1;
-      if (!r.isCorrect || r.timedOut || r.responseCategory === "not_fluent") {
-        weakFamilies[r.factFamilyKey] = (weakFamilies[r.factFamilyKey] || 0) + 1;
-      }
-    }
-    for (var key in weakFamilies) {
-      if (Object.prototype.hasOwnProperty.call(weakFamilies, key) && weakFamilies[key] >= 2) {
-        repeatedWeakness += 1;
-      }
-    }
-    var label = "almost";
-    if (count === 4) {
-      if (correct === 4 && fluent >= 3 && timeout === 0 && repeatedWeakness === 0) {
-        label = "pass";
-      } else if (correct >= 3 && timeout <= 1) {
-        label = "almost";
-      } else {
-        label = "keep_practicing";
-      }
-    } else if (count >= 12) {
-      if (correct >= 10 && fluent >= 7 && timeout <= 1 && repeatedWeakness === 0) {
-        label = "pass";
-      } else if (correct >= 8) {
-        label = "almost";
-      } else {
-        label = "keep_practicing";
-      }
-      if (label === "pass" && (notFluent + slow) >= 5) label = "almost";
-    } else if (bandId === "H") {
-      if (correct >= 13 && fluent >= 9 && timeout <= 1) {
-        label = "pass";
-      } else if (correct >= 11) {
-        label = "almost";
-      } else {
-        label = "keep_practicing";
-      }
-    } else {
-      if (correct >= 7 && fluent >= 5 && timeout <= 1 && repeatedWeakness === 0) {
-        label = "pass";
-      } else if (correct <= 4 || timeout >= 3 || repeatedWeakness >= 2) {
-        label = "keep_practicing";
-      } else {
-        label = "almost";
-      }
-    }
-    return {
-      bandId: bandId,
-      questions: count,
-      correct: correct,
-      fluent: fluent,
-      slow: slow,
-      notFluent: notFluent,
-      wrong: wrong,
-      timeout: timeout,
-      repeatedWeakness: repeatedWeakness,
-      label: label
-    };
-  }
-
-  function finishAssessment(reason) {
-    var session = appState.session;
-    if (!session) return;
-    stopQuestionTimer();
-    clearIdleSubmit();
-    session.status = "completed";
-    session.completedAt = new Date().toISOString();
-    session.finalReason = reason || "Complete.";
-    var result = buildFinalResult(session);
-    appState.latestResult = result;
-    saveCompletedAttempt(session, result);
-    saveResult(result);
-    renderHistory();
-    renderResult(result);
-    showScreen("resultScreen");
-  }
-
-  function saveCompletedAttempt(session, result) {
-    var attempts = getAttempts();
-    attempts[session.attemptKey] = {
-      attemptKey: session.attemptKey,
-      studentName: session.studentName,
-      studentId: session.studentId,
-      assessmentId: session.assessmentId,
-      classId: session.classId,
-      teacherCode: session.teacherCode,
-      status: "completed",
-      startedAt: session.startedAt,
-      completedAt: session.completedAt,
-      restartCount: session.restartCount,
-      resultLabel: result.resultLabel
-    };
-    saveAttempts(attempts);
-  }
-
-  function saveResult(result) {
-    var results = getResults();
-    results.push(result);
-    saveResults(results);
-  }
-
-  function buildFinalResult(session) {
-    var totals = summarizeResults(session.questionResults);
-    var verified = getVerifiedLevel(session.verifiedBandIndex);
-    var developingIndex = session.developingBandIndex;
-    if (developingIndex < 0 && session.verifiedBandIndex + 1 < BANDS.length) {
-      developingIndex = session.verifiedBandIndex + 1;
-    }
-    var developing = getDevelopingLevel(developingIndex);
-    var highest = session.highestAttemptedBand ? getBandById(session.highestAttemptedBand) : null;
-    var missedFacts = uniqueFacts(session.questionResults, function (r) { return !r.isCorrect && !r.timedOut; });
-    var timedOutFacts = uniqueFacts(session.questionResults, function (r) { return r.timedOut; });
-    var slowFacts = uniqueFacts(session.questionResults, function (r) { return r.isCorrect && r.responseCategory !== "fluent"; });
-    var repeatedFamilies = getRepeatedWeakFamilies(session.questionResults);
-    var recommendation = buildRecommendation(session, developingIndex, missedFacts, timedOutFacts, slowFacts);
-    var resultLabel = buildResultLabel(session, developingIndex);
-    return {
-      resultId: "R" + Date.now() + "-" + Math.floor(Math.random() * 100000),
-      studentName: session.studentName,
-      studentId: session.studentId,
-      assessmentId: session.assessmentId,
-      assessmentName: session.assessmentName,
-      classId: session.classId,
-      teacherCode: session.teacherCode,
-      testVersion: session.testVersion,
-      startedAt: session.startedAt,
-      completedAt: session.completedAt,
-      totalQuestions: session.questionResults.length,
-      highestAttemptedBand: highest ? highest.label : "Warm-up only",
-      verifiedLevel: verified,
-      developingLevel: developing,
-      resultLabel: resultLabel,
-      correctCount: totals.correct,
-      accuracyPercent: totals.total ? Math.round((totals.correct / totals.total) * 100) : 0,
-      fluentCount: totals.fluent,
-      slowCorrectCount: totals.slow + totals.notFluent,
-      wrongCount: totals.wrong,
-      timeoutCount: totals.timeout,
-      missedFacts: missedFacts,
-      timedOutFacts: timedOutFacts,
-      slowFacts: slowFacts,
-      repeatedMissedFactFamilies: repeatedFamilies,
-      recommendedPractice: recommendation,
-      restarted: session.restartCount > 0,
-      restartCount: session.restartCount,
-      completionStatus: "completed",
-      finalReason: session.finalReason,
-      bandMeta: session.bandMeta
-    };
-  }
-
-  function summarizeResults(results) {
-    var out = { total: results.length, correct: 0, fluent: 0, slow: 0, notFluent: 0, wrong: 0, timeout: 0 };
-    for (var i = 0; i < results.length; i += 1) {
-      var r = results[i];
-      if (r.isCorrect) out.correct += 1;
-      if (r.responseCategory === "fluent") out.fluent += 1;
-      if (r.responseCategory === "known_slow") out.slow += 1;
-      if (r.responseCategory === "not_fluent") out.notFluent += 1;
-      if (!r.isCorrect && !r.timedOut) out.wrong += 1;
-      if (r.timedOut) out.timeout += 1;
-    }
-    return out;
-  }
-
-  function getBandById(id) {
-    for (var i = 0; i < BANDS.length; i += 1) {
-      if (BANDS[i].id === id) return BANDS[i];
-    }
-    return null;
-  }
-
-  function getVerifiedLevel(index) {
-    if (index < 0) return "Not yet secure with Band A";
-    if (index >= BANDS.length) index = BANDS.length - 1;
-    return BANDS[index].label;
-  }
-
-  function getDevelopingLevel(index) {
-    if (index < 0 || index >= BANDS.length) return "No next band identified";
-    return BANDS[index].label;
-  }
-
-  function uniqueFacts(results, predicate) {
-    var seen = {};
-    var out = [];
-    for (var i = 0; i < results.length; i += 1) {
-      var r = results[i];
-      if (!predicate(r)) continue;
-      var key = r.displayed;
-      if (!seen[key]) {
-        seen[key] = true;
-        out.push(key);
-      }
-    }
-    return out;
-  }
-
-  function getRepeatedWeakFamilies(results) {
-    var counts = {};
-    var out = [];
-    var i;
-    for (i = 0; i < results.length; i += 1) {
-      var r = results[i];
-      if (!r.isCorrect || r.timedOut || r.responseCategory === "not_fluent") {
-        counts[r.factFamilyKey] = (counts[r.factFamilyKey] || 0) + 1;
-      }
-    }
-    for (var key in counts) {
-      if (Object.prototype.hasOwnProperty.call(counts, key) && counts[key] >= 2) {
-        out.push(key);
-      }
-    }
-    return out;
-  }
-
-  function buildResultLabel(session, developingIndex) {
-    if (session.verifiedBandIndex < 0) {
-      return "Needs support with 2s, 5s, and 10s";
-    }
-    if (session.verifiedBandIndex >= BANDS.length - 1) {
-      return "Mixed 2-12 mostly fluent";
-    }
-    var band = BANDS[developingIndex] || BANDS[session.verifiedBandIndex + 1];
-    if (!band) return "Maintain practice";
-    return "Keep practicing " + band.focus;
-  }
-
-  function buildRecommendation(session, developingIndex, missedFacts, timedOutFacts, slowFacts) {
-    if (session.verifiedBandIndex < 0) {
-      return "Assign practice: 2s, 5s, and 10s. Keep the check short and supportive.";
-    }
-    var nextBand = BANDS[developingIndex] || BANDS[session.verifiedBandIndex + 1];
-    if (!nextBand) {
-      if (missedFacts.length || timedOutFacts.length || slowFacts.length) {
-        return "Assign mixed review for the listed focus facts. Consider division facts as an extension.";
-      }
-      return "Ready for extension work, including division facts and mixed review.";
-    }
-    var focusFacts = missedFacts.concat(timedOutFacts).slice(0, 5);
-    var base = "Assign practice: " + nextBand.focus;
-    if (session.verifiedBandIndex >= 0) {
-      base += ", with mixed review of " + BANDS[session.verifiedBandIndex].focus;
-    }
-    if (focusFacts.length) {
-      base += ". Focus facts: " + focusFacts.join(", ");
-    }
-    return base + ".";
-  }
-
-  function renderResult(result) {
-    if (!result) return;
-    el.verifiedLevelText.textContent = shortResultText(result.verifiedLevel);
-    el.developingLevelText.textContent = shortResultText(result.developingLevel);
-    el.accuracyText.textContent = result.correctCount + "/" + result.totalQuestions + " (" + result.accuracyPercent + "%)";
-    el.fluentText.textContent = String(result.fluentCount);
-    el.recommendationText.textContent = result.recommendedPractice;
-    renderFactChips(el.missedFactsList, result.missedFacts, "No missed facts recorded.");
-    renderFactChips(el.timedOutFactsList, result.timedOutFacts, "No timeouts recorded.");
-    renderDetails(result);
-  }
-
-  function shortResultText(text) {
-    if (!text) return "-";
-    return text.replace("Band ", "");
-  }
-
-  function renderFactChips(container, facts, emptyText) {
-    container.innerHTML = "";
-    if (!facts || !facts.length) {
-      var span = document.createElement("span");
-      span.className = "subtle";
-      span.textContent = emptyText;
-      container.appendChild(span);
-      return;
-    }
-    for (var i = 0; i < facts.length; i += 1) {
-      var chip = document.createElement("span");
-      chip.className = "fact-chip";
-      chip.textContent = facts[i];
-      container.appendChild(chip);
-    }
-  }
-
-  function addDetailRow(label, value) {
-    var tr = document.createElement("tr");
-    var th = document.createElement("th");
-    var td = document.createElement("td");
-    th.textContent = label;
-    td.textContent = value;
-    tr.appendChild(th);
-    tr.appendChild(td);
-    el.resultDetailsBody.appendChild(tr);
-  }
-
-  function renderDetails(result) {
-    el.resultDetailsBody.innerHTML = "";
-    addDetailRow("Student", result.studentName + " (" + result.studentId + ")");
-    addDetailRow("Class", result.classId);
-    addDetailRow("Assessment", result.assessmentName + " / " + result.assessmentId);
-    addDetailRow("Code", result.teacherCode);
-    addDetailRow("Date", formatDate(result.completedAt));
-    addDetailRow("Questions", String(result.totalQuestions));
-    addDetailRow("Highest attempted", result.highestAttemptedBand);
-    addDetailRow("Wrong", String(result.wrongCount));
-    addDetailRow("Timeouts", String(result.timeoutCount));
-    addDetailRow("Slow correct", String(result.slowCorrectCount));
-    addDetailRow("Restarted", result.restarted ? "Yes (" + result.restartCount + ")" : "No");
-    addDetailRow("Completion", result.completionStatus);
-    addDetailRow("Final reason", result.finalReason || "Complete");
-  }
-
-  function formatDate(value) {
-    if (!value) return "";
-    try {
-      return new Date(value).toLocaleString();
-    } catch (e) {
-      return value;
-    }
-  }
-
-  function renderHistory() {
-    var results = getResults();
-    if (!el.historyTableWrap) return;
-    if (!results.length) {
-      el.historyTableWrap.innerHTML = '<div class="status-text">No results saved yet.</div>';
-      return;
-    }
-    var table = document.createElement("table");
-    var thead = document.createElement("thead");
-    var tr = document.createElement("tr");
-    var headers = ["Date", "Student", "Assessment", "Verified", "Developing", "Accuracy", "Restarted"];
-    for (var i = 0; i < headers.length; i += 1) {
-      var th = document.createElement("th");
-      th.textContent = headers[i];
-      tr.appendChild(th);
-    }
-    thead.appendChild(tr);
-    table.appendChild(thead);
-    var tbody = document.createElement("tbody");
-    var start = Math.max(0, results.length - 50);
-    for (var r = results.length - 1; r >= start; r -= 1) {
-      var item = results[r];
-      var row = document.createElement("tr");
-      var values = [
-        formatDate(item.completedAt),
-        item.studentName + " (" + item.studentId + ")",
-        item.assessmentId,
-        item.verifiedLevel,
-        item.developingLevel,
-        item.correctCount + "/" + item.totalQuestions + " (" + item.accuracyPercent + "%)",
-        item.restarted ? "Yes" : "No"
-      ];
-      for (var c = 0; c < values.length; c += 1) {
-        var td = document.createElement("td");
-        td.textContent = values[c];
-        row.appendChild(td);
-      }
-      tbody.appendChild(row);
-    }
-    table.appendChild(tbody);
-    el.historyTableWrap.innerHTML = "";
-    el.historyTableWrap.appendChild(table);
-  }
-
-  function copyResultSummary() {
-    var result = appState.latestResult;
-    if (!result) return;
-    var lines = [];
-    lines.push("FactFlow Check Result");
-    lines.push("Student: " + result.studentName + " (" + result.studentId + ")");
-    lines.push("Class: " + result.classId);
-    lines.push("Assessment: " + result.assessmentName + " / " + result.assessmentId);
-    lines.push("Code: " + result.teacherCode);
-    lines.push("Date: " + formatDate(result.completedAt));
-    lines.push("Questions: " + result.totalQuestions);
-    lines.push("Verified level: " + result.verifiedLevel);
-    lines.push("Developing level: " + result.developingLevel);
-    lines.push("Accuracy: " + result.correctCount + "/" + result.totalQuestions + " (" + result.accuracyPercent + "%)");
-    lines.push("Fluent: " + result.fluentCount);
-    lines.push("Slow correct: " + result.slowCorrectCount);
-    lines.push("Wrong: " + result.wrongCount);
-    lines.push("Timeouts: " + result.timeoutCount);
-    lines.push("Missed facts: " + ((result.missedFacts || []).join(", ") || "None"));
-    lines.push("Timed out facts: " + ((result.timedOutFacts || []).join(", ") || "None"));
-    lines.push("Restarted: " + (result.restarted ? "Yes" : "No"));
-    lines.push("Recommendation: " + result.recommendedPractice);
-    var text = lines.join("\n");
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(function () {
-        setStatus(el.copyStatus, "Result copied.", "good");
-      }, function () {
-        fallbackCopy(text);
+      var encoder = new TextEncoder();
+      var input = encoder.encode(TEACHER_PASS_SALT + '|' + String(passphrase || ''));
+      return window.crypto.subtle.digest('SHA-256', input).then(function (hash) {
+        return hexFromBuffer(hash);
       });
-    } else {
-      fallbackCopy(text);
     }
-  }
 
-  function fallbackCopy(text) {
-    var area = document.createElement("textarea");
-    area.value = text;
-    document.body.appendChild(area);
-    area.select();
-    try {
-      document.execCommand("copy");
-      setStatus(el.copyStatus, "Result copied.", "good");
-    } catch (e) {
-      setStatus(el.copyStatus, "Copy failed. Select and copy the result manually.", "warn");
+    function verifyTeacherPassphrase() {
+      var passphrase = String(el.teacherPassphrase.value || '');
+      if (!passphrase) { showTeacherUnlockError('Please enter the teacher passphrase.'); return; }
+      hashTeacherPassphrase(passphrase).then(function (hash) {
+        if (hash === TEACHER_PASS_HASH) {
+          unlockTeacherArea(appState.pendingTeacherTarget || 'teacherScreen');
+        } else {
+          showTeacherUnlockError('That passphrase did not work.');
+        }
+      }).catch(function (e) {
+        showTeacherUnlockError('Teacher lock requires HTTPS or localhost.');
+      });
     }
-    document.body.removeChild(area);
-  }
 
-  function clearHistory() {
-    if (!window.confirm("Clear saved results on this device?")) return;
-    saveResults([]);
-    renderHistory();
-    setStatus(el.setupStatus, "Local result history cleared.", "good");
-  }
-
-  function clearAttempts() {
-    if (!window.confirm("Clear local one-time attempt locks on this device?")) return;
-    saveAttempts({});
-    setStatus(el.setupStatus, "Local attempt locks cleared.", "good");
-  }
-
-  function applyTheme() {
-    var saved = localStorage.getItem(STORAGE.theme) || "light";
-    document.documentElement.setAttribute("data-theme", saved === "dark" ? "dark" : "light");
-  }
-
-  function toggleTheme() {
-    var current = document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
-    var next = current === "dark" ? "light" : "dark";
-    document.documentElement.setAttribute("data-theme", next);
-    try {
-      localStorage.setItem(STORAGE.theme, next);
-    } catch (e) {}
-  }
-
-  function bindEvents() {
-    el.themeBtn.addEventListener("click", toggleTheme);
-    el.generateCodeBtn.addEventListener("click", function () {
-      el.teacherCodeInput.value = generateCode();
-      setStatus(el.setupStatus, "New teacher code generated. Save setup before students begin.", "warn");
-    });
-    el.loadSavedSetupBtn.addEventListener("click", loadConfig);
-    el.saveSetupBtn.addEventListener("click", saveConfig);
-    el.goStudentBtn.addEventListener("click", function () {
-      saveConfig();
-      showScreen("studentScreen");
-    });
-    el.backSetupBtn.addEventListener("click", function () { showScreen("setupScreen"); });
-    el.startCheckBtn.addEventListener("click", startStudentCheck);
-    el.cancelCheckBtn.addEventListener("click", function () { showScreen("studentScreen"); });
-    el.beginQuestionsBtn.addEventListener("click", beginQuestions);
-    el.newStudentBtn.addEventListener("click", resetForNewStudent);
-    el.resultNewStudentBtn.addEventListener("click", resetForNewStudent);
-    el.showResultBtn.addEventListener("click", function () {
-      renderResult(appState.latestResult);
-      showScreen("resultScreen");
-    });
-    el.copyResultBtn.addEventListener("click", copyResultSummary);
-    el.clearHistoryBtn.addEventListener("click", clearHistory);
-    el.clearAttemptsBtn.addEventListener("click", clearAttempts);
-    el.keypad.addEventListener("click", function (event) {
-      var btn = event.target.closest("button[data-key]");
-      if (!btn) return;
-      handleKey(btn.getAttribute("data-key"));
-    });
-    document.addEventListener("keydown", function (event) {
-      if (!appState.currentQuestion || !el.assessmentScreen.classList.contains("active")) return;
-      if (/^[0-9]$/.test(event.key)) {
-        event.preventDefault();
-        handleKey(event.key);
-      } else if (event.key === "Backspace" || event.key === "Delete") {
-        event.preventDefault();
-        handleKey("clear");
-      } else if (event.key === "Enter") {
-        event.preventDefault();
-        handleKey("enter");
+    function unlockTeacherArea(targetScreen) {
+      appState.teacherUnlocked = true;
+      closeTeacherUnlock();
+      resetTeacherAutoLock();
+      if (targetScreen === 'resultScreen' && appState.latestResult) {
+        renderResult(appState.latestResult);
+        showScreen('resultScreen');
+      } else {
+        renderHistory();
+        showScreen('teacherScreen');
       }
-    });
-  }
+      showToast('Teacher area unlocked.');
+    }
 
-  function resetForNewStudent() {
-    appState.session = null;
-    appState.currentQuestion = null;
-    appState.latestResult = null;
-    el.studentNameInput.value = "";
-    el.studentIdInput.value = "";
-    el.studentCodeInput.value = "";
-    setStatus(el.studentStatus, "Enter the code from your teacher.", "");
-    showScreen("studentScreen");
-  }
+    function lockTeacherArea() {
+      appState.teacherUnlocked = false;
+      if (appState.teacherLockTimerId) {
+        window.clearTimeout(appState.teacherLockTimerId);
+        appState.teacherLockTimerId = null;
+      }
+      if (!appState.session) showScreen('entryScreen');
+      showToast('Teacher area locked.');
+    }
 
-  function init() {
-    cacheElements();
-    applyTheme();
-    bindEvents();
-    loadConfig();
-    renderHistory();
-  }
+    function resetTeacherAutoLock() {
+      if (appState.teacherLockTimerId) window.clearTimeout(appState.teacherLockTimerId);
+      appState.teacherLockTimerId = window.setTimeout(function () {
+        if (appState.teacherUnlocked) lockTeacherArea();
+      }, TEACHER_AUTO_LOCK_MS);
+    }
 
-  init();
-}());
+    function requireTeacherAccess(targetScreen) {
+      if (appState.teacherUnlocked) {
+        resetTeacherAutoLock();
+        if (targetScreen === 'resultScreen') {
+          if (appState.latestResult) { renderResult(appState.latestResult); showScreen('resultScreen'); }
+        } else {
+          renderHistory();
+          showScreen('teacherScreen');
+        }
+        return;
+      }
+      openTeacherUnlock(targetScreen);
+    }
+
+    function showScreen(id) {
+      var screens = ['entryScreen','testScreen','completeScreen','resultScreen','teacherScreen'];
+      for (var i = 0; i < screens.length; i++) {
+        if (el[screens[i]]) el[screens[i]].classList.toggle('active', screens[i] === id);
+      }
+    }
+
+    function showError(message) {
+      el.entryError.textContent = message;
+      el.entryError.classList.add('show');
+    }
+
+    function clearError() {
+      el.entryError.textContent = '';
+      el.entryError.classList.remove('show');
+    }
+
+    function showToast(message) {
+      el.toast.textContent = message;
+      el.toast.classList.add('show');
+      window.setTimeout(function () { el.toast.classList.remove('show'); }, 1800);
+    }
+
+    function shuffle(items) {
+      var arr = items.slice();
+      for (var i = arr.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = tmp;
+      }
+      return arr;
+    }
+
+    function getBandById(id) {
+      for (var i = 0; i < BANDS.length; i++) {
+        if (BANDS[i].id === id) return BANDS[i];
+      }
+      return null;
+    }
+
+    function getBandIndex(id) {
+      for (var i = 0; i < BANDS.length; i++) {
+        if (BANDS[i].id === id) return i;
+      }
+      return -1;
+    }
+
+    function generateBandPool(band) {
+      var pool = [];
+      var seen = {};
+      for (var i = 0; i < band.tables.length; i++) {
+        var table = band.tables[i];
+        for (var n = 2; n <= 12; n++) {
+          var fact = makeFact(table, n);
+          if (!seen[fact.familyKey]) {
+            seen[fact.familyKey] = true;
+            pool.push(fact);
+          }
+        }
+      }
+      return pool;
+    }
+
+    function getOtherFactor(fact, band) {
+      if (containsNumber(band.tables, fact.a) && !containsNumber(band.tables, fact.b)) return fact.b;
+      if (containsNumber(band.tables, fact.b) && !containsNumber(band.tables, fact.a)) return fact.a;
+      if (containsNumber(band.tables, fact.a)) return fact.b;
+      return fact.a;
+    }
+
+    function difficultyBucket(fact, band) {
+      var other = getOtherFactor(fact, band);
+      if (other === 2 || other === 5 || other === 10 || other === 11) return 'easy';
+      if (band.tables.length === 1) {
+        if (fact.a === fact.b || other === 12) return 'hard';
+        return 'core';
+      }
+      if (fact.a === fact.b) return 'hard';
+      if (other === 6 || other === 7 || other === 8 || other === 9 || other === 12) return 'hard';
+      return 'core';
+    }
+
+    function chooseTargets(count, isExtra, band) {
+      if (band.id === 'H') return { easy: 3, core: 7, hard: 5 };
+      if (isExtra || count <= FAST_TRACK_BLOCK_SIZE) return { easy: 1, core: 2, hard: 1 };
+      return { easy: 2, core: 4, hard: 2 };
+    }
+
+    function pushUnique(target, fact, used) {
+      if (!fact || used[fact.familyKey]) return false;
+      used[fact.familyKey] = true;
+      target.push(fact);
+      return true;
+    }
+
+    function pickFromBucket(bucket, count, used) {
+      var picks = [];
+      var shuffled = shuffle(bucket);
+      for (var i = 0; i < shuffled.length && picks.length < count; i++) {
+        pushUnique(picks, shuffled[i], used);
+      }
+      return picks;
+    }
+
+    function selectBandQuestions(band, count, isExtra) {
+      var pool = generateBandPool(band);
+      var session = appState.session;
+      var used = {};
+      var i;
+      if (session) {
+        for (i = 0; i < session.questionResults.length; i++) used[session.questionResults[i].familyKey] = true;
+        for (i = 0; i < session.blockQueue.length; i++) used[session.blockQueue[i].familyKey] = true;
+      }
+      var buckets = { easy: [], core: [], hard: [] };
+      for (i = 0; i < pool.length; i++) buckets[difficultyBucket(pool[i], band)].push(pool[i]);
+      var targets = chooseTargets(count, isExtra, band);
+      var picked = [];
+      var localUsed = {};
+      var levels = ['easy','core','hard'];
+      for (i = 0; i < levels.length; i++) {
+        var level = levels[i];
+        var levelPicks = pickFromBucket(buckets[level], targets[level], used);
+        for (var p = 0; p < levelPicks.length; p++) pushUnique(picked, levelPicks[p], localUsed);
+      }
+      var fillPool = shuffle(pool);
+      for (i = 0; i < fillPool.length && picked.length < count; i++) {
+        if (!used[fillPool[i].familyKey]) pushUnique(picked, fillPool[i], localUsed);
+      }
+      if (picked.length < count) {
+        fillPool = shuffle(pool);
+        for (i = 0; i < fillPool.length && picked.length < count; i++) pushUnique(picked, fillPool[i], localUsed);
+      }
+      picked = shuffle(picked).slice(0, count);
+      return smoothQuestionOrder(picked);
+    }
+
+    function smoothQuestionOrder(questions) {
+      var remaining = questions.slice();
+      var ordered = [];
+      var lastFamily = '';
+      while (remaining.length) {
+        var chosenIndex = 0;
+        for (var i = 0; i < remaining.length; i++) {
+          if (remaining[i].familyKey !== lastFamily) { chosenIndex = i; break; }
+        }
+        var fact = remaining.splice(chosenIndex, 1)[0];
+        if (Math.random() < 0.35) fact = reverseFact(fact);
+        ordered.push(fact);
+        lastFamily = fact.familyKey;
+      }
+      return ordered;
+    }
+
+    function startAssessment() {
+      clearError();
+      var name = String(el.studentName.value || '').trim();
+      var code = normalizeCode(el.teacherCode.value);
+      if (!name) { showError('Please enter your name or ID.'); return; }
+      if (!isCodeAccepted(code)) { showError('Please check the teacher code.'); return; }
+      appState.sessionId = null;
+      var key = getAttemptKey(name, code);
+      var existing = appState.attempts[key];
+      if (existing && existing.status === 'completed') {
+        showError('This student has already completed a check with this code on this device. Ask your teacher for a new code.');
+        return;
+      }
+      var restartCount = 0;
+      if (existing && existing.status === 'in_progress') restartCount = (existing.restartCount || 0) + 1;
+      appState.finishing = false;
+      appState.currentQuestion = null;
+      appState.session = {
+        id: 'ffc-' + Date.now() + '-' + Math.random().toString(36).slice(2, 9),
+        appVersion: APP_VERSION,
+        studentName: name,
+        code: code,
+        assessmentName: appState.config.assessmentName,
+        attemptKey: key,
+        restartCount: restartCount,
+        startedAt: new Date().toISOString(),
+        startMs: Date.now(),
+        startingBand: 'Warm-up -> Band A',
+        phase: 'warmup',
+        currentBandIndex: -1,
+        currentBandId: 'Warm-up',
+        blockHadExtras: false,
+        blockQueue: shuffle(WARMUP),
+        retestQueue: [],
+        retestFamilyState: {},
+        retestCountInBand: 0,
+        questionResults: [],
+        bandResults: [],
+        passedBandIds: [],
+        failedBandIds: [],
+        latestVerdict: '',
+        finalReason: '',
+        fastTrack: false,
+        currentBlockMode: 'standard'
+      };
+      appState.attempts[key] = { status: 'in_progress', restartCount: restartCount, startedAt: appState.session.startedAt };
+      saveJson(ATTEMPTS_KEY, appState.attempts);
+      el.testStudentLabel.textContent = name;
+      showScreen('testScreen');
+      renderBandTrack();
+      presentNextQuestion();
+    }
+
+    function renderBandTrack() {
+      var html = '';
+      var session = appState.session;
+      for (var i = 0; i < BANDS.length; i++) {
+        var cls = 'band-dot';
+        if (session) {
+          if (session.currentBandIndex === i) cls += ' current';
+          if (session.passedBandIds.indexOf(BANDS[i].id) !== -1) cls += ' passed';
+          if (session.failedBandIds.indexOf(BANDS[i].id) !== -1) cls += ' failed';
+        }
+        html += '<span class="' + cls + '"></span>';
+      }
+      el.bandTrack.innerHTML = html;
+    }
+
+    function clearAnswerTimers() {
+      if (appState.idleSubmitId) {
+        window.clearTimeout(appState.idleSubmitId);
+        appState.idleSubmitId = null;
+      }
+      if (appState.autoSubmitId) {
+        window.clearTimeout(appState.autoSubmitId);
+        appState.autoSubmitId = null;
+      }
+    }
+
+    function clearQuestionTimers() {
+      clearAnswerTimers();
+      if (appState.questionTimerId) {
+        window.clearTimeout(appState.questionTimerId);
+        appState.questionTimerId = null;
+      }
+      if (appState.nextQuestionId) {
+        window.clearTimeout(appState.nextQuestionId);
+        appState.nextQuestionId = null;
+      }
+      if (appState.timerIntervalId) {
+        window.clearInterval(appState.timerIntervalId);
+        appState.timerIntervalId = null;
+      }
+    }
+
+    function shouldFinishForLimits() {
+      var s = appState.session;
+      if (!s) return false;
+      if (s.questionResults.length >= MAX_QUESTIONS) return true;
+      if ((Date.now() - s.startMs) / 1000 >= MAX_TEST_SEC && s.questionResults.length >= MIN_QUESTIONS) return true;
+      return false;
+    }
+
+    function presentNextQuestion() {
+      var s = appState.session;
+      if (!s || appState.finishing) return;
+      clearQuestionTimers();
+      appState.inputLocked = false;
+      el.answerInput.value = '';
+      el.answerInput.className = 'answer-input';
+      setStatus('', '');
+      if (s.blockQueue.length === 0) {
+        completeCurrentBlock();
+        return;
+      }
+      if (shouldFinishForLimits()) {
+        finishAssessment('Question or time limit reached.');
+        return;
+      }
+      var dueRetest = getDueRetest();
+      var q = dueRetest || s.blockQueue.shift();
+      appState.currentQuestion = q;
+      appState.questionStartedAt = Date.now();
+      el.problemText.textContent = q.display;
+      el.qNumber.textContent = String(s.questionResults.length + 1);
+      el.qTotal.textContent = ' of up to ' + MAX_QUESTIONS;
+      startQuestionTimer();
+    }
+
+    function getDueRetest() {
+      var s = appState.session;
+      if (!s || !s.retestQueue.length) return null;
+      for (var i = 0; i < s.retestQueue.length; i++) {
+        if (s.questionResults.length >= s.retestQueue[i].dueAfter) {
+          var item = s.retestQueue.splice(i, 1)[0];
+          if (s.retestFamilyState) s.retestFamilyState[item.fact.familyKey] = 'served';
+          var fact = reverseFact(item.fact);
+          fact.isRetest = true;
+          return fact;
+        }
+      }
+      return null;
+    }
+
+    function startQuestionTimer() {
+      var start = Date.now();
+      appState.questionTimerId = window.setTimeout(function () { handleTimeout(); }, TIMEOUT_SEC * 1000);
+      appState.timerIntervalId = window.setInterval(function () {
+        var elapsed = (Date.now() - start) / 1000;
+        var remaining = Math.max(0, TIMEOUT_SEC - elapsed);
+        var pct = Math.max(0, Math.min(100, (remaining / TIMEOUT_SEC) * 100));
+        el.timerFill.style.width = pct + '%';
+        el.timerFill.classList.toggle('warn', remaining <= 4 && remaining > 2);
+        el.timerFill.classList.toggle('danger', remaining <= 2);
+      }, 100);
+      el.timerFill.style.width = '100%';
+      el.timerFill.className = 'timer-fill';
+    }
+
+    function handleTimeout() {
+      if (appState.inputLocked || !appState.currentQuestion) return;
+      submitAnswer(true);
+    }
+
+    function setStatus(text, kind) {
+      el.statusLine.textContent = text || '';
+      el.statusLine.className = 'status-line' + (kind ? ' ' + kind : '');
+    }
+
+    function handleKey(value) {
+      if (!appState.session || appState.inputLocked || !appState.currentQuestion) return;
+      var current = el.answerInput.value;
+      if (value === 'clear') {
+        el.answerInput.value = '';
+        clearAnswerTimers();
+        return;
+      }
+      if (value === 'backspace') {
+        el.answerInput.value = current.slice(0, -1);
+        clearAnswerTimers();
+        scheduleAutoSubmit();
+        return;
+      }
+      if (!/^[0-9]$/.test(value)) return;
+      var correctLength = String(appState.currentQuestion.answer).length;
+      if (current.length >= Math.max(3, correctLength)) return;
+      el.answerInput.value = current + value;
+      scheduleAutoSubmit();
+    }
+
+    function scheduleAutoSubmit() {
+      clearAnswerTimers();
+      if (!appState.currentQuestion || appState.inputLocked) return;
+      var input = el.answerInput.value;
+      if (!input) return;
+      var correct = String(appState.currentQuestion.answer);
+      if (input.length >= correct.length) {
+        appState.autoSubmitId = window.setTimeout(function () {
+          appState.autoSubmitId = null;
+          if (!appState.inputLocked && el.answerInput.value) submitAnswer(false);
+        }, AUTO_SUBMIT_MS);
+        return;
+      }
+      if (correct.indexOf(input) !== 0) {
+        var delay = correct.length >= 3 ? IDLE_SUBMIT_LONG_MS : IDLE_SUBMIT_SHORT_MS;
+        appState.idleSubmitId = window.setTimeout(function () {
+          appState.idleSubmitId = null;
+          if (!appState.inputLocked && el.answerInput.value) submitAnswer(false);
+        }, delay);
+      }
+    }
+
+    function shouldQueueRetest(session, question) {
+      if (!session || !question) return false;
+      if (session.phase !== 'band') return false;
+      if (question.isRetest) return false;
+      if (!session.retestFamilyState) session.retestFamilyState = {};
+      if (!session.retestCountInBand) session.retestCountInBand = 0;
+      if (session.retestFamilyState[question.familyKey]) return false;
+      if (session.retestCountInBand >= MAX_RETESTS_PER_BAND) return false;
+      return true;
+    }
+
+    function shouldEndCurrentBandEarly() {
+      var s = appState.session;
+      if (!s || s.phase !== 'band' || s.currentBandIndex < 0) return false;
+      var answers = getCurrentBandAnswers();
+      if (answers.length < EARLY_FAIL_MIN_BAND_ANSWERS) return false;
+      var correct = 0;
+      var timeout = 0;
+      var insecure = 0;
+      for (var i = 0; i < answers.length; i++) {
+        if (answers[i].correct) correct++;
+        if (answers[i].timeout) timeout++;
+        if (!answers[i].correct || answers[i].timeout) insecure++;
+      }
+      if (correct <= 2) return true;
+      if (timeout >= 3) return true;
+      if (insecure >= 5 && countRepeatedWeakness(answers) >= 2) return true;
+      return false;
+    }
+
+    function failCurrentBandEarly(reason) {
+      var s = appState.session;
+      if (!s || appState.finishing) return;
+      if (s.phase !== 'band' || s.currentBandIndex < 0) {
+        finishAssessment(reason || 'Enough evidence gathered.');
+        return;
+      }
+      var band = BANDS[s.currentBandIndex];
+      var answers = getCurrentBandAnswers();
+      s.blockQueue = [];
+      s.retestQueue = [];
+      s.bandResults.push(makeBandSummary(band, answers, 'fail'));
+      s.latestVerdict = 'fail';
+      if (s.failedBandIds.indexOf(band.id) === -1) s.failedBandIds.push(band.id);
+      renderBandTrack();
+      finishAssessment(reason || 'Enough evidence gathered.');
+    }
+
+    function submitAnswer(wasTimeout) {
+      var s = appState.session;
+      var q = appState.currentQuestion;
+      if (!s || !q || appState.inputLocked || appState.finishing) return;
+      appState.inputLocked = true;
+      clearQuestionTimers();
+      var raw = String(el.answerInput.value || '');
+      var responseTimeMs = Date.now() - appState.questionStartedAt;
+      var correct = !wasTimeout && raw !== '' && parseInt(raw, 10) === q.answer;
+      var category = 'not_secure';
+      if (correct && responseTimeMs < FLUENT_MS) category = 'fluent';
+      else if (correct && responseTimeMs <= SLOW_MS) category = 'known_slow';
+      else if (correct) category = 'not_fluent';
+      var result = {
+        questionNumber: s.questionResults.length + 1,
+        phase: s.phase,
+        bandId: s.currentBandId,
+        fact: q.display,
+        familyKey: q.familyKey,
+        answer: q.answer,
+        response: wasTimeout ? '' : raw,
+        correct: correct,
+        timeout: !!wasTimeout,
+        responseTimeMs: responseTimeMs,
+        category: category,
+        reversed: q.a > q.b,
+        retest: !!q.isRetest
+      };
+      s.questionResults.push(result);
+      if ((!correct || wasTimeout) && shouldQueueRetest(s, q)) {
+        s.retestFamilyState[q.familyKey] = 'pending';
+        s.retestCountInBand += 1;
+        s.retestQueue.push({ fact: cloneFact(q), dueAfter: s.questionResults.length + 2 });
+      }
+      if (wasTimeout) {
+        el.answerInput.value = String(q.answer);
+        el.answerInput.classList.add('warn');
+        setStatus('Time is up. The answer is ' + q.answer + '.', 'warn');
+      } else if (correct) {
+        el.answerInput.classList.add('good');
+        setStatus('Good.', 'good');
+      } else {
+        el.answerInput.classList.add('bad');
+        setStatus('Not secure yet.', 'bad');
+      }
+      var nextDelay = wasTimeout ? 1000 : 450;
+      if (shouldEndCurrentBandEarly()) {
+        setStatus('Enough evidence gathered.', 'warn');
+        appState.nextQuestionId = window.setTimeout(function () { failCurrentBandEarly('Enough evidence gathered.'); }, nextDelay);
+        return;
+      }
+      appState.nextQuestionId = window.setTimeout(function () { presentNextQuestion(); }, nextDelay);
+    }
+
+    function completeCurrentBlock() {
+      var s = appState.session;
+      if (!s || appState.finishing) return;
+      if (s.phase === 'warmup') {
+        if (isWarmupFastTrackReady()) {
+          s.fastTrack = true;
+          var warmSummary = makeWarmupBandASummary();
+          s.bandResults.push(warmSummary);
+          s.latestVerdict = 'pass';
+          if (s.passedBandIds.indexOf('A') === -1) s.passedBandIds.push('A');
+          renderBandTrack();
+          beginBand(1);
+          return;
+        }
+        beginBand(0);
+        return;
+      }
+      var band = BANDS[s.currentBandIndex];
+      var answers = getCurrentBandAnswers();
+      var verdict = evaluateBandAnswers(answers, s.blockHadExtras, band);
+      if (verdict === 'extra') {
+        var extraNeeded = band.extraSize;
+        if (!hasQuestionBudget(extraNeeded)) {
+          finishAssessment('Question limit reached before extra questions.');
+          return;
+        }
+        s.blockHadExtras = true;
+        s.currentBlockMode = 'extra';
+        s.blockQueue = selectBandQuestions(band, extraNeeded, true);
+        setStatus('A few more questions.', 'warn');
+        appState.nextQuestionId = window.setTimeout(function () { presentNextQuestion(); }, 650);
+        return;
+      }
+      var summary = makeBandSummary(band, answers, verdict);
+      s.bandResults.push(summary);
+      s.latestVerdict = verdict;
+      if (verdict === 'pass') {
+        if (s.passedBandIds.indexOf(band.id) === -1) s.passedBandIds.push(band.id);
+        if (s.currentBandIndex >= BANDS.length - 1) {
+          finishAssessment('Completed all bands.');
+          return;
+        }
+        beginBand(s.currentBandIndex + 1);
+        return;
+      }
+      if (s.failedBandIds.indexOf(band.id) === -1) s.failedBandIds.push(band.id);
+      finishAssessment('Enough evidence gathered.');
+    }
+
+    function getWarmupAnswers() {
+      var s = appState.session;
+      var answers = [];
+      if (!s) return answers;
+      for (var i = 0; i < s.questionResults.length; i++) {
+        if (s.questionResults[i].phase === 'warmup') answers.push(s.questionResults[i]);
+      }
+      return answers;
+    }
+
+    function isWarmupFastTrackReady() {
+      var answers = getWarmupAnswers();
+      if (answers.length < WARMUP.length) return false;
+      var correct = 0;
+      var fluent = 0;
+      var timeout = 0;
+      for (var i = 0; i < answers.length; i++) {
+        if (answers[i].correct) correct++;
+        if (answers[i].category === 'fluent') fluent++;
+        if (answers[i].timeout) timeout++;
+      }
+      return correct === answers.length && fluent >= answers.length - 1 && timeout === 0;
+    }
+
+    function makeWarmupBandASummary() {
+      var answers = getWarmupAnswers();
+      var summary = makeBandSummary(BANDS[0], answers, 'pass');
+      summary.label = BANDS[0].label + ' (verified from warm-up)';
+      summary.fastTrack = true;
+      return summary;
+    }
+
+    function hasQuestionBudget(count) {
+      var s = appState.session;
+      if (!s) return false;
+      return (MAX_QUESTIONS - s.questionResults.length) >= count;
+    }
+
+    function getInitialBlockSize(index) {
+      var s = appState.session;
+      var band = BANDS[index];
+      if (!band) return 0;
+      if (band.id === 'H') return band.blockSize;
+      if (s && s.fastTrack && index > 0) return FAST_TRACK_BLOCK_SIZE;
+      return band.blockSize;
+    }
+
+    function beginBand(index) {
+      var s = appState.session;
+      if (!s || appState.finishing) return;
+      if (index < 0 || index >= BANDS.length) { finishAssessment('Completed all bands.'); return; }
+      var band = BANDS[index];
+      var blockSize = getInitialBlockSize(index);
+      if (!hasQuestionBudget(blockSize)) {
+        finishAssessment('Question limit reached before the next full band could begin.');
+        return;
+      }
+      s.phase = 'band';
+      s.currentBandIndex = index;
+      s.currentBandId = band.id;
+      s.blockHadExtras = false;
+      s.currentBlockMode = (s.fastTrack && index > 0 && band.id !== 'H') ? 'gateway' : 'standard';
+      s.retestQueue = [];
+      s.retestFamilyState = {};
+      s.retestCountInBand = 0;
+      s.blockQueue = selectBandQuestions(band, blockSize, false);
+      renderBandTrack();
+      presentNextQuestion();
+    }
+
+    function getCurrentBandAnswers() {
+      var s = appState.session;
+      var answers = [];
+      for (var i = 0; i < s.questionResults.length; i++) {
+        if (s.questionResults[i].phase === 'band' && s.questionResults[i].bandId === s.currentBandId) answers.push(s.questionResults[i]);
+      }
+      return answers;
+    }
+
+    function countRepeatedWeakness(answers) {
+      var counts = {};
+      var repeated = 0;
+      for (var i = 0; i < answers.length; i++) {
+        if (!answers[i].correct || answers[i].timeout) {
+          counts[answers[i].familyKey] = (counts[answers[i].familyKey] || 0) + 1;
+        }
+      }
+      for (var key in counts) {
+        if (Object.prototype.hasOwnProperty.call(counts, key) && counts[key] >= 2) repeated++;
+      }
+      return repeated;
+    }
+
+    function evaluateBandAnswers(answers, hadExtras, band) {
+      var s = appState.session;
+      var n = answers.length;
+      var correct = 0;
+      var fluent = 0;
+      var timeout = 0;
+      var slowOrNotFluent = 0;
+      for (var i = 0; i < answers.length; i++) {
+        if (answers[i].correct) correct++;
+        if (answers[i].category === 'fluent') fluent++;
+        if (answers[i].timeout) timeout++;
+        if (answers[i].category === 'known_slow' || answers[i].category === 'not_fluent') slowOrNotFluent++;
+      }
+      var repeatedWeakness = countRepeatedWeakness(answers);
+      if (band.id === 'H') {
+        if (correct >= 13 && fluent >= 10 && timeout <= 2 && repeatedWeakness < 2) return 'pass';
+        return 'fail';
+      }
+      if (s && s.fastTrack && s.currentBlockMode === 'gateway' && !hadExtras && n <= FAST_TRACK_BLOCK_SIZE) {
+        if (correct === n && fluent >= n - 1 && timeout === 0 && repeatedWeakness === 0) return 'pass';
+        if (correct >= n - 1 && timeout <= 1 && repeatedWeakness < 2) return 'extra';
+        return 'fail';
+      }
+      if (!hadExtras) {
+        if (correct >= 7 && fluent >= 5 && timeout <= 1 && repeatedWeakness < 2) return 'pass';
+        if (correct <= 4 || timeout >= 3 || repeatedWeakness >= 2) return 'fail';
+        return 'extra';
+      }
+      if (correct >= Math.ceil(n * 0.83) && fluent >= Math.ceil(n * 0.55) && timeout <= 2 && repeatedWeakness < 2 && slowOrNotFluent <= Math.ceil(n * 0.45)) return 'pass';
+      return 'fail';
+    }
+
+    function makeBandSummary(band, answers, verdict) {
+      var correct = 0;
+      var fluent = 0;
+      var timeout = 0;
+      var wrong = 0;
+      var slow = 0;
+      for (var i = 0; i < answers.length; i++) {
+        if (answers[i].correct) correct++;
+        if (answers[i].category === 'fluent') fluent++;
+        if (answers[i].timeout) timeout++;
+        if (!answers[i].correct && !answers[i].timeout) wrong++;
+        if (answers[i].category === 'known_slow' || answers[i].category === 'not_fluent') slow++;
+      }
+      return {
+        bandId: band.id,
+        label: band.label,
+        questions: answers.length,
+        correct: correct,
+        fluent: fluent,
+        slow: slow,
+        wrong: wrong,
+        timeout: timeout,
+        repeatedWeakness: countRepeatedWeakness(answers),
+        verdict: verdict
+      };
+    }
+
+    function finishAssessment(reason) {
+      var s = appState.session;
+      if (!s || appState.finishing) return;
+      appState.finishing = true;
+      clearQuestionTimers();
+      s.finalReason = reason;
+      s.completedAt = new Date().toISOString();
+      s.durationSec = Math.round((Date.now() - s.startMs) / 1000);
+      var result = buildFinalResult(s);
+      appState.latestResult = result;
+      appState.results.unshift(result);
+      saveJson(RESULTS_KEY, appState.results);
+      appState.attempts[s.attemptKey] = { status: 'completed', restartCount: s.restartCount, completedAt: result.completedAt };
+      saveJson(ATTEMPTS_KEY, appState.attempts);
+      appState.session = null;
+      appState.currentQuestion = null;
+      renderResult(result);
+      renderHistory();
+      showScreen('resultScreen');
+    }
+
+    function buildFinalResult(s) {
+      var q = s.questionResults;
+      var total = q.length;
+      var correct = 0;
+      var fluent = 0;
+      var slow = 0;
+      var wrong = 0;
+      var timeout = 0;
+      var missed = {};
+      var timedOut = {};
+      for (var i = 0; i < q.length; i++) {
+        if (q[i].correct) correct++;
+        if (q[i].category === 'fluent') fluent++;
+        if (q[i].category === 'known_slow' || q[i].category === 'not_fluent') slow++;
+        if (!q[i].correct && !q[i].timeout) { wrong++; missed[q[i].familyKey] = q[i].fact; }
+        if (q[i].timeout) { timeout++; timedOut[q[i].familyKey] = q[i].fact; missed[q[i].familyKey] = q[i].fact; }
+      }
+      var verifiedIndex = -1;
+      for (i = 0; i < s.bandResults.length; i++) {
+        if (s.bandResults[i].verdict === 'pass') verifiedIndex = getBandIndex(s.bandResults[i].bandId);
+      }
+      var developingIndex = Math.max(0, Math.min(BANDS.length - 1, verifiedIndex + 1));
+      if (s.bandResults.length) {
+        var lastBand = s.bandResults[s.bandResults.length - 1];
+        if (lastBand.verdict !== 'pass') developingIndex = getBandIndex(lastBand.bandId);
+      }
+      var result = {
+        appVersion: APP_VERSION,
+        studentName: s.studentName,
+        code: s.code,
+        assessmentName: s.assessmentName,
+        startedAt: s.startedAt,
+        completedAt: s.completedAt,
+        durationSec: s.durationSec,
+        startingBand: s.startingBand,
+        highestAttemptedBand: s.currentBandId,
+        verifiedBandIndex: verifiedIndex,
+        verifiedBand: verifiedIndex >= 0 ? BANDS[verifiedIndex].id : 'None yet',
+        verifiedLabel: verifiedIndex >= 0 ? BANDS[verifiedIndex].label : 'Not yet secure with Band A',
+        developingBand: developingIndex >= 0 ? BANDS[developingIndex].id : 'A',
+        developingLabel: developingIndex >= 0 ? BANDS[developingIndex].label : BANDS[0].label,
+        totalQuestions: total,
+        correct: correct,
+        accuracy: total ? Math.round((correct / total) * 100) : 0,
+        fluent: fluent,
+        slow: slow,
+        wrong: wrong,
+        timeout: timeout,
+        missedFacts: objectValues(missed),
+        timedOutFacts: objectValues(timedOut),
+        restartCount: s.restartCount,
+        restarted: s.restartCount > 0,
+        finalReason: s.finalReason,
+        recommendedPractice: makeRecommendation(verifiedIndex, developingIndex, objectValues(missed)),
+        bandResults: s.bandResults,
+        questionResults: q
+      };
+      return result;
+    }
+
+    function objectValues(obj) {
+      var values = [];
+      for (var key in obj) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) values.push(obj[key]);
+      }
+      values.sort();
+      return values;
+    }
+
+    function makeRecommendation(verifiedIndex, developingIndex, missedFacts) {
+      if (verifiedIndex >= BANDS.length - 1) {
+        if (missedFacts.length) return 'Ready for mixed multiplication practice. Review: ' + missedFacts.slice(0, 6).join(', ') + '.';
+        return 'Ready for mixed multiplication and extension work.';
+      }
+      var focus = BANDS[Math.max(0, developingIndex)] || BANDS[0];
+      if (missedFacts.length) return 'Next focus: ' + focus.label + '. Review these facts first: ' + missedFacts.slice(0, 8).join(', ') + '.';
+      return 'Next focus: ' + focus.label + '. Use regular FactFlow practice before the next check.';
+    }
+
+    function renderResult(result) {
+      el.resultMeta.textContent = result.studentName + ' - ' + result.code + ' - ' + formatDate(result.completedAt);
+      el.verifiedLevel.textContent = result.verifiedBand;
+      el.verifiedDesc.textContent = result.verifiedLabel;
+      el.developingLevel.textContent = result.developingBand;
+      el.developingDesc.textContent = result.developingLabel;
+      el.accuracyStat.textContent = result.correct + '/' + result.totalQuestions + ' (' + result.accuracy + '%)';
+      el.fluentStat.textContent = String(result.fluent);
+      el.slowStat.textContent = String(result.slow);
+      el.missedStat.textContent = String(result.wrong + result.timeout);
+      el.recommendationText.textContent = result.recommendedPractice;
+      renderTags(el.missedTags, result.missedFacts, 'bad', 'No missed facts recorded.');
+      renderTags(el.timeoutTags, result.timedOutFacts, 'warn', 'No timeouts recorded.');
+      renderBandSummary(result.bandResults);
+    }
+
+    function renderTags(container, items, cls, emptyText) {
+      if (!items || !items.length) {
+        container.innerHTML = '<span class="muted small">' + escapeHtml(emptyText) + '</span>';
+        return;
+      }
+      var html = '';
+      for (var i = 0; i < items.length; i++) html += '<span class="tag ' + cls + '">' + escapeHtml(items[i]) + '</span>';
+      container.innerHTML = html;
+    }
+
+    function renderBandSummary(bands) {
+      if (!bands || !bands.length) {
+        el.bandSummary.innerHTML = '<p class="muted">No band summary recorded.</p>';
+        return;
+      }
+      var html = '<table><thead><tr><th>Band</th><th>Score</th><th>Fluent</th><th>Timeout</th><th>Verdict</th></tr></thead><tbody>';
+      for (var i = 0; i < bands.length; i++) {
+        html += '<tr><td>' + escapeHtml(bands[i].bandId + ' - ' + bands[i].label) + '</td><td>' + bands[i].correct + '/' + bands[i].questions + '</td><td>' + bands[i].fluent + '</td><td>' + bands[i].timeout + '</td><td>' + escapeHtml(bands[i].verdict) + '</td></tr>';
+      }
+      html += '</tbody></table>';
+      el.bandSummary.innerHTML = html;
+    }
+
+    function formatDate(iso) {
+      var d = new Date(iso);
+      if (isNaN(d.getTime())) return String(iso || '');
+      return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()) + ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+    }
+
+    function formatDuration(sec) {
+      var m = Math.floor(sec / 60);
+      var s = sec % 60;
+      if (m <= 0) return s + ' sec';
+      return m + ' min ' + s + ' sec';
+    }
+
+    function copySummary() {
+      var r = appState.latestResult;
+      if (!r) return;
+      var lines = [];
+      lines.push('FactFlow Check Result');
+      lines.push('Student: ' + r.studentName);
+      lines.push('Assessment: ' + r.assessmentName);
+      lines.push('Code: ' + r.code);
+      lines.push('Date: ' + formatDate(r.completedAt));
+      lines.push('Verified level: ' + r.verifiedBand + ' - ' + r.verifiedLabel);
+      lines.push('Developing level: ' + r.developingBand + ' - ' + r.developingLabel);
+      lines.push('Accuracy: ' + r.correct + '/' + r.totalQuestions + ' (' + r.accuracy + '%)');
+      lines.push('Fluent: ' + r.fluent);
+      lines.push('Slow/not fluent: ' + r.slow);
+      lines.push('Missed/timeouts: ' + (r.wrong + r.timeout));
+      lines.push('Missed facts: ' + (r.missedFacts.length ? r.missedFacts.join(', ') : 'None'));
+      lines.push('Recommendation: ' + r.recommendedPractice);
+      lines.push('Restarted: ' + (r.restarted ? 'Yes (' + r.restartCount + ')' : 'No'));
+      copyText(lines.join('\n'));
+    }
+
+    function copyText(text) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { showToast('Summary copied.'); }, function () { fallbackCopy(text); });
+      } else {
+        fallbackCopy(text);
+      }
+    }
+
+    function fallbackCopy(text) {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); showToast('Summary copied.'); } catch (e) { showToast('Copy failed.'); }
+      document.body.removeChild(ta);
+    }
+
+    function renderHistory() {
+      var results = appState.results || [];
+      if (!results.length) {
+        el.historyTable.innerHTML = '<tbody><tr><td class="muted">No saved results yet.</td></tr></tbody>';
+        return;
+      }
+      var html = '<thead><tr><th>Date</th><th>Student</th><th>Code</th><th>Verified</th><th>Developing</th><th>Accuracy</th><th>Q</th><th>Restart</th></tr></thead><tbody>';
+      for (var i = 0; i < results.length; i++) {
+        var r = results[i];
+        html += '<tr><td>' + escapeHtml(formatDate(r.completedAt)) + '</td><td>' + escapeHtml(r.studentName) + '</td><td>' + escapeHtml(r.code) + '</td><td>' + escapeHtml(r.verifiedBand) + '</td><td>' + escapeHtml(r.developingBand) + '</td><td>' + r.accuracy + '%</td><td>' + r.totalQuestions + '</td><td>' + (r.restarted ? 'Yes' : 'No') + '</td></tr>';
+      }
+      html += '</tbody>';
+      el.historyTable.innerHTML = html;
+    }
+
+    function clearSavedResults() {
+      if (!window.confirm('Clear all saved FactFlow Check results and attempt locks on this device?')) return;
+      appState.results = [];
+      appState.attempts = {};
+      saveJson(RESULTS_KEY, appState.results);
+      saveJson(ATTEMPTS_KEY, appState.attempts);
+      renderHistory();
+      showToast('Results cleared.');
+    }
+
+    function escapeHtml(value) {
+      return String(value == null ? '' : value).replace(/[&<>"']/g, function (ch) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
+      });
+    }
+
+    function bindEvents() {
+      el.teacherBtn.addEventListener('click', function () { requireTeacherAccess('teacherScreen'); });
+      el.backToEntryBtn.addEventListener('click', function () { lockTeacherArea(); });
+      el.beginBtn.addEventListener('click', startAssessment);
+      el.showTeacherResultBtn.addEventListener('click', function () { if (appState.latestResult) { renderResult(appState.latestResult); showScreen('resultScreen'); } });
+      el.studentViewBtn.addEventListener('click', function () { resetEntryForNewCheck(); });
+      el.newCheckBtn.addEventListener('click', function () { resetEntryForNewCheck(); });
+      el.cancelTeacherUnlockBtn.addEventListener('click', closeTeacherUnlock);
+      el.unlockTeacherBtn.addEventListener('click', verifyTeacherPassphrase);
+      el.teacherPassphrase.addEventListener('keydown', function (evt) {
+        if (evt.key === 'Enter') { evt.preventDefault(); verifyTeacherPassphrase(); }
+        else if (evt.key === 'Escape') { evt.preventDefault(); closeTeacherUnlock(); }
+      });
+      el.saveConfigBtn.addEventListener('click', function () {
+        appState.config.assessmentName = String(el.assessmentName.value || 'Multiplication Placement Check').trim();
+        appState.config.customCode = normalizeCode(el.customCode.value || '');
+        saveConfig();
+      });
+      el.generateCodeBtn.addEventListener('click', function () { el.customCode.value = makeRandomCode(); });
+      el.clearResultsBtn.addEventListener('click', clearSavedResults);
+      var keys = document.querySelectorAll('.key-btn');
+      for (var i = 0; i < keys.length; i++) {
+        keys[i].addEventListener('click', function () { handleKey(this.getAttribute('data-key')); });
+      }
+      document.addEventListener('keydown', function (evt) {
+        if (!appState.session) return;
+        if (/^[0-9]$/.test(evt.key)) { evt.preventDefault(); handleKey(evt.key); }
+        else if (evt.key === 'Backspace') { evt.preventDefault(); handleKey('backspace'); }
+        else if (evt.key === 'Delete' || evt.key === 'Escape') { evt.preventDefault(); handleKey('clear'); }
+      });
+      el.teacherCode.addEventListener('input', function () { el.teacherCode.value = normalizeCode(el.teacherCode.value); clearError(); });
+      el.studentName.addEventListener('input', clearError);
+      window.addEventListener('storage', handleStorageEvent);
+      window.addEventListener('beforeunload', function () {
+        if (appState.session && !appState.finishing) {
+          appState.attempts[appState.session.attemptKey] = { status: 'in_progress', restartCount: appState.session.restartCount, startedAt: appState.session.startedAt };
+          saveJson(ATTEMPTS_KEY, appState.attempts);
+        }
+      });
+    }
+
+    function makeRandomCode() {
+      var words = ['RIVER','MAPLE','NORTH','BRAVE','CLOUD','TIGER','LEAF','STAR','FACT','READY','MANGO','EAGLE'];
+      var word = words[Math.floor(Math.random() * words.length)];
+      var num = Math.floor(Math.random() * 90) + 10;
+      return word + '-' + num;
+    }
+
+    function handleStorageEvent(evt) {
+      if (!evt || !evt.key) return;
+      if (appState.session) return;
+      if (evt.key === RESULTS_KEY) {
+        appState.results = loadJson(RESULTS_KEY, []);
+        renderHistory();
+      } else if (evt.key === ATTEMPTS_KEY) {
+        appState.attempts = loadJson(ATTEMPTS_KEY, {});
+      } else if (evt.key === CONFIG_KEY) {
+        appState.config = loadConfig();
+        renderConfig();
+      }
+    }
+
+    function resetEntryForNewCheck() {
+      clearQuestionTimers();
+      appState.session = null;
+      appState.currentQuestion = null;
+      appState.finishing = false;
+      el.studentName.value = '';
+      el.teacherCode.value = '';
+      clearError();
+      showScreen('entryScreen');
+    }
+
+    function init() {
+      cacheDom();
+      appState.config = loadConfig();
+      appState.results = loadJson(RESULTS_KEY, []);
+      appState.attempts = loadJson(ATTEMPTS_KEY, {});
+      renderConfig();
+      renderHistory();
+      bindEvents();
+    }
+
+    init();
+  })();
   </script>
 </body>
 </html>
