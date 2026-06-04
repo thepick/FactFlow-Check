@@ -1,6 +1,14 @@
-# FactFlow Check v2
+# FactFlow Check v2.1
 
 FactFlow Check is a separate supervised assessment app for multiplication fact placement. It is meant to identify the hardest fact band a student can answer accurately and reasonably quickly without using regular FactFlow practice progress.
+
+
+## What changed in v2.1
+
+- Fixes a runaway retest loop where repeated wrong answers could keep generating reversal retests until the 45-question maximum.
+- Caps reversal retests to four per band and only one retest per fact family per band.
+- Prevents retest questions from creating more retest questions.
+- Adds an early-stop rule for clearly struggling performance inside a band after enough evidence is gathered.
 
 ## What changed in v2
 

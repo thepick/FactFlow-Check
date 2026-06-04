@@ -317,7 +317,7 @@
   (function () {
     'use strict';
 
-    var APP_VERSION = '2.0.0';
+    var APP_VERSION = '2.1.0';
     var RESULTS_KEY = 'factflowCheck.results.v2';
     var ATTEMPTS_KEY = 'factflowCheck.attempts.v2';
     var CONFIG_KEY = 'factflowCheck.config.v2';
@@ -332,6 +332,8 @@
     var AUTO_SUBMIT_MS = 120;
     var IDLE_SUBMIT_SHORT_MS = 800;
     var IDLE_SUBMIT_LONG_MS = 1100;
+    var MAX_RETESTS_PER_BAND = 4;
+    var EARLY_FAIL_MIN_BAND_ANSWERS = 6;
 
     var WARMUP = [
       makeFact(2, 4), makeFact(5, 6), makeFact(10, 7),
@@ -680,6 +682,8 @@
         blockHadExtras: false,
         blockQueue: shuffle(WARMUP),
         retestQueue: [],
+        retestFamilyState: {},
+        retestCountInBand: 0,
         questionResults: [],
         bandResults: [],
         passedBandIds: [],
@@ -777,6 +781,7 @@
       for (var i = 0; i < s.retestQueue.length; i++) {
         if (s.questionResults.length >= s.retestQueue[i].dueAfter) {
           var item = s.retestQueue.splice(i, 1)[0];
+          if (s.retestFamilyState) s.retestFamilyState[item.fact.familyKey] = 'served';
           var fact = reverseFact(item.fact);
           fact.isRetest = true;
           return fact;
@@ -853,6 +858,54 @@
       }
     }
 
+    function shouldQueueRetest(session, question) {
+      if (!session || !question) return false;
+      if (session.phase !== 'band') return false;
+      if (question.isRetest) return false;
+      if (!session.retestFamilyState) session.retestFamilyState = {};
+      if (!session.retestCountInBand) session.retestCountInBand = 0;
+      if (session.retestFamilyState[question.familyKey]) return false;
+      if (session.retestCountInBand >= MAX_RETESTS_PER_BAND) return false;
+      return true;
+    }
+
+    function shouldEndCurrentBandEarly() {
+      var s = appState.session;
+      if (!s || s.phase !== 'band' || s.currentBandIndex < 0) return false;
+      var answers = getCurrentBandAnswers();
+      if (answers.length < EARLY_FAIL_MIN_BAND_ANSWERS) return false;
+      var correct = 0;
+      var timeout = 0;
+      var insecure = 0;
+      for (var i = 0; i < answers.length; i++) {
+        if (answers[i].correct) correct++;
+        if (answers[i].timeout) timeout++;
+        if (!answers[i].correct || answers[i].timeout) insecure++;
+      }
+      if (correct <= 2) return true;
+      if (timeout >= 3) return true;
+      if (insecure >= 5 && countRepeatedWeakness(answers) >= 2) return true;
+      return false;
+    }
+
+    function failCurrentBandEarly(reason) {
+      var s = appState.session;
+      if (!s || appState.finishing) return;
+      if (s.phase !== 'band' || s.currentBandIndex < 0) {
+        finishAssessment(reason || 'Enough evidence gathered.');
+        return;
+      }
+      var band = BANDS[s.currentBandIndex];
+      var answers = getCurrentBandAnswers();
+      s.blockQueue = [];
+      s.retestQueue = [];
+      s.bandResults.push(makeBandSummary(band, answers, 'fail'));
+      s.latestVerdict = 'fail';
+      if (s.failedBandIds.indexOf(band.id) === -1) s.failedBandIds.push(band.id);
+      renderBandTrack();
+      finishAssessment(reason || 'Enough evidence gathered.');
+    }
+
     function submitAnswer(wasTimeout) {
       var s = appState.session;
       var q = appState.currentQuestion;
@@ -882,7 +935,9 @@
         retest: !!q.isRetest
       };
       s.questionResults.push(result);
-      if (!correct || wasTimeout) {
+      if ((!correct || wasTimeout) && shouldQueueRetest(s, q)) {
+        s.retestFamilyState[q.familyKey] = 'pending';
+        s.retestCountInBand += 1;
         s.retestQueue.push({ fact: cloneFact(q), dueAfter: s.questionResults.length + 2 });
       }
       if (wasTimeout) {
@@ -896,7 +951,13 @@
         el.answerInput.classList.add('bad');
         setStatus('Not secure yet.', 'bad');
       }
-      appState.nextQuestionId = window.setTimeout(function () { presentNextQuestion(); }, wasTimeout ? 1000 : 450);
+      var nextDelay = wasTimeout ? 1000 : 450;
+      if (shouldEndCurrentBandEarly()) {
+        setStatus('Enough evidence gathered.', 'warn');
+        appState.nextQuestionId = window.setTimeout(function () { failCurrentBandEarly('Enough evidence gathered.'); }, nextDelay);
+        return;
+      }
+      appState.nextQuestionId = window.setTimeout(function () { presentNextQuestion(); }, nextDelay);
     }
 
     function completeCurrentBlock() {
@@ -941,6 +1002,8 @@
       s.currentBandId = BANDS[index].id;
       s.blockHadExtras = false;
       s.retestQueue = [];
+      s.retestFamilyState = {};
+      s.retestCountInBand = 0;
       s.blockQueue = selectBandQuestions(BANDS[index], BANDS[index].blockSize, false);
       renderBandTrack();
       presentNextQuestion();
