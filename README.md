@@ -14,13 +14,13 @@ The app uses a 10-second question limit, but the full 10 seconds is not treated 
 
 ## Response categories
 
-Each answer is classified using accuracy and response time.
+Each answer is classified internally for scoring. Students only see a green or red border on the answer box — no text feedback appears during the check.
 
 * Correct under 4 seconds: fluent
 * Correct in 4 to 8 seconds: known but slow
 * Correct after 8 seconds: not fluent
-* Wrong answer: not secure
-* Timeout: not secure
+* Wrong answer: needs practice
+* Timeout: needs practice
 
 Accuracy matters most. However, fast correct answers provide stronger evidence that the student has automatic recall.
 
@@ -32,7 +32,7 @@ FactFlow Check is designed to estimate placement for fact practice, so it gives 
 
 * facts the student has already mastered
 * facts the student knows but has not made automatic yet
-* facts that are not secure
+* facts that need practice
 
 This allows the app to place students without forcing every student to answer every possible multiplication fact.
 
@@ -53,7 +53,7 @@ The bands move from facts that are usually easier or more familiar toward facts 
 
 ## Warm-up
 
-The check begins with a 6-question warm-up.
+The check begins with a brief 3-2-1 countdown to give the student a moment to prepare, followed by a 6-question warm-up.
 
 The warm-up gives the app an early sense of whether the student is ready for the faster placement path or whether the student should use the standard adaptive path.
 
@@ -109,7 +109,7 @@ Before starting a new band, the app checks whether there is enough question budg
 
 ## Placement result
 
-The final result is based on the highest band where the app has enough evidence that the student is accurate and fluent.
+The final result is based on the highest band where the app has enough evidence that the student is accurate and fluent. Each attempted band is shown in the band summary with a verdict of Passed or Developing.
 
 The result should be read as a placement recommendation, not a permanent label. A student may still know some facts above the placement level, and a teacher may adjust placement using classroom knowledge.
 
@@ -138,11 +138,12 @@ The result after a student finishes does not require the teacher passphrase.
 ## Suggested classroom workflow
 
 1. The teacher opens Teacher Tools and confirms the assessment name and code.
-2. Students enter the teacher code.
-3. Students complete the check independently.
-4. The result screen appears automatically.
-5. The teacher records the visible result from the screen.
-6. The student waits for the next instruction.
+2. Students enter the teacher code and click Begin.
+3. A 3-2-1 countdown appears, then the check starts.
+4. Students complete the check independently.
+5. The result screen appears automatically.
+6. The teacher records the visible result from the screen.
+7. Tap Done to return to the entry screen for the next student.
 
 ## Files
 
