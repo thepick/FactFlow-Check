@@ -150,16 +150,12 @@
           <div><span class="code-chip" id="studentCodeHint">Code required</span></div>
         </div>
         <div class="field">
-          <label for="studentName">Your name</label>
-          <input id="studentName" type="text" maxlength="48" autocomplete="off" placeholder="Example: Mina">
-        </div>
-        <div class="field">
           <label for="teacherCode">Teacher code</label>
           <input id="teacherCode" type="text" maxlength="24" autocomplete="off" placeholder="Example: SAMPLE-00" style="letter-spacing:0.05em;" oninput="this.value = this.value.toUpperCase();">
         </div>
         <div class="error" id="entryError"></div>
         <button class="btn" type="button" id="beginBtn">Begin Check</button>
-        <p class="muted small center">This check uses a one-code-per-student lock on this device. Restarted attempts are marked on the result screen.</p>
+        <p class="muted small center">This check uses a one-code-per-attempt lock on this device. Restarted attempts are marked on the result screen.</p>
       </div>
     </section>
 
@@ -384,7 +380,7 @@
     function cacheDom() {
       var ids = [
         'entryScreen','testScreen','completeScreen','resultScreen','teacherScreen','teacherBtn',
-        'studentCodeHint','studentName','teacherCode','entryError','beginBtn','qNumber','qTotal','testStudentLabel',
+        'studentCodeHint','teacherCode','entryError','beginBtn','qNumber','qTotal','testStudentLabel',
         'bandTrack','timerFill','problemText','answerInput','statusLine','showTeacherResultBtn','resultMeta',
         'verifiedLevel','verifiedDesc','developingLevel','developingDesc','accuracyStat','fluentStat','slowStat',
         'missedStat','recommendationText','missedTags','timeoutTags','bandSummary','studentViewBtn',
@@ -443,7 +439,7 @@
       var d = bangkokDate(date || new Date());
       var block = Math.floor(d.getHours() / 4);
       var seed = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
-      var words = ['RIVER','MAPLE','CHECK','BLUE','NORTH','BRAVE','CLOUD','TIGER','LEAF','STAR','FACT','READY'];
+      var words = ['RIVER','MAPLE','CHECK','BLUE','NORTH','BRAVE','CLOUD','TIGER','LEAF','STAR','FACT','READY','STORM','FLAME','STONE','CREEK','LIGHT','SHINE','OCEAN','PEARL','BLOOM','PLAIN','SWIFT','CROWN'];
       var word = words[(seed + block * 5) % words.length];
       var num = ((seed * 19 + block * 37) % 90) + 10;
       var expiresHour = (block + 1) * 4;
@@ -465,10 +461,6 @@
         if (clean === RESERVED_EXAMPLE_CODES[i]) return true;
       }
       return false;
-    }
-
-    function normalizeName(name) {
-      return String(name || '').toLowerCase().replace(/\s+/g, ' ').trim();
     }
 
     function safeJsonParse(value, fallback) {
@@ -527,8 +519,8 @@
       return false;
     }
 
-    function getAttemptKey(name, code) {
-      return normalizeName(name) + '|' + normalizeCode(code) + '|' + String(appState.config.assessmentName || '').toLowerCase();
+    function getAttemptKey(code) {
+      return normalizeCode(code) + '|' + String(appState.config.assessmentName || '').toLowerCase();
     }
 
     function openTeacherUnlock(targetScreen) {
@@ -790,15 +782,13 @@
 
     function startAssessment() {
       clearError();
-      var name = String(el.studentName.value || '').trim();
       var code = normalizeCode(el.teacherCode.value);
-      if (!name) { showError('Please enter your name.'); return; }
       if (!isCodeAccepted(code)) { showError('Please check the teacher code.'); return; }
       appState.sessionId = null;
-      var key = getAttemptKey(name, code);
+      var key = getAttemptKey(code);
       var existing = appState.attempts[key];
       if (existing && existing.status === 'completed') {
-        showError('This student has already completed a check with this code on this device. Ask your teacher for a new code.');
+        showError('This code has already been used on this device. Ask your teacher for a new code.');
         return;
       }
       var restartCount = 0;
@@ -808,7 +798,7 @@
       appState.session = {
         id: 'ffc-' + Date.now() + '-' + Math.random().toString(36).slice(2, 9),
         appVersion: APP_VERSION,
-        studentName: name,
+        studentName: 'Student',
         code: code,
         assessmentName: appState.config.assessmentName,
         attemptKey: key,
@@ -835,7 +825,7 @@
       };
       appState.attempts[key] = { status: 'in_progress', restartCount: restartCount, startedAt: appState.session.startedAt };
       saveJson(ATTEMPTS_KEY, appState.attempts);
-      el.testStudentLabel.textContent = name;
+      el.testStudentLabel.textContent = 'Student';
       showScreen('testScreen');
       renderBandTrack();
       presentNextQuestion();
@@ -1565,7 +1555,6 @@
         else if (evt.key === 'Delete' || evt.key === 'Escape') { evt.preventDefault(); handleKey('clear'); }
       });
       el.teacherCode.addEventListener('input', function () { el.teacherCode.value = normalizeCode(el.teacherCode.value); clearError(); });
-      el.studentName.addEventListener('input', clearError);
       window.addEventListener('storage', handleStorageEvent);
       window.addEventListener('beforeunload', function () {
         if (appState.session && !appState.finishing) {
@@ -1576,7 +1565,7 @@
     }
 
     function makeRandomCode() {
-      var words = ['RIVER','MAPLE','NORTH','BRAVE','CLOUD','TIGER','LEAF','STAR','FACT','READY','MANGO','EAGLE'];
+      var words = ['RIVER','MAPLE','NORTH','BRAVE','CLOUD','TIGER','LEAF','STAR','FACT','READY','MANGO','EAGLE','STORM','FLAME','STONE','CREEK','LIGHT','SHINE','OCEAN','PEARL','BLOOM','PLAIN','SWIFT','CROWN'];
       var word = words[Math.floor(Math.random() * words.length)];
       var num = Math.floor(Math.random() * 90) + 10;
       return word + '-' + num;
@@ -1601,7 +1590,6 @@
       appState.session = null;
       appState.currentQuestion = null;
       appState.finishing = false;
-      el.studentName.value = '';
       el.teacherCode.value = '';
       clearError();
       showScreen('entryScreen');
