@@ -128,8 +128,8 @@ This is a classroom barrier, not a secure online login. A different browser, cle
 The teacher area is hidden behind the passphrase. It can be used to:
 
 * Set the assessment name
-* Set a class code
-* Generate a class code
+* Set a custom code
+* Generate a custom code
 * Review saved results on the device
 * Clear saved results and local attempt locks
 

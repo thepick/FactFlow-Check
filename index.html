@@ -256,41 +256,31 @@
         <div class="row" style="justify-content:space-between;">
           <div>
             <h2>Teacher Tools</h2>
-            <p class="muted">Set the assessment label, check the current student code, and review saved results on this device.</p>
+            <p class="muted">Configure the assessment and review saved results.</p>
           </div>
-          <button class="btn secondary" type="button" id="backToEntryBtn">Exit and Lock</button>
+          <button class="btn warning" type="button" id="backToEntryBtn">Save &amp; Exit</button>
         </div>
-        <div class="two-col">
-          <div class="grid">
-            <div class="field">
-              <label for="assessmentName">Assessment name</label>
-              <input id="assessmentName" type="text" maxlength="60" placeholder="Example: Term 1 Multiplication Check">
-            </div>
-            <div class="field">
-              <label for="customCode">Optional class code</label>
-              <input id="customCode" type="text" maxlength="24" placeholder="Leave blank or use Generate Code" style="text-transform:uppercase;letter-spacing:0.05em;">
-            </div>
-            <div class="row">
-              <button class="btn" type="button" id="saveConfigBtn">Save Setup</button>
-              <button class="btn secondary" type="button" id="generateCodeBtn">Generate Code</button>
-            </div>
-            <div class="notice">
-              <div class="small muted">Current 4-hour student code</div>
-              <div class="code-chip" id="dailyCodeLabel">-</div>
-              <p class="muted small" id="codeWindowLabel" style="margin-top:8px;">Valid for the current 4-hour Bangkok-time window.</p>
-              <p class="muted small" style="margin-top:8px;">Students may use the saved class code or the current 4-hour code. Other random-looking codes are not accepted.</p>
-            </div>
+        <div class="field">
+          <label for="assessmentName">Assessment name</label>
+          <input id="assessmentName" type="text" maxlength="60" placeholder="Example: Term 1 Multiplication Check">
+        </div>
+        <div class="notice">
+          <div class="row" style="justify-content:space-between;align-items:center;">
+            <span class="small muted" style="font-weight:700;text-transform:uppercase;letter-spacing:0.04em;">Current 4-hour code</span>
+            <span class="code-chip" id="dailyCodeLabel">-</span>
           </div>
-          <div class="grid">
-            <h3>Device Results</h3>
-            <button class="btn danger" type="button" id="clearResultsBtn">Clear Saved Results</button>
-            <p class="muted small">Teacher tools are hidden from students. Use Exit and Lock when you are finished.</p>
-            <p class="muted small">This is a classroom barrier, not a secure online login.</p>
+          <p class="muted small" id="codeWindowLabel" style="margin-top:6px;">Valid until … Bangkok time.</p>
+        </div>
+        <div class="field">
+          <label for="customCode">Custom code (optional)</label>
+          <div class="row">
+            <input id="customCode" type="text" maxlength="24" placeholder="Leave blank or use Generate" style="flex:1;text-transform:uppercase;letter-spacing:0.05em;">
+            <button class="btn secondary" type="button" id="generateCodeBtn">Generate</button>
           </div>
         </div>
-        <div class="grid">
-          <h3>Saved results</h3>
-          <div class="history-wrap"><table id="historyTable"></table></div>
+        <div class="history-wrap"><table id="historyTable"></table></div>
+        <div class="row" style="justify-content:flex-end;">
+          <button class="btn secondary" type="button" id="clearResultsBtn">Clear All Results</button>
         </div>
       </div>
     </section>
@@ -384,7 +374,7 @@
         'bandTrack','timerFill','problemText','answerInput','statusLine','showTeacherResultBtn','resultMeta',
         'verifiedLevel','verifiedDesc','developingLevel','developingDesc','accuracyStat','fluentStat','slowStat',
         'missedStat','recommendationText','missedTags','timeoutTags','bandSummary','studentViewBtn',
-        'newCheckBtn','backToEntryBtn','assessmentName','customCode','saveConfigBtn','generateCodeBtn','dailyCodeLabel',
+        'newCheckBtn','backToEntryBtn','assessmentName','customCode','generateCodeBtn','dailyCodeLabel',
         'codeWindowLabel','clearResultsBtn','historyTable','teacherUnlockModal','teacherPassphrase','teacherUnlockError',
         'cancelTeacherUnlockBtn','unlockTeacherBtn','toast'
       ];
@@ -492,10 +482,17 @@
     }
 
     function saveConfig() {
+      appState.config.assessmentName = String(el.assessmentName.value || 'Multiplication Placement Check').trim();
+      appState.config.customCode = normalizeCode(el.customCode.value || '');
+      if (isReservedExampleCode(appState.config.customCode)) {
+        appState.config.customCode = '';
+        el.customCode.value = '';
+        showToast('The sample code is reserved and was not saved.');
+      }
       appState.config.updatedAt = new Date().toISOString();
       saveJson(CONFIG_KEY, appState.config);
       renderConfig();
-      showToast('Setup saved.');
+      showToast('Saved.');
     }
 
     function renderConfig() {
@@ -1078,10 +1075,8 @@
         setStatus('Time is up. The answer is ' + q.answer + '.', 'warn');
       } else if (correct) {
         el.answerInput.classList.add('good');
-        setStatus('Good.', 'good');
       } else {
         el.answerInput.classList.add('bad');
-        setStatus('Not secure yet.', 'bad');
       }
       var nextDelay = wasTimeout ? 1000 : 450;
       if (shouldEndCurrentBandEarly()) {
@@ -1426,7 +1421,7 @@
       }
       var html = '<table><thead><tr><th>Band</th><th>Score</th><th>Fluent</th><th>Timeout</th><th>Verdict</th></tr></thead><tbody>';
       for (var i = 0; i < bands.length; i++) {
-        html += '<tr><td>' + escapeHtml(bands[i].bandId + ' - ' + bands[i].label) + '</td><td>' + bands[i].correct + '/' + bands[i].questions + '</td><td>' + bands[i].fluent + '</td><td>' + bands[i].timeout + '</td><td>' + escapeHtml(bands[i].verdict) + '</td></tr>';
+        html += '<tr><td>' + escapeHtml(bands[i].bandId + ' - ' + bands[i].label) + '</td><td>' + bands[i].correct + '/' + bands[i].questions + '</td><td>' + bands[i].fluent + '</td><td>' + bands[i].timeout + '</td><td>' + (bands[i].verdict === 'pass' ? 'Passed' : 'Developing') + '</td></tr>';
       }
       html += '</tbody></table>';
       el.bandSummary.innerHTML = html;
@@ -1516,7 +1511,7 @@
 
     function bindEvents() {
       el.teacherBtn.addEventListener('click', function () { requireTeacherAccess('teacherScreen'); });
-      el.backToEntryBtn.addEventListener('click', function () { lockTeacherArea(); });
+      el.backToEntryBtn.addEventListener('click', function () { saveConfig(); lockTeacherArea(); });
       el.beginBtn.addEventListener('click', startAssessment);
       el.showTeacherResultBtn.addEventListener('click', function () { if (appState.latestResult) { renderResult(appState.latestResult); showScreen('resultScreen'); } });
       el.studentViewBtn.addEventListener('click', function () { resetEntryForNewCheck(); });
@@ -1527,17 +1522,7 @@
         if (evt.key === 'Enter') { evt.preventDefault(); verifyTeacherPassphrase(); }
         else if (evt.key === 'Escape') { evt.preventDefault(); closeTeacherUnlock(); }
       });
-      el.saveConfigBtn.addEventListener('click', function () {
-        appState.config.assessmentName = String(el.assessmentName.value || 'Multiplication Placement Check').trim();
-        appState.config.customCode = normalizeCode(el.customCode.value || '');
-        if (isReservedExampleCode(appState.config.customCode)) {
-          appState.config.customCode = '';
-          el.customCode.value = '';
-          showToast('The sample code is reserved and was not saved.');
-        }
-        saveConfig();
-      });
-      el.generateCodeBtn.addEventListener('click', function () { el.customCode.value = makeRandomCode(); });
+      el.generateCodeBtn.addEventListener('click', function () { el.customCode.value = makeRandomCode(); saveConfig(); });
       el.clearResultsBtn.addEventListener('click', clearSavedResults);
       var keys = document.querySelectorAll('.key-btn');
       for (var i = 0; i < keys.length; i++) {
