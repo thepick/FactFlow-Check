@@ -295,8 +295,7 @@
           <div id="bandSummary"></div>
         </div>
         <div class="row" style="justify-content:center;">
-          <button class="btn secondary" type="button" id="studentViewBtn">Back to Start</button>
-          <button class="btn secondary" type="button" id="newCheckBtn">New Check</button>
+          <button class="btn secondary" type="button" id="studentViewBtn">Done</button>
         </div>
       </div>
     </section>
@@ -423,7 +422,7 @@
         'bandTrack','timerFill','problemText','answerInput','statusLine','showTeacherResultBtn','resultMeta',
         'verifiedLevel','verifiedDesc','developingLevel','developingDesc','accuracyStat','fluentStat','slowStat',
         'missedStat','recommendationText','missedTags','timeoutTags','bandSummary','studentViewBtn',
-        'newCheckBtn','assessmentName','customCode','generateCodeBtn','dailyCodeLabel',
+        'assessmentName','customCode','generateCodeBtn','dailyCodeLabel',
         'codeWindowLabel','clearResultsBtn','historyTable','teacherUnlockModal','teacherPassphrase','teacherUnlockError',
         'cancelTeacherUnlockBtn','unlockTeacherBtn','toast','countdownOverlay','countdownLabel','countdownValue'
       ];
@@ -1607,7 +1606,6 @@
       el.beginBtn.addEventListener('click', startAssessment);
       el.showTeacherResultBtn.addEventListener('click', function () { if (appState.latestResult) { renderResult(appState.latestResult); showScreen('resultScreen'); } });
       el.studentViewBtn.addEventListener('click', function () { resetEntryForNewCheck(); });
-      el.newCheckBtn.addEventListener('click', function () { resetEntryForNewCheck(); });
       el.cancelTeacherUnlockBtn.addEventListener('click', closeTeacherUnlock);
       el.unlockTeacherBtn.addEventListener('click', verifyTeacherPassphrase);
       el.teacherPassphrase.addEventListener('keydown', function (evt) {
