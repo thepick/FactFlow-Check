@@ -1,4 +1,4 @@
-# FactFlow Check v2.5
+# FactFlow Check
 
 FactFlow Check is a separate supervised assessment app for multiplication fact placement. It is designed to be used alongside [FactFlow](https://github.com/thepick/FactFlow) for regular multiplication fact practice. FactFlow Check does not use regular FactFlow practice progress as proof of mastery.
 
