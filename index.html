@@ -1478,7 +1478,7 @@
     }
 
     function renderResult(result) {
-      el.resultMeta.textContent = result.studentName + ' - ' + result.code + ' - ' + formatDate(result.completedAt);
+      el.resultMeta.textContent = result.code + ' - ' + formatDate(result.completedAt);
       el.verifiedLevel.textContent = result.verifiedBand;
       el.verifiedDesc.textContent = result.verifiedLabel;
       el.developingLevel.textContent = result.developingBand;
@@ -1534,7 +1534,6 @@
       if (!r) return;
       var lines = [];
       lines.push('FactFlow Check Result');
-      lines.push('Student: ' + r.studentName);
       lines.push('Assessment: ' + r.assessmentName);
       lines.push('Code: ' + r.code);
       lines.push('Date: ' + formatDate(r.completedAt));
@@ -1573,10 +1572,10 @@
         el.historyTable.innerHTML = '<tbody><tr><td class="muted">No saved results yet.</td></tr></tbody>';
         return;
       }
-      var html = '<thead><tr><th>Date</th><th>Student</th><th>Code</th><th>Verified</th><th>Developing</th><th>Accuracy</th><th>Q</th><th>Restart</th></tr></thead><tbody>';
+      var html = '<thead><tr><th>Date</th><th>Code</th><th>Verified</th><th>Developing</th><th>Accuracy</th><th>Q</th><th>Restart</th></tr></thead><tbody>';
       for (var i = 0; i < results.length; i++) {
         var r = results[i];
-        html += '<tr><td>' + escapeHtml(formatDate(r.completedAt)) + '</td><td>' + escapeHtml(r.studentName) + '</td><td>' + escapeHtml(r.code) + '</td><td>' + escapeHtml(r.verifiedBand) + '</td><td>' + escapeHtml(r.developingBand) + '</td><td>' + r.accuracy + '%</td><td>' + r.totalQuestions + '</td><td>' + (r.restarted ? 'Yes' : 'No') + '</td></tr>';
+        html += '<tr><td>' + escapeHtml(formatDate(r.completedAt)) + '</td><td>' + escapeHtml(r.code) + '</td><td>' + escapeHtml(r.verifiedBand) + '</td><td>' + escapeHtml(r.developingBand) + '</td><td>' + r.accuracy + '%</td><td>' + r.totalQuestions + '</td><td>' + (r.restarted ? 'Yes' : 'No') + '</td></tr>';
       }
       html += '</tbody>';
       el.historyTable.innerHTML = html;

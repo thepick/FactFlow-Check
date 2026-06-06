@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FactFlow Check</title>
+<style>
+  body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    max-width: 720px;
+    margin: 40px auto;
+    padding: 0 24px 60px;
+    color: #27231d;
+    line-height: 1.6;
+    font-size: 15px;
+  }
+  h1 { font-size: 1.8rem; margin: 0 0 0.5em; }
+  h2 { font-size: 1.25rem; margin-top: 2em; margin-bottom: 0.6em; color: #3b6fb6; border-bottom: 1px solid #e8e4dc; padding-bottom: 0.3em; }
+  h3 { font-size: 1.05rem; margin-top: 1.5em; margin-bottom: 0.4em; }
+  p { margin: 0 0 0.8em; }
+  a { color: #3b6fb6; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code { background: #f0ede8; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; font-family: "SF Mono", "Fira Code", monospace; }
+  pre { background: #f7f6f2; padding: 14px 16px; border-radius: 10px; overflow-x: auto; border: 1px solid #d5d0c8; }
+  pre code { background: none; padding: 0; }
+  ul, ol { padding-left: 1.5em; margin: 0 0 0.8em; }
+  li { margin-bottom: 0.3em; }
+  blockquote { border-left: 3px solid #d5d0c8; margin: 1em 0; padding: 0.5em 1em; color: #68635d; font-style: italic; }
+  hr { border: none; border-top: 1px solid #d5d0c8; margin: 2em 0; }
+  strong { color: #27231d; }
+</style>
+</head>
+<body>
+<h1>FactFlow Check</h1>
+
+<p>FactFlow Check is a separate supervised assessment app for multiplication fact placement. It is designed to be used alongside <a href="https://github.com/thepick/FactFlow">FactFlow</a> for regular multiplication fact practice. FactFlow Check does not use regular FactFlow practice progress as proof of mastery.</p>
+
+<p>The purpose of FactFlow Check is to give the teacher a quick, structured snapshot of a student's multiplication fact fluency. It is not meant to replace classroom observation, normal practice, or teacher judgment. It is meant to help place students at a reasonable starting point for multiplication fact practice.</p>
+
+<h2>Assessment approach</h2>
+
+<p>FactFlow Check assesses both accuracy and fluency.</p>
+
+<p>A student who answers correctly is showing knowledge of the fact. A student who answers correctly and quickly is showing stronger evidence that the fact is automatic. This matters because multiplication fact fluency is not only about eventually finding the answer. It is also about recalling the answer quickly enough that the student can use it while solving larger math problems.</p>
+
+<p>The app uses a 10-second question limit, but the full 10 seconds is not treated as fluent recall. The 10-second limit gives students time to respond, while the response speed categories help the app decide how strong the evidence is.</p>
+
+<h2>Response categories</h2>
+
+<p>Each answer is classified internally for scoring. Students only see a green or red border on the answer box — no text feedback appears during the check.</p>
+
+<ul>
+<li>Correct under 4 seconds: fluent</li>
+<li>Correct in 4 to 8 seconds: known but slow</li>
+<li>Correct after 8 seconds: not fluent</li>
+<li>Wrong answer: needs practice</li>
+<li>Timeout: needs practice</li>
+</ol>
+
+<p>Accuracy matters most. However, fast correct answers provide stronger evidence that the student has automatic recall.</p>
+
+<h2>Why speed is included</h2>
+
+<p>A student may know a multiplication fact but still need to count, skip-count, or use another strategy to find the answer. That is useful math thinking, but it is not yet fluent recall.</p>
+
+<p>FactFlow Check is designed to estimate placement for fact practice, so it gives more credit to facts that are answered quickly and correctly. This helps separate:</p>
+
+<ul>
+<li>facts the student has already mastered</li>
+<li>facts the student knows but has not made automatic yet</li>
+<li>facts that need practice</li>
+</ul>
+
+<p>This allows the app to place students without forcing every student to answer every possible multiplication fact.</p>
+
+<h2>Fact bands</h2>
+
+<p>The assessment is organized into fact bands. Each band represents a set of related multiplication facts.</p>
+
+<ul>
+<li>Band A: 2s, 5s, 10s</li>
+<li>Band B: 3s, 4s</li>
+<li>Band C: 6s</li>
+<li>Band D: 7s</li>
+<li>Band E: 8s</li>
+<li>Band F: 9s</li>
+<li>Band G: 11s, 12s</li>
+<li>Band H: Mixed 2-12</li>
+</ol>
+
+<p>The bands move from facts that are usually easier or more familiar toward facts that are often harder for students. This lets the app build evidence step by step instead of giving a long random test.</p>
+
+<h2>Warm-up</h2>
+
+<p>The check begins with a brief 3-2-1 countdown to give the student a moment to prepare, followed by a 6-question warm-up.</p>
+
+<p>The warm-up gives the app an early sense of whether the student is ready for the faster placement path or whether the student should use the standard adaptive path.</p>
+
+<p>If the student answers the warm-up correctly and fluently, the app treats Band A as verified from warm-up evidence and moves the student into the fast-track path.</p>
+
+<p>If the warm-up does not provide strong enough evidence, the student uses the standard path.</p>
+
+<h2>Fast-track path</h2>
+
+<p>The fast-track path is for students who show strong early evidence of fluency.</p>
+
+<p>In fast-track mode:</p>
+
+<ul>
+<li>Bands B through G begin with 6-question gateway blocks.</li>
+<li>A strong fluent gateway result moves the student up to the next band.</li>
+<li>An unclear gateway result adds 4 more questions from the same band.</li>
+<li>A weak gateway result stops the climb.</li>
+<li>Band H uses an 18-question mixed 2-12 check.</li>
+</ol>
+
+<p>The fast-track path allows a very strong student to reach the highest placement within the 60-question cap.</p>
+
+<p>A full fast-track check can use:</p>
+
+<ul>
+<li>Warm-up: 6 questions</li>
+<li>Bands B-G: 6 bands x 6 questions = 36 questions</li>
+<li>Band H: 18 questions</li>
+<li>Total: 60 questions</li>
+</ul>
+
+<p>This design keeps the check short enough for classroom use while still allowing strong students to show that they are ready for advanced mixed-fact practice.</p>
+
+<h2>Standard path</h2>
+
+<p>Students who do not qualify for the fast-track path use the regular adaptive path.</p>
+
+<p>In the standard path:</p>
+
+<ul>
+<li>Each band starts with 8 questions.</li>
+<li>If the result is unclear, the app adds 4 more questions from the same band.</li>
+<li>If the result is strong, the student moves up.</li>
+<li>If the result is weak, the climb stops.</li>
+<li>The app can finish early when it has enough evidence.</li>
+<li>The app does not start a band if there is not enough question budget left to complete it properly.</li>
+</ol>
+
+<p>This path gives students more chances within each band before the app makes a placement decision.</p>
+
+<h2>Question cap</h2>
+
+<p>The assessment has a maximum of 60 questions.</p>
+
+<p>The cap helps keep the check practical for classroom use. It also prevents struggling students from being pushed through too many questions after the app already has enough evidence for placement.</p>
+
+<p>Before starting a new band, the app checks whether there is enough question budget left to complete that band in a meaningful way. This prevents the app from starting a section it cannot properly finish.</p>
+
+<h2>Placement result</h2>
+
+<p>The final result is based on the highest band where the app has enough evidence that the student is accurate and fluent. Each attempted band is shown in the band summary with a verdict of Passed or Developing.</p>
+
+<p>The result should be read as a placement recommendation, not a permanent label. A student may still know some facts above the placement level, and a teacher may adjust placement using classroom knowledge.</p>
+
+<p>The result is intended to answer this question:</p>
+
+<p>"What is the highest multiplication fact level where this student has shown enough accuracy and fluency to begin practice confidently?"</p>
+
+<h2>One-code-per-attempt lock</h2>
+
+<p>The app uses a local attempt lock. Each code can only be used once per device. Once a student completes a check with a given code on a particular machine, that code is locked on that device until the teacher clears the saved results.</p>
+
+<p>This is a classroom barrier, not a secure online login. A different browser, cleared storage, or another device can bypass it.</p>
+
+<h2>Teacher tools</h2>
+
+<p>The teacher area is hidden behind the passphrase. The default passphrase is <code>strawberry</code>. It can be used to:</p>
+
+<ul>
+<li>Set the assessment name</li>
+<li>Set a custom code</li>
+<li>Generate a custom code</li>
+<li>Review saved results on the device</li>
+<li>Clear saved results and local attempt locks</li>
+</ol>
+
+<p>The result after a student finishes does not require the teacher passphrase.</p>
+
+<h2>Suggested classroom workflow</h2>
+
+<ol>
+<li>The teacher opens Teacher Tools and confirms the assessment name and code.</li>
+<li>Students enter the teacher code and click Begin.</li>
+<li>A 3-2-1 countdown appears, then the check starts.</li>
+<li>Students complete the check independently.</li>
+<li>The result screen appears automatically.</li>
+<li>The teacher records the visible result from the screen.</li>
+<li>Tap Done to return to the entry screen for the next student.</li>
+</ol>
+
+<h2>Files</h2>
+
+<ul>
+<li>index.html: the complete FactFlow Check app</li>
+<li>README.md: this file</li>
+</ul>
+
+</body>
+</html>
