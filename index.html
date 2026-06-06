@@ -369,8 +369,8 @@
     var FLUENT_MS = 4000;
     var SLOW_MS = 8000;
     var AUTO_SUBMIT_MS = 120;
-    var IDLE_SUBMIT_SHORT_MS = 800;
-    var IDLE_SUBMIT_LONG_MS = 1100;
+    var IDLE_SUBMIT_SHORT_MS = 500;
+    var IDLE_SUBMIT_LONG_MS = 700;
     var MAX_RETESTS_PER_BAND = 4;
     var EARLY_FAIL_MIN_BAND_ANSWERS = 6;
     var TEACHER_PASS_SALT = 'ffc-teacher-lock-v1';
@@ -1167,7 +1167,7 @@
       } else {
         el.answerInput.classList.add('bad');
       }
-      var nextDelay = wasTimeout ? 1000 : 450;
+      var nextDelay = wasTimeout ? 700 : 280;
       if (shouldEndCurrentBandEarly()) {
         setStatus('Enough evidence gathered.', 'warn');
         appState.nextQuestionId = window.setTimeout(function () { failCurrentBandEarly('Enough evidence gathered.'); }, nextDelay);
@@ -1206,7 +1206,7 @@
         s.currentBlockMode = 'extra';
         s.blockQueue = selectBandQuestions(band, extraNeeded, true);
         setStatus('A few more questions.', 'warn');
-        appState.nextQuestionId = window.setTimeout(function () { presentNextQuestion(); }, 650);
+        appState.nextQuestionId = window.setTimeout(function () { presentNextQuestion(); }, 400);
         return;
       }
       var summary = makeBandSummary(band, answers, verdict);
