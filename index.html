@@ -126,6 +126,50 @@
       .header-actions .btn { padding: 0.55rem 0.7rem; font-size: 0.84rem; }
       .key-btn { min-height: 48px; }
     }
+
+    /* Countdown overlay */
+    #testScreen .panel { position: relative; overflow: hidden; }
+    .countdown-overlay {
+      display: none;
+      position: absolute;
+      inset: 0;
+      z-index: 80;
+      place-items: center;
+      pointer-events: none;
+      background: color-mix(in srgb, var(--surface) 72%, transparent);
+      backdrop-filter: blur(2px);
+    }
+    .countdown-overlay.active { display: grid; }
+    .countdown-card {
+      min-width: 140px;
+      padding: 1rem 1.35rem;
+      text-align: center;
+      border-radius: var(--radius);
+      background: var(--surface-2);
+      border: 2px solid color-mix(in srgb, var(--primary) 45%, transparent);
+      box-shadow: var(--shadow);
+    }
+    .countdown-label {
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 800;
+    }
+    .countdown-number {
+      margin-top: 0.25rem;
+      font-size: clamp(3rem, 14vw, 5.5rem);
+      line-height: 1;
+      font-weight: 900;
+      color: var(--primary);
+      letter-spacing: -0.06em;
+      animation: countdownPop 300ms ease;
+    }
+    @keyframes countdownPop {
+      0% { transform: scale(0.78); opacity: 0; }
+      70% { transform: scale(1.08); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
   </style>
 </head>
 <body>
@@ -161,6 +205,12 @@
 
     <section class="screen" id="testScreen">
       <div class="panel">
+        <div class="countdown-overlay" id="countdownOverlay" aria-live="assertive" aria-hidden="true">
+          <div class="countdown-card">
+            <div class="countdown-label" id="countdownLabel">Get ready</div>
+            <div class="countdown-number" id="countdownValue">3</div>
+          </div>
+        </div>
         <div class="test-meta">
           <span>Question <span id="qNumber">1</span><span id="qTotal"></span></span>
           <span id="testStudentLabel">Student</span>
@@ -258,7 +308,6 @@
             <h2>Teacher Tools</h2>
             <p class="muted">Configure the assessment and review saved results.</p>
           </div>
-          <button class="btn warning" type="button" id="backToEntryBtn">Save &amp; Exit</button>
         </div>
         <div class="field">
           <label for="assessmentName">Assessment name</label>
@@ -326,7 +375,7 @@
     var MAX_RETESTS_PER_BAND = 4;
     var EARLY_FAIL_MIN_BAND_ANSWERS = 6;
     var TEACHER_PASS_SALT = 'ffc-teacher-lock-v1';
-    var TEACHER_PASS_HASH = 'c9f18fe32a681cb097b0edca67d97c882e6714903f8306e0a540fcaf74194d97';
+    var TEACHER_PASS_HASH = '99691dcd1e9a5a4c574211307202ecd2caea10dc19f8962772935960184ff11d';
     var TEACHER_AUTO_LOCK_MS = 15 * 60 * 1000;
     var RESERVED_EXAMPLE_CODES = ['SAMPLE-00'];
 
@@ -374,9 +423,9 @@
         'bandTrack','timerFill','problemText','answerInput','statusLine','showTeacherResultBtn','resultMeta',
         'verifiedLevel','verifiedDesc','developingLevel','developingDesc','accuracyStat','fluentStat','slowStat',
         'missedStat','recommendationText','missedTags','timeoutTags','bandSummary','studentViewBtn',
-        'newCheckBtn','backToEntryBtn','assessmentName','customCode','generateCodeBtn','dailyCodeLabel',
+        'newCheckBtn','assessmentName','customCode','generateCodeBtn','dailyCodeLabel',
         'codeWindowLabel','clearResultsBtn','historyTable','teacherUnlockModal','teacherPassphrase','teacherUnlockError',
-        'cancelTeacherUnlockBtn','unlockTeacherBtn','toast'
+        'cancelTeacherUnlockBtn','unlockTeacherBtn','toast','countdownOverlay','countdownLabel','countdownValue'
       ];
       for (var i = 0; i < ids.length; i++) el[ids[i]] = document.getElementById(ids[i]);
     }
@@ -581,6 +630,8 @@
       appState.teacherUnlocked = true;
       closeTeacherUnlock();
       resetTeacherAutoLock();
+      el.teacherBtn.textContent = 'Save & Exit';
+      el.teacherBtn.className = 'btn warning';
       if (targetScreen === 'resultScreen' && appState.latestResult) {
         renderResult(appState.latestResult);
         showScreen('resultScreen');
@@ -597,6 +648,8 @@
         window.clearTimeout(appState.teacherLockTimerId);
         appState.teacherLockTimerId = null;
       }
+      el.teacherBtn.textContent = 'Teacher';
+      el.teacherBtn.className = 'btn secondary';
       if (!appState.session) showScreen('entryScreen');
       showToast('Teacher area locked.');
     }
@@ -777,6 +830,42 @@
       return ordered;
     }
 
+    var countdownTimerId = null;
+
+    function showCountdown(value, label) {
+      el.countdownValue.textContent = String(value);
+      el.countdownLabel.textContent = label || 'Get ready';
+      el.countdownOverlay.classList.add('active');
+      el.countdownOverlay.setAttribute('aria-hidden', 'false');
+    }
+
+    function hideCountdown() {
+      if (countdownTimerId) { window.clearInterval(countdownTimerId); countdownTimerId = null; }
+      el.countdownOverlay.classList.remove('active');
+      el.countdownOverlay.setAttribute('aria-hidden', 'true');
+    }
+
+    function runCountdown(onDone) {
+      var remaining = 3;
+      el.answerInput.disabled = true;
+      showCountdown(remaining, 'Get ready');
+
+      countdownTimerId = window.setInterval(function () {
+        remaining--;
+        if (remaining > 0) {
+          showCountdown(remaining, 'Get ready');
+          return;
+        }
+        if (remaining === 0) {
+          showCountdown('Go!', '');
+          return;
+        }
+        hideCountdown();
+        el.answerInput.disabled = false;
+        onDone();
+      }, 1000);
+    }
+
     function startAssessment() {
       clearError();
       var code = normalizeCode(el.teacherCode.value);
@@ -825,7 +914,7 @@
       el.testStudentLabel.textContent = 'Student';
       showScreen('testScreen');
       renderBandTrack();
-      presentNextQuestion();
+      runCountdown(function () { presentNextQuestion(); });
     }
 
     function renderBandTrack() {
@@ -868,6 +957,7 @@
         window.clearInterval(appState.timerIntervalId);
         appState.timerIntervalId = null;
       }
+      hideCountdown();
     }
 
     function shouldFinishForLimits() {
@@ -1510,8 +1600,10 @@
     }
 
     function bindEvents() {
-      el.teacherBtn.addEventListener('click', function () { requireTeacherAccess('teacherScreen'); });
-      el.backToEntryBtn.addEventListener('click', function () { saveConfig(); lockTeacherArea(); });
+      el.teacherBtn.addEventListener('click', function () {
+        if (appState.teacherUnlocked) { saveConfig(); lockTeacherArea(); }
+        else { requireTeacherAccess('teacherScreen'); }
+      });
       el.beginBtn.addEventListener('click', startAssessment);
       el.showTeacherResultBtn.addEventListener('click', function () { if (appState.latestResult) { renderResult(appState.latestResult); showScreen('resultScreen'); } });
       el.studentViewBtn.addEventListener('click', function () { resetEntryForNewCheck(); });

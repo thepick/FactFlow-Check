@@ -1,6 +1,6 @@
 # FactFlow Check v2.5
 
-FactFlow Check is a separate supervised assessment app for multiplication fact placement. It looks and feels similar to FactFlow, but it does not use regular FactFlow practice progress as proof of mastery.
+FactFlow Check is a separate supervised assessment app for multiplication fact placement. It is designed to be used alongside [FactFlow](https://github.com/thepick/FactFlow) for regular multiplication fact practice. FactFlow Check does not use regular FactFlow practice progress as proof of mastery.
 
 The purpose of FactFlow Check is to give the teacher a quick, structured snapshot of a student's multiplication fact fluency. It is not meant to replace classroom observation, normal practice, or teacher judgment. It is meant to help place students at a reasonable starting point for multiplication fact practice.
 
@@ -125,7 +125,7 @@ This is a classroom barrier, not a secure online login. A different browser, cle
 
 ## Teacher tools
 
-The teacher area is hidden behind the passphrase. It can be used to:
+The teacher area is hidden behind the passphrase. The default passphrase is `strawberry`. It can be used to:
 
 * Set the assessment name
 * Set a custom code
