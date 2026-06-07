@@ -73,16 +73,18 @@ The `DEFAULT_TEACHER_KEY` at the top of the script determines which teacher's sh
 
 ---
 
-## When you redeploy the Apps Script
+## When you update the Apps Script
 
-If you edit the Apps Script later, you must:
+If you edit the Apps Script later and want to push changes without changing your URL:
 
-1. Click **Deploy → New Deployment** (a new deployment, not just save)
-2. Copy the **new URL** it gives you
-3. Give the new URL to the person maintaining `index.html` so they can update your entry in the `TEACHERS` object
-4. They re-upload `index.html`
+1. Click **Deploy → Manage deployments**
+2. Find your Web App deployment in the list, click the **pencil/edit icon** ✏️
+3. Under **Version**, select **New version**
+4. Click **Deploy**
 
-Each deployment gets a unique URL. The old URL stops working once a new deployment is created.
+This pushes your code changes to the **same URL** — no need to update the TEACHERS map in `index.html` and no need to share a new link with students.
+
+**⚠ Do NOT use Deploy → New Deployment** unless you want a fresh URL (e.g., for a brand-new sheet). New Deployment creates a new URL and the old one stops working.
 
 ---
 
@@ -96,10 +98,10 @@ Each deployment gets a unique URL. The old URL stops working once a new deployme
 ## Sheet structure
 
 **Raw Data** (hidden — full chronological log):
-- Timestamp, Student, Code, Assessment, Verified, Developing, Accuracy, Fluent, Slow, Wrong, Timeout, Questions, Missed Facts, Restarted, Duration
+- Timestamp, Student, Code, Assessment, Verified, Developing, Accuracy %, Fluent, Slow, Wrong, Timeout, Questions, Missed Facts, Duration sec
 
 **Summary** (what you look at):
-- Student, Date, Code, Verified, Developing, Accuracy, Fluent, Slow, Missed, Facts to Review, Restart?
+- Student, Date, Code, Verified, Developing, Accuracy %, Fluent, Slow, Missed, Facts to Review
 - One row per student
 - Automatically sorted A–Z
 - Each new submission updates that student's row in place
@@ -117,5 +119,5 @@ The Apps Script may have a bug. Go to Extensions → Apps Script in your Sheet, 
 **Duplicate entries for the same student:**
 Name normalization handles case and spacing, but not typos (e.g., "Ben" vs "Bne"). Remind the student to correct their spelling — the name is remembered on their device for next time.
 
-**URL changed after redeploying:**
-If you redeploy the Apps Script, you get a new URL. Give the new URL to the person maintaining `index.html` so they can update your `TEACHERS` entry. The old URL stops working.
+**Data not appearing in your sheet:**
+Check that the Apps Script is deployed (Deploy → Manage deployments — you should see an active Web App). If missing, follow Step 3 above. Also verify the `?t=` parameter in the student's link matches your TEACHERS key exactly (e.g., `?t=IP5/8`, not `?t=5/8`).

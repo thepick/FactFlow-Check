@@ -302,8 +302,6 @@
           <div id="bandSummary"></div>
         </div>
         <div class="row" style="justify-content:center;gap:10px;">
-          <button class="btn" type="button" id="submitResultBtn">Send Results</button>
-          <span class="spinner hidden" id="submitSpinner"></span>
           <button class="btn secondary" type="button" id="studentViewBtn">Done</button>
         </div>
       </div>
@@ -482,7 +480,7 @@
         'assessmentName','customCode','generateCodeBtn','dailyCodeLabel',
         'codeWindowLabel','clearResultsBtn','historyTable','teacherUnlockModal','teacherPassphrase','teacherUnlockError',
         'cancelTeacherUnlockBtn','unlockTeacherBtn','toast','countdownOverlay','countdownLabel','countdownValue',
-        'submitResultBtn','submitSpinner','teacherBadge','teacherBadgeName'
+        'teacherBadge','teacherBadgeName'
       ];
       for (var i = 0; i < ids.length; i++) el[ids[i]] = document.getElementById(ids[i]);
     }
@@ -874,6 +872,8 @@
 
     function startAssessment() {
       clearError();
+      var studentName = normalizeName(el.studentName.value);
+      if (!studentName) { showError('Please enter your name.'); el.studentName.focus(); return; }
       var code = normalizeCode(el.teacherCode.value);
       if (!isCodeAccepted(code)) { showError('Please check the teacher code.'); return; }
       appState.sessionId = null;
@@ -888,7 +888,7 @@
       appState.session = {
         id: 'ffc-' + Date.now() + '-' + Math.random().toString(36).slice(2, 9),
         appVersion: APP_VERSION,
-        studentName: normalizeName(el.studentName.value) || 'Student',
+        studentName: studentName,
         code: code,
         assessmentName: appState.config.assessmentName,
         attemptKey: key,
@@ -914,7 +914,7 @@
       };
       appState.attempts[key] = { status: 'in_progress', startedAt: appState.session.startedAt };
       saveJson(ATTEMPTS_KEY, appState.attempts);
-      el.testStudentLabel.textContent = normalizeName(el.studentName.value) || 'Student';
+      el.testStudentLabel.textContent = studentName;
       showScreen('testScreen');
       renderBandTrack();
       runCountdown(function () { presentNextQuestion(); });
@@ -1427,6 +1427,7 @@
       renderResult(result);
       renderHistory();
       showScreen('resultScreen');
+      sendResults();
     }
 
     function buildFinalResult(s) {
@@ -1634,10 +1635,10 @@
 
     function sendResults() {
       var r = appState.latestResult;
-      if (!r) { showToast('No result to send.'); return; }
+      if (!r) return;
       var url = SUBMIT_URL;
-      el.submitResultBtn.disabled = true;
-      el.submitSpinner.classList.remove('hidden');
+      el.studentViewBtn.disabled = true;
+      showToast('Sending results\u2026');
       var payload = {
         appVersion: r.appVersion,
         studentName: r.studentName,
@@ -1669,19 +1670,19 @@
         var data;
         try { data = JSON.parse(txt); } catch (e) { data = null; }
         if (data && data.ok) {
-          showToast('Results sent.');
           appState.resultPending = false;
+          showToast('Results sent \u2714');
         } else {
+          appState.resultPending = false;
           copySummary();
-          showToast('Server error. Results copied instead.');
+          showToast('Server error. Results copied to clipboard.');
         }
-        el.submitResultBtn.disabled = false;
-        el.submitSpinner.classList.add('hidden');
+        el.studentViewBtn.disabled = false;
       }).catch(function () {
+        appState.resultPending = false;
         copySummary();
-        showToast('Could not reach server. Results copied instead.');
-        el.submitResultBtn.disabled = false;
-        el.submitSpinner.classList.add('hidden');
+        showToast('Could not reach server. Results copied to clipboard.');
+        el.studentViewBtn.disabled = false;
       });
     }
 
@@ -1693,7 +1694,6 @@
       el.beginBtn.addEventListener('click', startAssessment);
       el.showTeacherResultBtn.addEventListener('click', function () { if (appState.latestResult) { renderResult(appState.latestResult); showScreen('resultScreen'); } });
       el.studentViewBtn.addEventListener('click', function () { resetEntryForNewCheck(); });
-      el.submitResultBtn.addEventListener('click', sendResults);
       el.cancelTeacherUnlockBtn.addEventListener('click', closeTeacherUnlock);
       el.unlockTeacherBtn.addEventListener('click', verifyTeacherPassphrase);
       el.teacherPassphrase.addEventListener('keydown', function (evt) {
@@ -1722,7 +1722,7 @@
       window.addEventListener('beforeunload', function (evt) {
         if (appState.resultPending) {
           evt.preventDefault();
-          evt.returnValue = 'Your results have not been sent. Press Submit to send them to your teacher.';
+          evt.returnValue = 'Your results are still being sent. Please wait.';
           return evt.returnValue;
         }
         if (appState.session && !appState.finishing) {
