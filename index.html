@@ -206,7 +206,7 @@
         </div>
         <div class="error" id="entryError"></div>
         <button class="btn" type="button" id="beginBtn">Begin Check</button>
-        <p class="muted small center">This check uses a one-code-per-attempt lock on this device. Restarted attempts are marked on the result screen.</p>
+        <p class="muted small center">This check uses a one-code-per-attempt lock on this device.</p>
       </div>
     </section>
 
@@ -879,12 +879,10 @@
       appState.sessionId = null;
       var key = getAttemptKey(code);
       var existing = appState.attempts[key];
-      if (existing && existing.status === 'completed') {
+      if (existing && (existing.status === 'completed' || existing.status === 'in_progress' || existing.status === 'abandoned')) {
         showError('This code has already been used on this device. Ask your teacher for a new code.');
         return;
       }
-      var restartCount = 0;
-      if (existing && existing.status === 'in_progress') restartCount = (existing.restartCount || 0) + 1;
       appState.finishing = false;
       appState.currentQuestion = null;
       appState.session = {
@@ -894,7 +892,7 @@
         code: code,
         assessmentName: appState.config.assessmentName,
         attemptKey: key,
-        restartCount: restartCount,
+        restartCount: 0,
         startedAt: new Date().toISOString(),
         startMs: Date.now(),
         startingBand: 'Warm-up -> Band A',
@@ -1580,7 +1578,6 @@
       lines.push('Missed/timeouts: ' + (r.wrong + r.timeout));
       lines.push('Missed facts: ' + (r.missedFacts.length ? r.missedFacts.join(', ') : 'None'));
       lines.push('Recommendation: ' + r.recommendedPractice);
-      lines.push('Restarted: ' + (r.restarted ? 'Yes (' + r.restartCount + ')' : 'No'));
       copyText(lines.join('\n'));
     }
 
@@ -1607,10 +1604,10 @@
         el.historyTable.innerHTML = '<tbody><tr><td class="muted">No saved results yet.</td></tr></tbody>';
         return;
       }
-      var html = '<thead><tr><th>Date</th><th>Student</th><th>Code</th><th>Verified</th><th>Developing</th><th>Accuracy</th><th>Q</th><th>Restart</th></tr></thead><tbody>';
+      var html = '<thead><tr><th>Date</th><th>Student</th><th>Code</th><th>Verified</th><th>Developing</th><th>Accuracy</th><th>Q</th></tr></thead><tbody>';
       for (var i = 0; i < results.length; i++) {
         var r = results[i];
-        html += '<tr><td>' + escapeHtml(formatDate(r.completedAt)) + '</td><td>' + escapeHtml(r.studentName || 'Student') + '</td><td>' + escapeHtml(r.code) + '</td><td>' + escapeHtml(r.verifiedBand) + '</td><td>' + escapeHtml(r.developingBand) + '</td><td>' + r.accuracy + '%</td><td>' + r.totalQuestions + '</td><td>' + (r.restarted ? 'Yes' : 'No') + '</td></tr>';
+        html += '<tr><td>' + escapeHtml(formatDate(r.completedAt)) + '</td><td>' + escapeHtml(r.studentName || 'Student') + '</td><td>' + escapeHtml(r.code) + '</td><td>' + escapeHtml(r.verifiedBand) + '</td><td>' + escapeHtml(r.developingBand) + '</td><td>' + r.accuracy + '%</td><td>' + r.totalQuestions + '</td></tr>';
       }
       html += '</tbody>';
       el.historyTable.innerHTML = html;
@@ -1734,7 +1731,7 @@
           return evt.returnValue;
         }
         if (appState.session && !appState.finishing) {
-          appState.attempts[appState.session.attemptKey] = { status: 'in_progress', restartCount: appState.session.restartCount, startedAt: appState.session.startedAt };
+          appState.attempts[appState.session.attemptKey] = { status: 'abandoned', abandonedAt: new Date().toISOString() };
           saveJson(ATTEMPTS_KEY, appState.attempts);
         }
       });
