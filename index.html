@@ -892,7 +892,6 @@
         code: code,
         assessmentName: appState.config.assessmentName,
         attemptKey: key,
-        restartCount: 0,
         startedAt: new Date().toISOString(),
         startMs: Date.now(),
         startingBand: 'Warm-up -> Band A',
@@ -913,7 +912,7 @@
         fastTrack: false,
         currentBlockMode: 'standard'
       };
-      appState.attempts[key] = { status: 'in_progress', restartCount: appState.session.restartCount, startedAt: appState.session.startedAt };
+      appState.attempts[key] = { status: 'in_progress', startedAt: appState.session.startedAt };
       saveJson(ATTEMPTS_KEY, appState.attempts);
       el.testStudentLabel.textContent = normalizeName(el.studentName.value) || 'Student';
       showScreen('testScreen');
@@ -1421,7 +1420,7 @@
       appState.resultPending = true;
       appState.results.unshift(result);
       saveJson(RESULTS_KEY, appState.results);
-      appState.attempts[s.attemptKey] = { status: 'completed', restartCount: s.restartCount, completedAt: result.completedAt };
+      appState.attempts[s.attemptKey] = { status: 'completed', completedAt: result.completedAt };
       saveJson(ATTEMPTS_KEY, appState.attempts);
       appState.session = null;
       appState.currentQuestion = null;
@@ -1480,8 +1479,6 @@
         timeout: timeout,
         missedFacts: objectValues(missed),
         timedOutFacts: objectValues(timedOut),
-        restartCount: s.restartCount,
-        restarted: s.restartCount > 0,
         finalReason: s.finalReason,
         recommendedPractice: makeRecommendation(verifiedIndex, developingIndex, objectValues(missed)),
         bandResults: s.bandResults,
@@ -1661,8 +1658,6 @@
         timeout: r.timeout,
         missedFacts: r.missedFacts,
         timedOutFacts: r.timedOutFacts,
-        restarted: r.restarted,
-        restartCount: r.restartCount,
         finalReason: r.finalReason
       };
       fetch(url, {
