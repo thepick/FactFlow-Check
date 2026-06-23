@@ -383,7 +383,7 @@
   var TEACHERS = {
     'IP5/9': {
       name: 'Ajarn Michael — IP5/9',
-      url: 'https://script.google.com/macros/s/AKfycbyuE5nR4e0d-qS5xvsoK_DdyUwUlBt-0uCBbG2KgNnhnF63B-B4g-DI819f5MfwDR93Bg/exec'
+      url: 'https://script.google.com/a/macros/ku.th/s/AKfycbxgXxJFgOHGi39oPEHGybpPByBHhfVeLLQRhI2cy8l78_gHo35D8fYSVzc8jPUQmz1EdA/exec'
     },
     'IP5/8': {
       name: 'Ajarn Jordan — IP5/8',
@@ -399,11 +399,11 @@
       var m = q.match(/[?&]t=([^&]+)/);
       if (m) {
         var key = decodeURIComponent(m[1]);
-        if (TEACHERS[key]) activeTeacher = TEACHERS[key];
+        if (TEACHERS[key]) { activeTeacher = Object.assign({}, TEACHERS[key], { key: key }); }
       }
     }
     if (!activeTeacher && TEACHERS[DEFAULT_TEACHER_KEY]) {
-      activeTeacher = TEACHERS[DEFAULT_TEACHER_KEY];
+      activeTeacher = Object.assign({}, TEACHERS[DEFAULT_TEACHER_KEY], { key: DEFAULT_TEACHER_KEY });
     }
   })();
 
@@ -1637,9 +1637,15 @@
       var r = appState.latestResult;
       if (!r) return;
       var url = SUBMIT_URL;
+      if (!url) {
+        showToast('Cannot send: no submission endpoint.');
+        el.studentViewBtn.disabled = false;
+        return;
+      }
       el.studentViewBtn.disabled = true;
       showToast('Sending results\u2026');
       var payload = {
+        classCode: activeTeacher ? activeTeacher.key : '',
         appVersion: r.appVersion,
         studentName: r.studentName,
         code: r.code,
