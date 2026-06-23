@@ -115,6 +115,7 @@
     .history-wrap { overflow-x: auto; max-height: 420px; overflow-y: auto; border: 1px solid var(--border); border-radius: 12px; }
     .toast { position: fixed; top: 14px; left: 50%; transform: translateX(-50%) translateY(-8px); opacity: 0; transition: opacity 180ms, transform 180ms; z-index: 10; padding: 0.65rem 1rem; border-radius: 999px; background: var(--text); color: var(--bg); font-weight: 900; box-shadow: var(--shadow); pointer-events: none; }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .send-status { font-size: 0.9rem; color: var(--text); opacity: 0.8; min-height: 1.4em; }
     .hidden { display: none !important; }
     .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid var(--surface-2); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.6s linear infinite; vertical-align: middle; margin: auto 0; }
     @keyframes spin { to { transform: rotate(360deg); } }
@@ -302,6 +303,9 @@
           <div id="bandSummary"></div>
         </div>
         <div class="row" style="justify-content:center;gap:10px;">
+          <span id="sendStatus" class="send-status"></span>
+        </div>
+        <div class="row" style="justify-content:center;gap:10px;">
           <button class="btn secondary" type="button" id="studentViewBtn">Done</button>
         </div>
       </div>
@@ -476,7 +480,7 @@
         'studentCodeHint','studentName','teacherCode','entryError','beginBtn','qNumber','qTotal','testStudentLabel',
         'bandTrack','timerFill','problemText','answerInput','statusLine','showTeacherResultBtn','resultMeta',
         'verifiedLevel','verifiedDesc','developingLevel','developingDesc','accuracyStat','fluentStat','slowStat',
-        'missedStat','recommendationText','missedTags','timeoutTags','bandSummary','studentViewBtn',
+        'missedStat','recommendationText','missedTags','timeoutTags','bandSummary','studentViewBtn','sendStatus',
         'assessmentName','customCode','generateCodeBtn','dailyCodeLabel',
         'codeWindowLabel','clearResultsBtn','historyTable','teacherUnlockModal','teacherPassphrase','teacherUnlockError',
         'cancelTeacherUnlockBtn','unlockTeacherBtn','toast','countdownOverlay','countdownLabel','countdownValue',
@@ -1643,6 +1647,7 @@
         return;
       }
       el.studentViewBtn.disabled = true;
+      el.sendStatus.textContent = 'Sending results\u2026';
       showToast('Sending results\u2026');
       var payload = {
         classCode: activeTeacher ? activeTeacher.key : '',
@@ -1677,15 +1682,18 @@
         try { data = JSON.parse(txt); } catch (e) { data = null; }
         if (data && data.ok) {
           appState.resultPending = false;
+          el.sendStatus.textContent = '\u2714 Results sent';
           showToast('Results sent \u2714');
         } else {
           appState.resultPending = false;
+          el.sendStatus.textContent = '\u2718 Server error \u2014 copied to clipboard';
           copySummary();
           showToast('Server error. Results copied to clipboard.');
         }
         el.studentViewBtn.disabled = false;
       }).catch(function () {
         appState.resultPending = false;
+        el.sendStatus.textContent = '\u2718 Could not reach server \u2014 copied to clipboard';
         copySummary();
         showToast('Could not reach server. Results copied to clipboard.');
         el.studentViewBtn.disabled = false;
