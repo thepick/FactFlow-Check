@@ -179,9 +179,36 @@ async function run() {
   }
   const rx={console,Logger:{log(){}},LockService:{getScriptLock:()=>({waitLock(){locked=true;},releaseLock(){locked=false;}})},SpreadsheetApp:{openById:()=>({getSheetByName:name=>sheets.get(name),insertSheet:name=>{assert.ok(locked);const sheet=new Sheet(name);sheets.set(name,sheet);return sheet;}}),flush(){flushes++;if(failFlush)throw Error('Flush unavailable');}},ContentService:{MimeType:{JSON:'json'},createTextOutput:text=>({setMimeType:()=>JSON.parse(text)})}};
   vm.createContext(rx);vm.runInContext(receiverSource,rx);
+  // Grades remain receiver-only, use fixed level weights, and distinguish accommodations.
+  assert.equal(rx.teacherGradeCells(fullResult)[0],1);
+  assert.equal(rx.teacherGradeCells(simulate('slow'))[0],0.6);
+  assert.equal(rx.teacherGradeCells(simulate('wrong'))[0],0);
+  assert.equal(rx.teacherGradeCells(simulate('timeout'))[0],0);
+  assert.equal(rx.teacherGradeCells(simulate('skip'))[0],0);
+  const accommodated=rx.teacherGradeCells(simulate('perfect',{mode:'extended'}));
+  assert.equal(accommodated[0],'');assert.equal(accommodated[2],1);assert.equal(accommodated[3],'');
+  assert.equal(rx.teacherGradeCells({...fullResult,finalReason:'Teacher ended the check.'})[0],'');
+  const missing=JSON.parse(JSON.stringify(fullResult));missing.bandResults[7].questions=0;
+  assert.equal(rx.teacherGradeCells(missing)[0],'');
+  const varied=JSON.parse(JSON.stringify(fullResult));
+  varied.bandResults.forEach(b=>{b.correct=b.questions/2;b.fluent=0;});
+  assert.equal(rx.teacherGradeCells(varied)[0],0.3);
+  varied.bandResults[0].questions=12;varied.bandResults[0].correct=6;
+  assert.equal(rx.teacherGradeCells(varied)[0],0.3); // Extra questions do not change a level's weight.
+  const boss=JSON.parse(JSON.stringify(fullResult));boss.bandResults[7].correct=0;boss.bandResults[7].fluent=0;
+  assert.equal(rx.teacherGradeCells(boss)[0],0.875); // Final challenge contributes exactly one eighth.
+  const james=JSON.parse(JSON.stringify(fullResult));
+  [[12,9,7],[8,8,8],[6,2,1],[11,7,3],[11,6,4],[6,3,1],[12,9,9],[18,12,11]].forEach(([n,c,f],i)=>Object.assign(james.bandResults[i],{questions:n,correct:c,fluent:f,verdict:i===2||i===5?'fail':'incomplete'}));
+  assert.ok(Math.abs(rx.teacherGradeCells(james)[0]-0.5843434343434343)<1e-12);
   const payload=Object.assign({},posted,{completedAt:'2026-09-20T03:00:00Z'});
   assert.equal(rx.handleFactFlowCheck(payload).ok,true);
   assert.equal(flushes,1);assert.equal(locked,false);
+  assert.equal(sheets.get('Check v3').rows[1][22],1);
+  assert.equal(sheets.get('Check v3').rows[0][22],'Teacher Grade %');
+  assert.equal(Object.hasOwn(rx.handleFactFlowCheck(payload),'grade'),false);
+  sheets.get('Check v3').rows[1][22]='';rx.refreshTeacherGrades();
+  assert.equal(sheets.get('Check v3').rows[1][22],1);
+  assert.equal(JSON.parse(sheets.get('Check Raw v3').rows[1][15]).teacherGrade,undefined);
   assert.equal(rx.handleFactFlowCheck(payload).ok,true);
   assert.equal(sheets.get('Check Raw v3').getLastRow(),2);
   for(const bad of [{schemaVersion:9},{skipped:-1},{conditions:{mode:'extended',input:'student',mixed:true,hideTimer:false}},{bandResults:payload.bandResults.slice(1)},{totalQuestions:99},{accuracy:1}])assert.equal(rx.handleFactFlowCheck(Object.assign({},payload,bad)).ok,false);

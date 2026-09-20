@@ -59,3 +59,13 @@ Run `node test.cjs`. No dependencies or real Google requests are needed. Tests c
 A real Edge browser check additionally covers the full 78-question route, teacher settings, keyboard submission, a 74/74 scored result, mobile layout, zero preview POST requests, and refresh recovery.
 
 See [PILOT.md](PILOT.md) for acceptance criteria and [SETUP-GUIDE.md](SETUP-GUIDE.md) for promotion. Michael approved promotion after the classroom preview and interface revisions. Continue collecting classroom observations to review the provisional criteria.
+
+## Teacher-only percentage grade
+
+Check v3 columns W-Z contain Teacher Grade %, Grade Basis, Level-weighted Accuracy %, and Level-weighted Fluency %. The receiver calculates these values; they are never returned to the browser or added to student reports or downloads.
+
+Each of the eight levels contributes 12.5%, including the final challenge. Average correct/questions across levels and average fluent/questions across levels, then combine 60% accuracy + 40% fluency. All scored responses within each level count, including clarification questions. Wrong, timed-out and skipped responses earn zero; introductions are excluded. Extra questions do not increase a level's weight. This is a classroom scoring convention, not a standardized grade.
+
+Only completed routes receive a grade. A level ended early for clear difficulty still counts; unfinished assessments remain ungraded. Extended, untimed and teacher-recorded checks show accuracy only, with combined grade and standard fluency blank. Numeric fractions display to one decimal percent. James's supplied example is 58.4% with equal level weights, versus the earlier provisional 61% pooled estimate.
+
+After updating both receivers, run refreshTeacherGrades in the Apps Script editor to fill existing IP5/8 and IP5/9 summary grade columns from saved schema-3 evidence matched by assessment ID. It updates only these four columns and their formatting. Raw evidence, legacy results and student verdicts remain unchanged. New submissions and retries calculate the grade automatically. The helper is not exposed as a public receiver action. Existing spreadsheet sharing controls access to grades.
