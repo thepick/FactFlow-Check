@@ -63,7 +63,12 @@ async function run() {
     const r=simulate(mode);assert.equal(r.bandResults.length,8);assert.ok(r.bandResults.every(b=>b.questions>0));
     if(mode==='screenshot')assert.ok(r.bandResults.every(b=>b.verdict==='pass'));
     if(mode==='uneven'){assert.equal(r.bandResults[3].verdict,'fail');assert.equal(r.bandResults[5].verdict,'pass');}
-    if(mode==='extras')assert.equal(r.countedQuestions,102);
+    if(mode==='extras'){
+      assert.equal(r.countedQuestions,102);
+      const order=r.questionResults.map(q=>q.bandId).filter((id,i,all)=>i===0||id!==all[i-1]);
+      assert.equal(order.join(','),'A,B,C,D,E,F,G,H');
+      assert.ok(r.breaks.some(b=>b.reason==='A few more questions'));
+    }
     if(mode==='wrong')assert.ok(r.bandResults.every(b=>b.verdict==='fail'));
     if(mode==='timeout'||mode==='skip')assert.ok(r.bandResults.every(b=>b.verdict==='incomplete'));
     if(mode==='slow'){assert.ok(r.bandResults.every(b=>b.verdict==='slow'));assert.ok(r.activeSec>400);}

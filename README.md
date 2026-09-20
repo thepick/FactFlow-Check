@@ -7,8 +7,8 @@ An independent, supervised snapshot of multiplication accuracy and fluent recall
 - Named fact groups: 2s, 5s & 10s; 3s & 4s; 6s; 7s; 8s; 9s; 11s & 12s; Final challenge: mixed facts 2–12.
 - Every group is assessed independently. Difficulty in one group does not block later groups.
 - Four unscored 1-times-table examples teach the controls without priming scored facts.
-- Eight initial questions per group; uncertain accuracy is revisited after all initial groups. Up to four extra unique facts per group, or three for a single table (there are only eleven unique facts from ×2 to ×12).
-- Required final challenge: eighteen mixed-recall questions covering all eleven tables, after the other groups and any follow-up questions. It appears in the same report and overall response totals as the other groups.
+- Eight initial questions per group; uncertain accuracy is clarified immediately with more questions from the same group before moving on. Up to four extra unique facts per group, or three for a single table (there are only eleven unique facts from ×2 to ×12).
+- Required final challenge: eighteen mixed-recall questions covering all eleven tables, after all other groups and their immediate follow-up questions. It appears in the same report and overall response totals as the other groups.
 - Interrupted displays and repeated introductions are outside the scored budget; they are recorded separately where applicable.
 - No repeated-fact retests or fast-track awards. Within a group, a reversed fact is the same fact.
 - A computed maximum of 102 counted questions (98 scored), including every extra and mixed recall; 78 counted (74 scored) when initial evidence is clear.

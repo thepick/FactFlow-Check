@@ -850,7 +850,7 @@
     }
 
     function renderBandTrack() {
-      el.bandTrack.textContent = appState.session ? (appState.session.phase==='warmup'?'Unscored introduction':BANDS[appState.session.currentBandIndex].label) : '';
+      el.bandTrack.textContent = appState.session ? (appState.session.phase==='warmup'?'Unscored introduction':BANDS[appState.session.currentBandIndex].label+(appState.session.blockHadExtras?' · A few more questions':'')) : '';
     }
 
     function clearAnswerTimers() {
@@ -971,17 +971,22 @@
       if(s.phase==='warmup') {s.nextBlock={index:0,extra:false};showBreak('Introduction complete','Ready to assess your multiplication facts.');return;}
       var band=BANDS[s.currentBandIndex],answers=getCurrentBandAnswers();
       var verdict=evaluateBandAnswers(answers,s.blockHadExtras,band);
-      if(verdict==='extra') {if(s.pendingExtras.indexOf(s.currentBandIndex)<0)s.pendingExtras.push(s.currentBandIndex);verdict='incomplete';}
+      var needsExtra=verdict==='extra';
+      if(needsExtra)verdict='incomplete';
       s.bandResults=s.bandResults.filter(function(r){return r.bandId!==band.id;});
       s.bandResults.push(makeBandSummary(band,answers,verdict));
       var next=null;
-      if(s.stage==='initial'&&s.currentBandIndex<6)next={index:s.currentBandIndex+1,extra:false};
-      else if(s.pendingExtras.length){s.stage='extras';next={index:s.pendingExtras.shift(),extra:true};}
-      else if(band.id!=='H'){s.stage='mixed';next={index:7,extra:false};}
+      if(needsExtra)next={index:s.currentBandIndex,extra:true};
+      // Preserve outstanding follow-ups when resuming a check saved by the older flow.
+      else if(s.pendingExtras.length)next={index:s.pendingExtras.shift(),extra:true};
+      else {
+        var index=BANDS.findIndex(function(group){return !s.bandResults.some(function(result){return result.bandId===group.id;});});
+        if(index>=0)next={index:index,extra:false};
+      }
       if(!next){finishAssessment('Completed the selected fact groups.');return;}
       s.nextBlock=next;
       s.needsTeacherCheck=false;
-      showBreak('Section complete','Next: '+BANDS[next.index].label+'.');
+      showBreak(next.extra?'A few more questions':'Section complete',next.extra?BANDS[next.index].label+': '+BANDS[next.index].extraSize+' new questions to clarify this group.':'Next: '+BANDS[next.index].label+'.');
     }
 
     function hasQuestionBudget(count) {var s=appState.session;return !!s&&s.maxQuestions-s.questionResults.length>=count;}
