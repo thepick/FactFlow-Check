@@ -1,123 +1,41 @@
-# FactFlow Check — Teacher Setup Guide
+# FactFlow Check — setup and upgrade
 
-## One-time setup (about 5 minutes per teacher)
+## Upgrade existing classes
 
-### Step 1: Create a Google Sheet
+1. Open each existing class receiver in Google Apps Script.
+2. Replace its code with the complete `factflow-apps-script.gs` from this version. This is the shared receiver for assessment and practice; do not add a second copy alongside the existing functions.
+3. Verify the class-to-spreadsheet mapping in `CLASS_SPREADSHEET_IDS`. The receiver opens those explicit spreadsheet IDs, not whichever sheet happens to contain the script. The deploying Google account needs access to each target sheet it serves.
+4. Use **Deploy → Manage deployments → Edit → New version → Deploy**, preserving the existing Web App URL. Run as yourself with access set to Anyone.
+5. Publish the updated Check app after the receiver. The older Check client is supported through its `classCode` field; regular FactFlow practice submissions retain their existing response format.
+6. Complete a supervised test and confirm **Results sent**, the class's Check row, and the matching Raw Data assessment ID. A new app against an old receiver keeps its result pending until the receiver is upgraded.
 
-1. Go to [sheets.google.com](https://sheets.google.com)
-2. Click **+ Blank spreadsheet**
-3. Title it "FactFlow Results" (or anything you like)
+Existing rows and practice tabs are preserved. New metadata is appended to the right of the assessment sheets: Raw Data columns O–P hold the assessment ID and full JSON evidence; Check columns K–N hold the assessment ID, incomplete bands, unassessed bands, and stopping reason. Legacy Summary is renamed Check when appropriate. Existing legacy column labels may still say Developing; new assessments leave that field as None identified unless a band actually needs practice.
 
-### Step 2: Add the Apps Script
+Do not test delivery by repeatedly submitting real student data. Use a clearly identified test student and verify the class destination before classroom use.
 
-1. In your Google Sheet, go to **Extensions → Apps Script**
-2. Delete any starter code that appears
-3. Copy the **entire contents** of `factflow-apps-script.gs` (provided in this folder)
-4. Paste it into the Apps Script editor
-5. Click the save icon (💾) or press **Ctrl+S**
-6. Name the project "FactFlow Receiver" when prompted
+## Add a class
 
-### Step 3: Deploy as a Web App
+1. Create a Google Sheet and copy its spreadsheet ID from its URL.
+2. Add the lower-case class key and spreadsheet ID to `CLASS_SPREADSHEET_IDS` in the receiver. Update `ALLOWED_CLASS_CODES` and the diagnostic list in `getAllowedSpreadsheetIds` too.
+3. Deploy the receiver as a Web App using the V8 runtime, executing as the owner, with access set to Anyone.
+4. Add an entry to `TEACHERS` in Check's `index.html`:
 
-1. In the Apps Script editor, click **Deploy → New Deployment**
-2. Click the gear icon ⚙️ next to "Select type" and choose **Web app**
-3. Set these values:
-   - **Description:** `FactFlow Check receiver`
-   - **Execute as:** `Me` (your Google account)
-   - **Who has access:** `Anyone`
-4. Click **Deploy**
-5. Click **Authorize access** (Google will ask — safe, only accesses your Sheet)
-6. **Copy the URL** that appears. It looks like:
-   ```
-   https://script.google.com/macros/s/AKfycbyx.../exec
-   ```
-7. Click **Done**
+```js
+'IP5/9': {
+  name: 'Your class display name',
+  spreadsheetId: 'YOUR_GOOGLE_SPREADSHEET_ID',
+  url: 'https://script.google.com/macros/s/YOUR_DEPLOYMENT/exec'
+}
+```
 
-### Step 4: Add your URL to the TEACHERS map
+5. Share `https://ffc.mtomlinson.ca/?t=IP5/9`, replacing the class key as appropriate. An omitted route uses DEFAULT_TEACHER_KEY; an explicitly invalid or empty route is rejected.
 
-1. Give your deployment URL to the person who maintains the `index.html` file
-2. They will add an entry to the `TEACHERS` object near the top of the `<script>` section:
-   ```js
-   'IP5/9': {
-     name: 'Ajarn Michael — IP5/9',
-     url: 'https://script.google.com/macros/s/.../exec'
-   }
-   ```
-3. Your teacher key (e.g. `IP5/9`) becomes the link your students use
+The two apps can use the same receiver and spreadsheet while retaining separate assessment and practice tabs. No assessment is imported into practice, and no practice record is used as evidence in Check.
 
-### Step 5: Share your link and test
+## Delivery recovery
 
-1. Your class link is `ffcbeta.mtomlinson.ca/?t=YOUR_KEY`
-2. Open the link, enter a student name and a valid teacher code, complete a check
-3. On the result screen, click **Send Results**
-4. Open your Google Sheet — you should see:
-   - **Raw Data** sheet (hidden): every submission, timestamped
-   - **Summary** sheet (visible): one row per student, alphabetical, showing only the latest result
+Results save locally before sending. Failed or timed-out requests remain pending; Retry sending reuses the assessment ID. The receiver returns success only after writing and flushing the result, with the assessment ID and spreadsheet ID in its receipt. Repeated attempts repair incomplete summary writes without adding another raw record, and an older result cannot replace a newer summary.
 
----
+Reloading reopens a pending result. Teacher Tools can reopen other saved results. Copy result is a manual fallback; it does not confirm delivery. Pending results prevent Clear All Results. Browser storage must remain available: clearing browser data can erase local unsent results.
 
-## Multi-teacher setup
-
-A single hosted app at `ffcbeta.mtomlinson.ca` serves multiple teachers. Each teacher:
-
-1. Creates their own Google Sheet and deploys their own Apps Script (Steps 1–3 above)
-2. Gets an entry in the `TEACHERS` object in `index.html`
-3. Shares their unique link (`?t=KEY`) with their class
-
-| Teacher | Key | Link |
-|---------|-----|------|
-| Ajarn Michael | `IP5/9` | `ffcbeta.mtomlinson.ca/?t=IP5/9` |
-| Ajarn Jordan | `IP5/8` | `ffcbeta.mtomlinson.ca/?t=IP5/8` |
-
-The `DEFAULT_TEACHER_KEY` at the top of the script determines which teacher's sheet is used when no `?t=` parameter is present.
-
----
-
-## When you update the Apps Script
-
-If you edit the Apps Script later and want to push changes without changing your URL:
-
-1. Click **Deploy → Manage deployments**
-2. Find your Web App deployment in the list, click the **pencil/edit icon** ✏️
-3. Under **Version**, select **New version**
-4. Click **Deploy**
-
-This pushes your code changes to the **same URL** — no need to update the TEACHERS map in `index.html` and no need to share a new link with students.
-
-**⚠ Do NOT use Deploy → New Deployment** unless you want a fresh URL (e.g., for a brand-new sheet). New Deployment creates a new URL and the old one stops working.
-
----
-
-## How it works
-
-| Student clicks... | What happens |
-|---|---|
-| **Send Results** | Posts their result to their teacher's Sheet. Row appears in Summary instantly. |
-| (offline / server error) | Falls back to copying results to clipboard with a toast message. |
-
-## Sheet structure
-
-**Raw Data** (hidden — full chronological log):
-- Timestamp, Student, Code, Assessment, Verified, Developing, Accuracy %, Fluent, Slow, Wrong, Timeout, Questions, Missed Facts, Duration sec
-
-**Summary** (what you look at):
-- Student, Date, Code, Verified, Developing, Accuracy %, Fluent, Slow, Missed, Facts to Review
-- One row per student
-- Automatically sorted A–Z
-- Each new submission updates that student's row in place
-
----
-
-## Troubleshooting
-
-**"Could not reach server" message:**
-Check that the student's device has internet. If they're offline, results are copied to clipboard — they can paste into an email later.
-
-**"Server error" message:**
-The Apps Script may have a bug. Go to Extensions → Apps Script in your Sheet, click **Executions** in the left sidebar, and look for errors. Redeploy after fixing.
-
-**Duplicate entries for the same student:**
-Name normalization handles case and spacing, but not typos (e.g., "Ben" vs "Bne"). Remind the student to correct their spelling — the name is remembered on their device for next time.
-
-**Data not appearing in your sheet:**
-Check that the Apps Script is deployed (Deploy → Manage deployments — you should see an active Web App). If missing, follow Step 3 above. Also verify the `?t=` parameter in the student's link matches your TEACHERS key exactly (e.g., `?t=IP5/8`, not `?t=5/8`).
+Run `node test.cjs` before publishing. These local checks mock Google services; a deployment smoke test is still needed after the receiver upgrade.
