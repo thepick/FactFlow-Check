@@ -210,7 +210,7 @@
           <input id="teacherCode" type="text" maxlength="24" autocomplete="off" placeholder="Example: SAMPLE-00" style="letter-spacing:0.05em;" oninput="this.value = this.value.toUpperCase();">
         </div>
         <div class="error" id="entryError"></div>
-        <button class="btn" type="button" id="beginBtn">Begin Check</button>
+        <button class="btn" type="button" id="beginBtn" disabled>Begin Check</button>
         <p class="muted small center">Each student can use this code once per assessment on this device.</p>
         <div class="notice" id="recoveryNotice" hidden><p id="recoveryText"></p><button class="btn secondary" id="resumeSessionBtn" type="button">Teacher: resume saved check</button></div>
       </div>
@@ -391,7 +391,7 @@
   </div>
   <div class="toast" id="toast" aria-live="polite"></div>
 
-  <script src="assessment.js"></script>
+  <script src="assessment.js?v=3.0.0-preview"></script>
   <script>
   /* ╔══════════════════════════════════════════════════════════════╗
      ║              FACTFLOW CHECK — TEACHER SETUP               ║
@@ -1470,7 +1470,8 @@
       renderConfig();
       renderHistory();
       bindEvents();
-      if (routeError) { showError(routeError); el.beginBtn.disabled = true; }
+      el.beginBtn.disabled = !!routeError;
+      if (routeError) { showError(routeError); }
       var pending = appState.results.filter(function (result) { return result.submissionStatus === 'pending'; });
       if (pending.length && !routeError) {
         appState.latestResult = pending[0];
