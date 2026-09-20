@@ -1,41 +1,21 @@
-# FactFlow Check — setup and upgrade
+# FactFlow Check 3.0 setup
 
-## Upgrade existing classes
+Version 3.0 sends completed assessments to the existing class Google Sheets and retains local copies. The separate /preview/ page remains local-only. Live progress and attempt locks use separate storage keys, so pilot sessions cannot block a live check.
 
-1. Open each existing class receiver in Google Apps Script.
-2. Replace its code with the complete `factflow-apps-script.gs` from this version. This is the shared receiver for assessment and practice; do not add a second copy alongside the existing functions.
-3. Verify the class-to-spreadsheet mapping in `CLASS_SPREADSHEET_IDS`. The receiver opens those explicit spreadsheet IDs, not whichever sheet happens to contain the script. The deploying Google account needs access to each target sheet it serves.
-4. Use **Deploy → Manage deployments → Edit → New version → Deploy**, preserving the existing Web App URL. Run as yourself with access set to Anyone.
-5. Publish the updated Check app after the receiver. The older Check client is supported through its `classCode` field; regular FactFlow practice submissions retain their existing response format.
-6. Complete a supervised test and confirm **Results sent**, the class's Check row, and the matching Raw Data assessment ID. A new app against an old receiver keeps its result pending until the receiver is upgraded.
+## Run locally
 
-Existing rows and practice tabs are preserved. New metadata is appended to the right of the assessment sheets: Raw Data columns O–P hold the assessment ID and full JSON evidence; Check columns K–N hold the assessment ID, incomplete bands, unassessed bands, and stopping reason. Legacy Summary is renamed Check when appropriate. Existing legacy column labels may still say Developing; new assessments leave that field as None identified unless a band actually needs practice.
+Serve this directory with a local HTTP server, then open index.html with your class parameter, for example ?t=IP5/9. Keep assessment.js beside index.html. Teacher access requires a secure browser context (HTTPS or localhost).
 
-Do not test delivery by repeatedly submitting real student data. Use a clearly identified test student and verify the class destination before classroom use.
+## Existing class routing
 
-## Add a class
+The TEACHERS map in index.html specifies class code, spreadsheet ID and Apps Script endpoint. Missing class parameters use the documented IP5/9 default; invalid explicit parameters fail closed. Keep existing school links and routing IDs.
 
-1. Create a Google Sheet and copy its spreadsheet ID from its URL.
-2. Add the lower-case class key and spreadsheet ID to `CLASS_SPREADSHEET_IDS` in the receiver. Update `ALLOWED_CLASS_CODES` and the diagnostic list in `getAllowedSpreadsheetIds` too.
-3. Deploy the receiver as a Web App using the V8 runtime, executing as the owner, with access set to Anyone.
-4. Add an entry to `TEACHERS` in Check's `index.html`:
+## Receiver compatibility for version 3.0
 
-```js
-'IP5/9': {
-  name: 'Your class display name',
-  spreadsheetId: 'YOUR_GOOGLE_SPREADSHEET_ID',
-  url: 'https://script.google.com/macros/s/YOUR_DEPLOYMENT/exec'
-}
-```
+The updated factflow-apps-script.gs and FactFlow's factflow-practice-apps-script.gs are identical. Install either complete file in each existing Apps Script project, save, then update the existing deployment to a new version. Keep its endpoint and access settings unchanged. This step is not necessary to use the local-only preview.
 
-5. Share `https://ffc.mtomlinson.ca/?t=IP5/9`, replacing the class key as appropriate. An omitted route uses DEFAULT_TEACHER_KEY; an explicitly invalid or empty route is rejected.
+The new receiver supports schema 2 and schema 3. Schema 3 records are separated into Check v3 and Check Raw v3; existing Check, Raw Data, FactFlow Practice and Practice Raw Data remain intact. Literal-cell handling, strict spreadsheet routing, assessment IDs, deduplication, stale-result protection and exact acknowledgments are retained. Complete JSON evidence is stored in the hidden raw tab.
 
-The two apps can use the same receiver and spreadsheet while retaining separate assessment and practice tabs. No assessment is imported into practice, and no practice record is used as evidence in Check.
+Preview-only results are not queued for automatic later submission. Export them during the pilot. Promoting the app does not retroactively change or rescore those results.
 
-## Delivery recovery
-
-Results save locally before sending. Failed or timed-out requests remain pending; Retry sending reuses the assessment ID. The receiver returns success only after writing and flushing the result, with the assessment ID and spreadsheet ID in its receipt. Repeated attempts repair incomplete summary writes without adding another raw record, and an older result cannot replace a newer summary.
-
-Reloading reopens a pending result. Teacher Tools can reopen other saved results. Copy result is a manual fallback; it does not confirm delivery. Pending results prevent Clear All Results. Browser storage must remain available: clearing browser data can erase local unsent results.
-
-Run `node test.cjs` before publishing. These local checks mock Google services; a deployment smoke test is still needed after the receiver upgrade.
+Run node test.cjs before deployment. Use PILOT.md to review classroom observations and future releases. The existing teacher passphrase remains unchanged; classroom codes and passphrase protection are not strong authentication.
