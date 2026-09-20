@@ -1,4 +1,4 @@
-# FactFlow Check 3.0 preview
+# FactFlow Quiz 3.0 preview
 
 An independent, supervised snapshot of multiplication accuracy and fluent recall. FactFlow practice remains separate. This release is a classroom pilot, not a validated diagnostic instrument or a permanent student level.
 

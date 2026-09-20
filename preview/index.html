@@ -9,7 +9,7 @@
   <link rel="apple-touch-icon" sizes="152x152" href="../apple-touch-icon-152x152.png">
   <link rel="apple-touch-icon" sizes="167x167" href="../apple-touch-icon-167x167.png">
   <link rel="apple-touch-icon" href="../apple-touch-icon.png">
-  <title>FactFlow Check</title>
+  <title>FactFlow Quiz</title>
   <style>
     [hidden] { display:none !important; }
     select { font:inherit; padding:12px; max-width:100%; }
@@ -185,7 +185,7 @@
       <div class="brand">
         <div class="logo" aria-hidden="true"><img src="../app-logo.png" alt=""></div>
         <div>
-          <h1>FactFlow Check <span class="subtitle">Mastery snapshot</span></h1>
+          <h1>FactFlow Quiz <span class="subtitle">Mastery snapshot</span></h1>
         </div>
       </div>
       <div class="header-actions">
@@ -196,7 +196,7 @@
     <section class="screen active" id="entryScreen">
       <div class="panel entry-card grid">
         <div class="center grid">
-          <h2>Welcome to FactFlow Check</h2>
+          <h2>Welcome to FactFlow Quiz</h2>
           <p class="muted">Answer each fact as quickly and accurately as you can. When you finish, your result will appear on the screen.</p>
           <div><span class="code-chip" id="studentCodeHint">Code required</span></div>
         </div>
@@ -210,9 +210,9 @@
           <input id="teacherCode" type="text" maxlength="24" autocomplete="off" placeholder="Example: SAMPLE-00" style="letter-spacing:0.05em;" oninput="this.value = this.value.toUpperCase();">
         </div>
         <div class="error" id="entryError"></div>
-        <button class="btn" type="button" id="beginBtn" disabled>Begin Check</button>
+        <button class="btn" type="button" id="beginBtn" disabled>Begin Quiz</button>
         <p class="muted small center">Each student can use this code once per assessment on this device.</p>
-        <div class="notice" id="recoveryNotice" hidden><p id="recoveryText"></p><button class="btn secondary" id="resumeSessionBtn" type="button">Teacher: resume saved check</button></div>
+        <div class="notice" id="recoveryNotice" hidden><p id="recoveryText"></p><button class="btn secondary" id="resumeSessionBtn" type="button">Teacher: resume saved quiz</button></div>
       </div>
     </section>
 
@@ -267,7 +267,7 @@
 
     <section class="screen" id="completeScreen">
       <div class="panel center grid">
-        <h2>Check complete</h2>
+        <h2>Quiz complete</h2>
         <p class="muted">Please show your teacher.</p>
         <div class="notice"><strong>Raise your hand and wait quietly.</strong></div>
         <div class="row" style="justify-content:center;">
@@ -279,7 +279,7 @@
     <section class="screen" id="resultScreen">
       <div class="panel grid">
         <div class="center grid">
-          <h2>FactFlow Check Result</h2>
+          <h2>FactFlow Quiz Result</h2>
           <p class="muted" id="resultMeta">Student - Code - Date</p>
         </div>
         <div class="result-cards">
@@ -340,13 +340,13 @@
         </div>
         <div class="field">
           <label for="assessmentName">Assessment name</label>
-          <input id="assessmentName" type="text" maxlength="60" placeholder="Example: Term 1 Multiplication Check">
+          <input id="assessmentName" type="text" maxlength="60" placeholder="Example: Term 1 Multiplication Quiz">
         </div>
         <div class="field"><label for="assessmentMode">Response conditions for the next student</label>
           <select id="assessmentMode"><option value="standard">Standard: 10 seconds per question; fluent under 4 seconds</option><option value="extended">Extended: 20 seconds; accuracy only</option><option value="untimed">Untimed: accuracy only</option></select></div>
         <div class="field"><label for="inputMethod">Answer method</label><select id="inputMethod"><option value="student">Student keypad or keyboard</option><option value="teacher">Teacher records spoken answers (accuracy only)</option></select></div>
         <div class="field"><label><input type="checkbox" id="hideTimer"> Hide visual countdown</label></div>
-        <p class="muted small">These settings are saved on this device. Extended, untimed, and teacher-recorded checks cannot earn standard fluency verdicts. Only change settings before a check.</p>
+        <p class="muted small">These settings are saved on this device. Extended, untimed, and teacher-recorded quizzes cannot earn standard fluency verdicts. Only change settings before a quiz.</p>
         <div class="notice">
           <p class="small muted">This preview keeps results locally. Download each completed result before clearing this browser. Existing classroom results are preserved separately.</p>
         </div>
@@ -394,7 +394,7 @@
   <script src="assessment.js?v=3.0.0-final-challenge"></script>
   <script>
   /* ╔══════════════════════════════════════════════════════════════╗
-     ║              FACTFLOW CHECK — TEACHER SETUP               ║
+     ║              FACTFLOW QUIZ — TEACHER SETUP               ║
      ║                                                          ║
      ║  Each teacher needs their own Google Sheet + Apps Script. ║
      ║  Add an entry to TEACHERS below with a short key, the     ║
@@ -583,16 +583,16 @@
     function loadConfig() {
       var cfg = loadJson(CONFIG_KEY, null);
       if (!cfg || typeof cfg !== 'object') {
-        cfg = { assessmentName: 'Multiplication Mastery Check', customCode: '', updatedAt: new Date().toISOString() };
+        cfg = { assessmentName: 'Multiplication Mastery Quiz', customCode: '', updatedAt: new Date().toISOString() };
       }
-      if (!cfg.assessmentName) cfg.assessmentName = 'Multiplication Mastery Check';
+      if (!cfg.assessmentName || cfg.assessmentName === 'Multiplication Mastery Check') cfg.assessmentName = 'Multiplication Mastery Quiz';
       if (!cfg.customCode) cfg.customCode = '';
       cfg.conditions = normalizeConditions(cfg.conditions);
       return cfg;
     }
 
     function saveConfig() {
-      appState.config.assessmentName = String(el.assessmentName.value || 'Multiplication Mastery Check').trim();
+      appState.config.assessmentName = String(el.assessmentName.value || 'Multiplication Mastery Quiz').trim();
       appState.config.customCode = normalizeCode(el.customCode.value || '');
       if (isReservedExampleCode(appState.config.customCode)) {
         appState.config.customCode = '';
@@ -697,7 +697,7 @@
       el.teacherBtn.className = 'btn warning';
       if (targetScreen === 'resumeSession') { restoreSession(); return; }
       if (targetScreen === 'continueAssessment') { continueAssessment(true); return; }
-      if (targetScreen === 'endAssessment') { finishAssessment('Teacher ended the check.'); return; }
+      if (targetScreen === 'endAssessment') { finishAssessment('Teacher ended the quiz.'); return; }
       if (targetScreen === 'resultScreen' && appState.latestResult) {
         renderResult(appState.latestResult);
         showScreen('resultScreen');
@@ -732,7 +732,7 @@
         resetTeacherAutoLock();
         if (targetScreen === 'resumeSession') { restoreSession(); return; }
         if (targetScreen === 'continueAssessment') { continueAssessment(true); return; }
-        if (targetScreen === 'endAssessment') { finishAssessment('Teacher ended the check.'); return; }
+        if (targetScreen === 'endAssessment') { finishAssessment('Teacher ended the quiz.'); return; }
         if (targetScreen === 'resultScreen') {
           if (appState.latestResult) { renderResult(appState.latestResult); showScreen('resultScreen'); }
         } else {
@@ -803,7 +803,7 @@
       if (!studentName) { showError('Please enter your name.'); el.studentName.focus(); return; }
       var code = normalizeCode(el.teacherCode.value);
       if (!isCodeAccepted(code)) { showError('Please check the teacher code.'); return; }
-      if (loadJson(SESSION_KEY,null)) { showError('Resume or end the saved check before starting another.'); return; }
+      if (loadJson(SESSION_KEY,null)) { showError('Resume or end the saved quiz before starting another.'); return; }
       appState.sessionId = null;
       var key = getAttemptKey(code);
       var existing = appState.attempts[key];
@@ -1093,7 +1093,7 @@
     function makeRecommendation(bands,missedFacts) {
       var lines=['A sampled snapshot of multiplication facts, not a permanent level.'];
       ['pass','slow','accuracy_only','fail','incomplete','not_assessed'].forEach(function(v){var labels=bands.filter(function(b){return b.verdict===v;}).map(function(b){return b.label;});if(labels.length)lines.push(verdictLabel(v)+': '+labels.join('; ')+'.');});
-      if(bands.every(function(b){return b.verdict==='pass';}))lines.push('Demonstrated the assessed multiplication facts through 12. This check does not assess beyond that range.');
+      if(bands.every(function(b){return b.verdict==='pass';}))lines.push('Demonstrated the assessed multiplication facts through 12. This quiz does not assess beyond that range.');
       if(missedFacts.length)lines.push('Incorrect responses: '+missedFacts.join(', ')+'.');
       return lines.join(' ');
     }
@@ -1149,7 +1149,7 @@
       var r = appState.latestResult;
       if (!r) return;
       var lines = [];
-      lines.push('FactFlow Check Result');
+      lines.push('FactFlow Quiz Result');
       lines.push('Student: ' + r.studentName);
       lines.push('Assessment: ' + r.assessmentName);
       lines.push('Code: ' + r.code);
@@ -1203,9 +1203,9 @@
     }
 
     function clearSavedResults() {
-      if (appState.session||loadJson(SESSION_KEY,null)){showToast('Resume or end the active check first.');return;}
+      if (appState.session||loadJson(SESSION_KEY,null)){showToast('Resume or end the active quiz first.');return;}
       if (hasPendingResults()) { showToast('Send all pending results before clearing them.'); return; }
-      if (!window.confirm('Clear all saved FactFlow Check results and attempt locks on this device?')) return;
+      if (!window.confirm('Clear all saved FactFlow Quiz results and attempt locks on this device?')) return;
       appState.results = [];
       appState.attempts = {};
       saveJson(RESULTS_KEY, appState.results);
@@ -1486,21 +1486,21 @@
         delete s.pendingQuestion;
       }
       s.needsTeacherCheck=true;
-      showBreak('Check paused',s.replacementUnavailable?'An interrupted question could not be replaced with a new fact. This group may have incomplete evidence. Ask your teacher to continue.':'No answer was scored for the interruption. Ask your teacher to resume with a replacement question.');
+      showBreak('Quiz paused',s.replacementUnavailable?'An interrupted question could not be replaced with a new fact. This group may have incomplete evidence. Ask your teacher to continue.':'No answer was scored for the interruption. Ask your teacher to resume with a replacement question.');
     }
     function restoreSession() {
       var saved=loadJson(SESSION_KEY,null);
-      if(!saved||saved.appVersion!==APP_VERSION||saved.teacherKey!==activeTeacher.key){showError('This saved check cannot be resumed in this version or class.');return;}
+      if(!saved||saved.appVersion!==APP_VERSION||saved.teacherKey!==activeTeacher.key){showError('This saved quiz cannot be resumed in this version or class.');return;}
       if(!['questionResults','bandResults','blockQueue','pendingExtras','breaks','interruptions'].every(function(k){return Array.isArray(saved[k]);})||typeof saved.id!=='string'||!Number.isInteger(saved.currentBandIndex)||saved.currentBandIndex< -1||saved.currentBandIndex>7){showError('The saved progress is damaged. Keep this browser data and ask for help recovering it.');return;}
       saved.conditions=normalizeConditions(saved.conditions);saved.maxQuestions=FactGroups.budget();
       appState.session=saved;appState.finishing=false;el.testStudentLabel.textContent=saved.studentName;el.recoveryNotice.hidden=true;
       if(saved.pendingQuestion){saved.paused=false;interruptQuestion('Recovered after refresh');}
-      else {saved.needsTeacherCheck=false;showBreak('Resume saved check','Started '+formatDate(saved.startedAt)+'. Continue only as part of the same supervised assessment; dates and breaks are recorded.');}
+      else {saved.needsTeacherCheck=false;showBreak('Resume saved quiz','Started '+formatDate(saved.startedAt)+'. Continue only as part of the same supervised assessment; dates and breaks are recorded.');}
     }
     function downloadResult() {
       var r=appState.latestResult;if(!r)return;
       var blob=new Blob([JSON.stringify(r,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),link=document.createElement('a');
-      link.href=url;link.download='FactFlow-Check-'+r.assessmentId+'.json';link.click();
+      link.href=url;link.download='FactFlow-Quiz-'+r.assessmentId+'.json';link.click();
       window.setTimeout(function(){URL.revokeObjectURL(url);},1000);
     }
 
@@ -1525,7 +1525,7 @@
       var saved=loadJson(SESSION_KEY,null);
       if(saved&&!routeError){
         if(saved.completedResult){appState.latestResult=saved.completedResult;if(!appState.results.some(function(r){return r.assessmentId===saved.id;}))appState.results.unshift(saved.completedResult);saveResults();if(appState.resultsSaved)saveJson(SESSION_KEY,null);renderResult(saved.completedResult);showScreen('resultScreen');}
-        else if(!appState.results.some(function(r){return r.assessmentId===saved.id;})){el.recoveryNotice.hidden=false;el.recoveryText.textContent='A check for '+saved.studentName+' is saved. Your teacher can resume it.';}
+        else if(!appState.results.some(function(r){return r.assessmentId===saved.id;})){el.recoveryNotice.hidden=false;el.recoveryText.textContent='A quiz for '+saved.studentName+' is saved. Your teacher can resume it.';}
         else saveJson(SESSION_KEY,null);
       }
 

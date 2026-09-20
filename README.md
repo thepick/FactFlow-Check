@@ -1,4 +1,4 @@
-# FactFlow Check 3.0
+# FactFlow Quiz 3.0
 
 An independent, supervised snapshot of multiplication accuracy and fluent recall. FactFlow practice remains separate. This is a sampled classroom assessment, not a validated diagnostic instrument or a permanent student level.
 
@@ -36,7 +36,7 @@ These are operational criteria, not population norms. Eight sampled questions do
 
 ## Classroom workflow
 
-1. Open FactFlow Check using your existing class link.
+1. Open FactFlow Quiz using your existing class link.
 2. In Teacher Tools, choose response conditions, answer method and visual countdown. Save & Exit. Settings are local to this browser/device.
 3. Enter the student's name and teacher code. Complete or repeat the introduction, then continue through blank section screens.
 4. Wait ten seconds between sections or select Continue to start sooner. Difficulty does not block later groups.
@@ -69,3 +69,5 @@ Each of the eight levels contributes 12.5%, including the final challenge. Avera
 Only completed routes receive a grade. A level ended early for clear difficulty still counts; unfinished assessments remain ungraded. Extended, untimed and teacher-recorded checks show accuracy only, with combined grade and standard fluency blank. Numeric fractions display rounded to the nearest whole percent. James's supplied example displays as 58% (58.434...% before rounding) with equal level weights, versus the earlier provisional 61% pooled estimate.
 
 After updating both receivers, run refreshTeacherGrades in the Apps Script editor to fill existing IP5/8 and IP5/9 summary grade columns from saved schema-3 evidence matched by assessment ID. It updates only these four columns and their formatting. Raw evidence, legacy results and student verdicts remain unchanged. New submissions and retries calculate the grade automatically. The helper is not exposed as a public receiver action. Existing spreadsheet sharing controls access to grades.
+
+The public name is FactFlow Quiz. Existing URLs, repository names, spreadsheet tab names, storage keys and receiver identifiers are retained for compatibility, so saved results, active sessions and class links continue to work. New downloads use the FactFlow-Quiz filename prefix.

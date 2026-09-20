@@ -1,4 +1,4 @@
-# FactFlow Check 3.0 setup
+# FactFlow Quiz 3.0 setup
 
 The current branch is a preview. It saves locally and provides Copy result and Download result; it does not submit to Google Sheets. The existing production app and receivers continue to operate separately.
 
