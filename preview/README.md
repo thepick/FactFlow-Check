@@ -12,8 +12,8 @@ An independent, supervised snapshot of multiplication accuracy and fluent recall
 - Interrupted displays and repeated introductions are outside the scored budget; they are recorded separately where applicable.
 - No repeated-fact retests or fast-track awards. Within a group, a reversed fact is the same fact.
 - A computed maximum of 102 counted questions (98 scored), including every extra and mixed recall; 78 counted (74 scored) when initial evidence is clear. Without mixed recall the maximum is 84 counted.
-- Every section ends at a blank break screen. Two successive groups showing difficulty or incomplete evidence require a teacher check-in. The teacher can continue or finish with honest coverage labels.
-- No total-time failure. After 400 seconds of active response time, the section screen suggests a break. The per-question deadline still applies.
+- Between-section screens automatically continue after a visible ten-second countdown. Continue starts the next section immediately. No question is visible during the countdown; there is no end-check button on that screen.
+- No total-time failure. The per-question deadline still applies. An interrupted question still requires teacher-authorised recovery; automatic section transitions never start questions while the page is hidden.
 
 ## Timing and evidence
 
@@ -39,12 +39,12 @@ These are operational criteria, not population norms. Eight sampled questions do
 1. Open the preview using your class link. The standard classroom page remains version 2.8.0.
 2. In Teacher Tools, choose response conditions, answer method, visual countdown, and whether to include mixed recall. Save & Exit. Settings are local to this browser/device.
 3. Enter the student's name and teacher code. Complete or repeat the introduction, then continue through blank section screens.
-4. At teacher check-ins, decide whether to continue, rest, or end. Check does not assume unassessed groups are weak.
+4. Wait ten seconds between sections or select Continue to start sooner. Difficulty does not block later groups.
 5. Download the JSON result and/or copy the readable summary. Preview results are saved locally only; no Google requests are made by the preview.
 6. After a refresh, use Teacher: resume saved check. A visible interrupted fact is replaced with an unused fact; if none is available, evidence remains incomplete. A teacher must authorise resumption. Dates and interruptions are retained. Prefer the same supervised sitting; cross-day resumes are explicitly dated.
 7. Clearing browser data removes local results and progress. Export results before doing so. A persistent warning appears if local storage fails.
 
-The existing teacher passphrase and code workflow are retained; they are classroom controls, not secure authentication. Do not use another student's name to resume a saved check. Complete or end it first.
+Automatic class codes use a date/class-seeded mixed schedule and four digits, replacing the ordered word rotation. They change each four-hour Bangkok window and agree across devices in the same class. They are reproducible classroom codes, not secret random passwords. Custom codes remain device-local. The teacher passphrase is retained; they are classroom controls, not secure authentication. Do not use another student's name to resume a saved check. Complete it first.
 
 ## Results and compatibility
 
