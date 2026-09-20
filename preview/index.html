@@ -1,0 +1,1499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="../favicon-48x48.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="../apple-touch-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="167x167" href="../apple-touch-icon-167x167.png">
+  <link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <title>FactFlow Check</title>
+  <style>
+    [hidden] { display:none !important; }
+    select { font:inherit; padding:12px; max-width:100%; }
+    :root {
+      --font-body: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --bg: #f7f6f2;
+      --surface: #fbfaf7;
+      --surface-2: #f0ede8;
+      --border: #d5d0c8;
+      --text: #27231d;
+      --muted: #68635d;
+      --faint: #969088;
+      --primary: #3b6fb6;
+      --primary-dark: #27538f;
+      --primary-soft: #d9e6f8;
+      --success: #437a22;
+      --success-soft: #dcebd2;
+      --warning: #b77900;
+      --warning-soft: #f0e1bf;
+      --danger: #a12c7b;
+      --danger-soft: #ead4e1;
+      --shadow: 0 4px 14px rgba(30, 25, 15, 0.08);
+      --radius: 16px;
+    }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: none; text-size-adjust: none; }
+    body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--text); font-family: var(--font-body); line-height: 1.45; }
+    button, input, select, textarea { font: inherit; color: inherit; }
+    button { cursor: pointer; }
+    button:disabled { cursor: not-allowed; opacity: 0.45; }
+    input, select { width: 100%; min-height: 44px; border: 1px solid var(--border); background: var(--surface); border-radius: 10px; padding: 0.65rem 0.8rem; }
+    h1, h2, h3, p { margin: 0; }
+    .app { max-width: 920px; margin: 0 auto; padding: 16px; display: grid; gap: 14px; }
+    .header { border-radius: var(--radius); padding: 14px 16px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; box-shadow: var(--shadow); display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .logo { width: 42px; height: 42px; display: block; flex: 0 0 42px; }
+    .logo img { display: block; width: 100%; height: 100%; object-fit: contain; }
+    .brand h1 { font-size: 1.25rem; line-height: 1.05; }
+    .brand .subtitle { display: block; font-size: 0.78rem; font-weight: 500; opacity: 0.86; margin-top: 2px; }
+    .header-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+    .screen { display: none; }
+    .screen.active { display: block; }
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; }
+    .grid { display: grid; gap: 14px; }
+    .app > *, .grid > * { min-width: 0; }
+    #bandSummary { overflow-x: auto; }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .field { display: grid; gap: 5px; }
+    .field label { color: var(--muted); font-weight: 700; font-size: 0.78rem; letter-spacing: 0.04em; text-transform: uppercase; }
+    .muted { color: var(--muted); font-size: 0.94rem; }
+    .small { font-size: 0.84rem; }
+    .center { text-align: center; }
+    .btn { border: 0; border-radius: 10px; padding: 0.72rem 1rem; background: var(--primary); color: white; font-weight: 800; min-height: 44px; }
+    .btn:hover { background: var(--primary-dark); }
+    .btn.secondary { background: transparent; color: var(--text); border: 1px solid var(--border); }
+    .btn.secondary:hover { background: var(--surface-2); }
+    .btn.warning { background: var(--warning); color: #1e1605; }
+    .btn.danger { background: var(--danger); }
+    .notice { border-radius: 12px; padding: 12px; background: var(--primary-soft); color: var(--text); border: 1px solid color-mix(in srgb, var(--primary) 35%, transparent); }
+    .error { display: none; border-radius: 12px; padding: 10px 12px; background: var(--danger-soft); color: var(--danger); font-weight: 800; }
+    .error.show { display: block; }
+    .entry-card { max-width: 520px; margin: 0 auto; }
+    .code-chip { display: inline-flex; align-items: center; justify-content: center; min-height: 34px; padding: 0.2rem 0.75rem; border-radius: 999px; font-weight: 900; letter-spacing: 0.08em; color: var(--primary); background: var(--primary-soft); border: 1px solid color-mix(in srgb, var(--primary) 35%, transparent); }
+    .test-meta { display: flex; justify-content: space-between; gap: 10px; align-items: center; color: var(--muted); font-size: 0.82rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; }
+    .band-track { display: flex; justify-content: center; gap: 5px; margin: 10px 0 6px; }
+    .band-dot { width: 11px; height: 11px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); }
+    .band-dot.passed { background: var(--success); border-color: var(--success); }
+    .band-dot.current { background: var(--primary); border-color: var(--primary); transform: scale(1.28); }
+    .band-dot.failed { background: var(--danger); border-color: var(--danger); }
+    .problem-area { text-align: center; padding: 16px 0 10px; }
+    .problem-text { font-size: clamp(2.6rem, 9vw, 5.2rem); font-weight: 900; letter-spacing: -0.04em; }
+    .answer-wrap { max-width: 280px; margin: 0 auto; }
+    .answer-input { text-align: center; font-size: clamp(1.7rem, 6vw, 3rem); font-weight: 900; min-height: 70px; background: var(--surface); }
+    .answer-input.good { border-color: var(--success); box-shadow: 0 0 0 8px color-mix(in srgb, var(--success) 22%, transparent); }
+    .answer-input.bad { border-color: var(--danger); box-shadow: 0 0 0 8px color-mix(in srgb, var(--danger) 20%, transparent); }
+    .answer-input.warn { border-color: var(--warning); box-shadow: 0 0 0 8px color-mix(in srgb, var(--warning) 22%, transparent); }
+    .keypad { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; max-width: 420px; margin: 14px auto 0; }
+    .key-btn { min-height: 52px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface-2); font-weight: 900; font-size: 1.12rem; user-select: none; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+    .key-btn:hover { filter: brightness(0.98); }
+    .key-btn.action { color: var(--primary); background: var(--primary-soft); font-size: 0.95rem; }
+    .timer-bar { height: 8px; border-radius: 999px; overflow: hidden; background: var(--surface-2); border: 1px solid var(--border); margin-top: 12px; }
+    .timer-fill { height: 100%; width: 100%; background: var(--primary); transform-origin: left center; transition: width 180ms linear, background 180ms linear; }
+    .timer-fill.warn { background: var(--warning); }
+    .timer-fill.danger { background: var(--danger); }
+    .status-line { min-height: 26px; text-align: center; margin-top: 10px; font-weight: 800; color: var(--muted); }
+    .status-line.good { color: var(--success); }
+    .status-line.bad { color: var(--danger); }
+    .status-line.warn { color: var(--warning); }
+    .result-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .result-card { border-radius: 14px; border: 1px solid var(--border); background: var(--surface-2); padding: 14px; text-align: center; }
+    .result-card .label { color: var(--muted); font-size: 0.76rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; }
+    .result-card .value { font-size: 1.4rem; font-weight: 900; margin-top: 3px; }
+    .result-card.verified { border-color: color-mix(in srgb, var(--success) 45%, var(--border)); background: var(--success-soft); }
+    .result-card.developing { border-color: color-mix(in srgb, var(--warning) 45%, var(--border)); background: var(--warning-soft); }
+    .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .stat { border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2); padding: 9px; text-align: center; }
+    .stat .label { color: var(--muted); font-size: 0.72rem; font-weight: 800; text-transform: uppercase; }
+    .stat .value { font-weight: 900; }
+    .tag-list { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag { border-radius: 999px; padding: 0.25rem 0.55rem; font-weight: 900; font-size: 0.78rem; background: var(--surface-2); border: 1px solid var(--border); }
+    .tag.bad { background: var(--danger-soft); color: var(--danger); border-color: color-mix(in srgb, var(--danger) 35%, var(--border)); }
+    .tag.warn { background: var(--warning-soft); color: var(--warning); border-color: color-mix(in srgb, var(--warning) 35%, var(--border)); }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    th, td { text-align: left; border-bottom: 1px solid var(--border); padding: 0.48rem 0.35rem; vertical-align: top; }
+    th { color: var(--muted); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    .history-wrap { overflow-x: auto; max-height: 420px; overflow-y: auto; border: 1px solid var(--border); border-radius: 12px; }
+    .toast { position: fixed; top: 14px; left: 50%; transform: translateX(-50%) translateY(-8px); opacity: 0; transition: opacity 180ms, transform 180ms; z-index: 10; padding: 0.65rem 1rem; border-radius: 999px; background: var(--text); color: var(--bg); font-weight: 900; box-shadow: var(--shadow); pointer-events: none; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .send-status { font-size: 0.9rem; color: var(--text); opacity: 0.8; min-height: 1.4em; }
+    .hidden { display: none !important; }
+    .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid var(--surface-2); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.6s linear infinite; vertical-align: middle; margin: auto 0; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .modal-backdrop { position: fixed; inset: 0; z-index: 20; background: rgba(0, 0, 0, 0.38); display: grid; place-items: center; padding: 16px; }
+    .modal-card { width: min(420px, 100%); background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; }
+    @media (max-width: 720px) {
+      .app { padding: 10px; }
+      .header { align-items: flex-start; }
+      .two-col, .result-cards { grid-template-columns: 1fr; }
+      .stat-row { grid-template-columns: repeat(2, 1fr); }
+      .header-actions .btn { padding: 0.55rem 0.7rem; font-size: 0.84rem; }
+      .key-btn { min-height: 48px; }
+    }
+
+    /* Countdown overlay */
+    #testScreen .panel { position: relative; overflow: hidden; }
+    .countdown-overlay {
+      display: none;
+      position: absolute;
+      inset: 0;
+      z-index: 80;
+      place-items: center;
+      pointer-events: none;
+      background: color-mix(in srgb, var(--surface) 72%, transparent);
+      backdrop-filter: blur(2px);
+    }
+    .countdown-overlay.active { display: grid; }
+    .countdown-card {
+      min-width: 140px;
+      padding: 1rem 1.35rem;
+      text-align: center;
+      border-radius: var(--radius);
+      background: var(--surface-2);
+      border: 2px solid color-mix(in srgb, var(--primary) 45%, transparent);
+      box-shadow: var(--shadow);
+    }
+    .countdown-label {
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 800;
+    }
+    .countdown-number {
+      margin-top: 0.25rem;
+      font-size: clamp(3rem, 14vw, 5.5rem);
+      line-height: 1;
+      font-weight: 900;
+      color: var(--primary);
+      letter-spacing: -0.06em;
+      animation: countdownPop 300ms ease;
+    }
+    @keyframes countdownPop {
+      0% { transform: scale(0.78); opacity: 0; }
+      70% { transform: scale(1.08); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"><img src="../app-logo.png" alt=""></div>
+        <div>
+          <h1>FactFlow Check <span class="subtitle">Mastery snapshot</span></h1>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn secondary" type="button" id="teacherBtn">Teacher</button>
+      </div>
+    </header>
+
+    <section class="screen active" id="entryScreen">
+      <div class="panel entry-card grid">
+        <div class="center grid">
+          <h2>Welcome to FactFlow Check</h2>
+          <p class="muted">Answer each fact as quickly and accurately as you can. When you finish, your result will appear on the screen.</p>
+          <div><span class="code-chip" id="studentCodeHint">Code required</span></div>
+        </div>
+        <p class="muted small center" id="teacherBadge"><strong id="teacherBadgeName"></strong></p>
+        <div class="field">
+          <label for="studentName">Your name</label>
+          <input id="studentName" type="text" maxlength="40" autocomplete="off" placeholder="First name">
+        </div>
+        <div class="field">
+          <label for="teacherCode">Teacher code</label>
+          <input id="teacherCode" type="text" maxlength="24" autocomplete="off" placeholder="Example: SAMPLE-00" style="letter-spacing:0.05em;" oninput="this.value = this.value.toUpperCase();">
+        </div>
+        <div class="error" id="entryError"></div>
+        <button class="btn" type="button" id="beginBtn">Begin Check</button>
+        <p class="muted small center">Each student can use this code once per assessment on this device.</p>
+        <div class="notice" id="recoveryNotice" hidden><p id="recoveryText"></p><button class="btn secondary" id="resumeSessionBtn" type="button">Teacher: resume saved check</button></div>
+      </div>
+    </section>
+
+    <p class="notice" role="status">Preview for classroom pilot · Results stay on this device. Copy or download them for your records.</p>
+    <p class="error show" id="sessionWarning" role="alert" hidden></p>
+    <section class="screen" id="breakScreen">
+      <div class="panel grid center"><h2 id="breakTitle" tabindex="-1">Section complete</h2><p id="breakMessage"></p>
+      <p id="conditionsLabel" class="muted"></p><p>No question is visible. Take a break if you need one.</p>
+      <div class="row" style="justify-content:center"><button class="btn" type="button" id="continueBtn">Continue</button>
+      <button class="btn secondary" type="button" id="repeatIntroBtn">Repeat introduction</button>
+      <button class="btn secondary" type="button" id="endSessionBtn">Teacher: end check</button></div></div>
+    </section>
+    <section class="screen" id="testScreen">
+      <div class="panel">
+        <div class="countdown-overlay" id="countdownOverlay" aria-live="assertive" aria-hidden="true">
+          <div class="countdown-card">
+            <div class="countdown-label" id="countdownLabel">Get ready</div>
+            <div class="countdown-number" id="countdownValue">3</div>
+          </div>
+        </div>
+        <div class="test-meta">
+          <span>Question <span id="qNumber">1</span><span id="qTotal"></span></span>
+          <span id="testStudentLabel">Student</span>
+        </div>
+        <div class="band-track" id="bandTrack" aria-hidden="true"></div>
+        <div class="timer-bar" aria-hidden="true"><div class="timer-fill" id="timerFill"></div></div>
+        <div class="problem-area" aria-live="polite">
+          <div class="problem-text" id="problemText">Ready?</div>
+        </div>
+        <p class="muted small center">Type or tap your answer, then press Enter or Submit.</p>
+        <div class="answer-wrap">
+          <input id="answerInput" class="answer-input" inputmode="none" readonly autocomplete="off" maxlength="3" placeholder="?" aria-label="Answer">
+        </div>
+        <div class="keypad" aria-label="Number keypad">
+          <button class="key-btn" type="button" data-key="1">1</button>
+          <button class="key-btn" type="button" data-key="2">2</button>
+          <button class="key-btn" type="button" data-key="3">3</button>
+          <button class="key-btn" type="button" data-key="4">4</button>
+          <button class="key-btn" type="button" data-key="5">5</button>
+          <button class="key-btn" type="button" data-key="6">6</button>
+          <button class="key-btn" type="button" data-key="7">7</button>
+          <button class="key-btn" type="button" data-key="8">8</button>
+          <button class="key-btn" type="button" data-key="9">9</button>
+          <button class="key-btn action" type="button" data-key="clear">Clear</button>
+          <button class="key-btn" type="button" data-key="0">0</button>
+          <button class="key-btn action" type="button" data-key="backspace">Back</button>
+        </div>
+        <div class="row" style="justify-content:center"><button class="btn secondary" id="submitAnswerBtn" type="button">Submit answer</button><button class="btn secondary" id="skipQuestionBtn" type="button">Skip</button></div>
+        <div class="status-line" id="statusLine" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="screen" id="completeScreen">
+      <div class="panel center grid">
+        <h2>Check complete</h2>
+        <p class="muted">Please show your teacher.</p>
+        <div class="notice"><strong>Raise your hand and wait quietly.</strong></div>
+        <div class="row" style="justify-content:center;">
+          <button class="btn" type="button" id="showTeacherResultBtn">Teacher Result</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="resultScreen">
+      <div class="panel grid">
+        <div class="center grid">
+          <h2>FactFlow Check Result</h2>
+          <p class="muted" id="resultMeta">Student - Code - Date</p>
+        </div>
+        <div class="result-cards">
+          <div class="result-card verified">
+            <div class="label">Fluent recall demonstrated</div>
+            <div class="value" style="font-size:1.25rem" id="verifiedLevel">-</div>
+            <p class="muted small" id="verifiedDesc"></p>
+          </div>
+          <div class="result-card developing">
+            <div class="label">Areas needing attention</div>
+            <div class="value" style="font-size:1.25rem" id="developingLevel">-</div>
+            <p class="muted small" id="developingDesc"></p>
+          </div>
+        </div>
+        <div class="stat-row">
+          <div class="stat"><div class="label">Accuracy</div><div class="value" id="accuracyStat">-</div></div>
+          <div class="stat"><div class="label">Fluent</div><div class="value" id="fluentStat">-</div></div>
+          <div class="stat"><div class="label">Slow</div><div class="value" id="slowStat">-</div></div>
+          <div class="stat"><div class="label">Response gaps</div><div class="value" id="missedStat">-</div></div>
+        </div>
+        <div class="grid">
+          <h3>Assessment snapshot</h3>
+          <div class="notice" id="recommendationText">-</div>
+        </div>
+        <div class="two-col">
+          <div class="grid">
+            <h3>Missed facts</h3>
+            <div class="tag-list" id="missedTags"></div>
+          </div>
+          <div class="grid">
+            <h3>No response in time</h3>
+            <div class="tag-list" id="timeoutTags"></div>
+          </div>
+        </div>
+        <div class="grid">
+          <h3>Fact group summary</h3>
+          <div id="bandSummary" role="region" aria-label="Fact group assessment details" tabindex="0"></div>
+        </div>
+        <div class="row" style="justify-content:center;gap:10px;">
+          <span id="sendStatus" class="send-status" role="status" aria-live="polite"></span>
+        </div>
+        <div class="row" style="justify-content:center;gap:10px;">
+          <button class="btn" type="button" id="retryResultsBtn">Retry sending</button>
+          <button class="btn secondary" type="button" id="copyResultsBtn">Copy result</button>
+          <button class="btn secondary" type="button" id="downloadResultBtn">Download result</button>
+          <button class="btn secondary" type="button" id="studentViewBtn">Done</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="teacherScreen">
+      <div class="panel grid">
+        <div class="row" style="justify-content:space-between;">
+          <div>
+            <h2>Teacher Tools</h2>
+            <p class="muted">Configure the assessment and review saved results.</p>
+          </div>
+        </div>
+        <div class="field">
+          <label for="assessmentName">Assessment name</label>
+          <input id="assessmentName" type="text" maxlength="60" placeholder="Example: Term 1 Multiplication Check">
+        </div>
+        <div class="field"><label for="assessmentMode">Response conditions for the next student</label>
+          <select id="assessmentMode"><option value="standard">Standard: 10 seconds per question; fluent under 4 seconds</option><option value="extended">Extended: 20 seconds; accuracy only</option><option value="untimed">Untimed: accuracy only</option></select></div>
+        <div class="field"><label for="inputMethod">Answer method</label><select id="inputMethod"><option value="student">Student keypad or keyboard</option><option value="teacher">Teacher records spoken answers (accuracy only)</option></select></div>
+        <div class="field"><label><input type="checkbox" id="hideTimer"> Hide visual countdown</label><label><input type="checkbox" id="includeMixed"> Include mixed recall (2–12)</label></div>
+        <p class="muted small">These settings are saved on this device. Extended, untimed, and teacher-recorded checks cannot earn standard fluency verdicts. Only change settings before a check.</p>
+        <div class="notice">
+          <p class="small muted">This preview keeps results locally. Download each completed result before clearing this browser. Existing classroom results are preserved separately.</p>
+        </div>
+        <div class="notice">
+          <div class="row" style="justify-content:space-between;align-items:center;">
+            <span class="small muted" style="font-weight:700;text-transform:uppercase;letter-spacing:0.04em;">Current 4-hour code</span>
+            <span class="code-chip" id="dailyCodeLabel">-</span>
+          </div>
+          <p class="muted small" id="codeWindowLabel" style="margin-top:6px;">Valid until … Bangkok time.</p>
+        </div>
+        <div class="field">
+          <label for="customCode">Custom code (optional)</label>
+          <div class="row">
+            <input id="customCode" type="text" maxlength="24" placeholder="Leave blank or use Generate" style="flex:1;text-transform:uppercase;letter-spacing:0.05em;">
+            <button class="btn secondary" type="button" id="generateCodeBtn">Generate</button>
+          </div>
+        </div>
+        <div class="history-wrap"><table id="historyTable"></table></div>
+        <div class="row" style="justify-content:flex-end;">
+          <button class="btn secondary" type="button" id="clearResultsBtn">Clear All Results</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="modal-backdrop hidden" id="teacherUnlockModal" role="dialog" aria-modal="true" aria-labelledby="teacherUnlockTitle">
+    <div class="modal-card grid">
+      <div>
+        <h2 id="teacherUnlockTitle">Teacher Access</h2>
+        <p class="muted">Enter the teacher passphrase to open the teacher area.</p>
+      </div>
+      <div class="field">
+        <label for="teacherPassphrase">Teacher passphrase</label>
+        <input id="teacherPassphrase" type="password" maxlength="64" autocomplete="off">
+      </div>
+      <div class="error" id="teacherUnlockError"></div>
+      <div class="row" style="justify-content:flex-end;">
+        <button class="btn secondary" type="button" id="cancelTeacherUnlockBtn">Cancel</button>
+        <button class="btn" type="button" id="unlockTeacherBtn">Unlock</button>
+      </div>
+    </div>
+  </div>
+  <div class="toast" id="toast" aria-live="polite"></div>
+
+  <script src="assessment.js"></script>
+  <script>
+  /* ╔══════════════════════════════════════════════════════════════╗
+     ║              FACTFLOW CHECK — TEACHER SETUP               ║
+     ║                                                          ║
+     ║  Each teacher needs their own Google Sheet + Apps Script. ║
+     ║  Add an entry to TEACHERS below with a short key, the     ║
+     ║  teacher's display name, and their Apps Script URL.       ║
+     ║                                                          ║
+     ║  Teachers share: ffc.mtomlinson.ca/?t=KEY                 ║
+     ║  Example:          ffc.mtomlinson.ca/?t=IP5/9             ║
+     ║                                                          ║
+     ║  DEFAULT_TEACHER_KEY is used when the URL has no ?t=.     ║
+     ║  See SETUP-GUIDE.md for detailed instructions.           ║
+     ╚══════════════════════════════════════════════════════════════╝
+  */
+  var DEFAULT_TEACHER_KEY = 'IP5/9';
+
+  var TEACHERS = {
+    'IP5/9': {
+      name: 'Ajarn Michael — IP5/9',
+      spreadsheetId: '1hLfZ0OJ5huE3OKg5w4wLvMLu5ImP2SDHdmtX89C7JJY',
+      url: 'https://script.google.com/a/macros/ku.th/s/AKfycbxgXxJFgOHGi39oPEHGybpPByBHhfVeLLQRhI2cy8l78_gHo35D8fYSVzc8jPUQmz1EdA/exec'
+    },
+    'IP5/8': {
+      name: 'Ajarn Jordan — IP5/8',
+      spreadsheetId: '1VYs2dbduN8s5R3YEoOzIqQO2fnHko0YQypd3MYKn3Wg',
+      url: 'https://script.google.com/macros/s/AKfycbz1DSGVUh2rCaQBRAnf9SuXiF3Ki6tEXKSRNsoiKt-v8z8-UIMARxclA-YjCaU2fQO2OA/exec'
+    }
+  };
+
+  // A missing route uses the documented default; an invalid explicit route never does.
+  var activeTeacher = null;
+  var routeError = '';
+  (function () {
+    var params = new URLSearchParams(window.location.search);
+    var key = params.has('t') ? String(params.get('t')).trim().toUpperCase() : DEFAULT_TEACHER_KEY;
+    if (Object.prototype.hasOwnProperty.call(TEACHERS, key)) {
+      activeTeacher = Object.assign({}, TEACHERS[key], { key: key });
+    } else {
+      routeError = 'Unknown class link. Ask your teacher for the correct link.';
+    }
+  })();
+
+  (function () {
+    'use strict';
+
+    var APP_VERSION = '3.0.0-preview';
+    var RESULTS_KEY = 'factflowCheck.results.v3';
+    var ATTEMPTS_KEY = 'factflowCheck.attempts.v3';
+    var CONFIG_KEY = 'factflowCheck.config.v3';
+    var TIMEOUT_SEC = 10;
+    var BREAK_SUGGEST_SEC = 400;
+    var PREVIEW_MODE = true;
+    var SESSION_KEY = 'factflowCheck.session.v3|' + (activeTeacher ? activeTeacher.key : 'invalid');
+    var FLUENT_MS = 4000;
+    var TEACHER_PASS_SALT = 'ffc-teacher-lock-v1';
+    var TEACHER_PASS_HASH = '99691dcd1e9a5a4c574211307202ecd2caea10dc19f8962772935960184ff11d';
+    var TEACHER_AUTO_LOCK_MS = 15 * 60 * 1000;
+    var RESERVED_EXAMPLE_CODES = ['SAMPLE-00'];
+
+    var WARMUP = [makeFact(1,2),makeFact(1,5),makeFact(1,10),makeFact(1,3)];
+    var BANDS = FactGroups.groups;
+
+    var el = {};
+    var appState = {
+      config: null,
+      results: [],
+      attempts: {},
+      session: null,
+      currentQuestion: null,
+      questionStartedAt: 0,
+      inputLocked: false,
+      finishing: false,
+      autoSubmitId: null,
+      idleSubmitId: null,
+      questionTimerId: null,
+      nextQuestionId: null,
+      timerIntervalId: null,
+      latestResult: null,
+      teacherUnlocked: false,
+      teacherLockTimerId: null,
+      pendingTeacherTarget: ''
+    };
+
+    function cacheDom() {
+      var ids = [
+        'entryScreen','testScreen','completeScreen','resultScreen','teacherScreen','teacherBtn',
+        'studentCodeHint','studentName','teacherCode','entryError','beginBtn','qNumber','qTotal','testStudentLabel',
+        'bandTrack','timerFill','problemText','answerInput','statusLine','showTeacherResultBtn','resultMeta',
+        'verifiedLevel','verifiedDesc','developingLevel','developingDesc','accuracyStat','fluentStat','slowStat',
+        'missedStat','recommendationText','missedTags','timeoutTags','bandSummary','studentViewBtn','sendStatus',
+        'assessmentName','customCode','generateCodeBtn','dailyCodeLabel',
+        'codeWindowLabel','clearResultsBtn','historyTable','teacherUnlockModal','teacherPassphrase','teacherUnlockError',
+        'cancelTeacherUnlockBtn','unlockTeacherBtn','toast','countdownOverlay','countdownLabel','countdownValue',
+        'teacherBadge','teacherBadgeName','retryResultsBtn','copyResultsBtn','downloadResultBtn',
+        'breakScreen','breakTitle','breakMessage','conditionsLabel','continueBtn','repeatIntroBtn','endSessionBtn',
+        'assessmentMode','inputMethod','hideTimer','includeMixed','recoveryNotice','recoveryText','resumeSessionBtn','sessionWarning','submitAnswerBtn','skipQuestionBtn'
+      ];
+      for (var i = 0; i < ids.length; i++) el[ids[i]] = document.getElementById(ids[i]);
+    }
+
+    function makeFact(a, b) {
+      var left = parseInt(a, 10);
+      var right = parseInt(b, 10);
+      return {
+        a: left,
+        b: right,
+        answer: left * right,
+        familyKey: makeFamilyKey(left, right),
+        display: left + ' x ' + right
+      };
+    }
+
+    function makeFamilyKey(a, b) {
+      var x = parseInt(a, 10);
+      var y = parseInt(b, 10);
+      if (x <= y) return x + 'x' + y;
+      return y + 'x' + x;
+    }
+
+
+
+    function pad2(n) {
+      return n < 10 ? '0' + n : String(n);
+    }
+
+    function bangkokDate(date) {
+      var d = date || new Date();
+      var utcMs = d.getTime() + (d.getTimezoneOffset() * 60000);
+      return new Date(utcMs + (7 * 60 * 60000));
+    }
+
+    function fourHourCodeInfo(date) {
+      var d = bangkokDate(date || new Date());
+      var block = Math.floor(d.getHours() / 4);
+      var seed = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+      var words = ['RIVER','MAPLE','CHECK','BLUE','NORTH','BRAVE','CLOUD','TIGER','LEAF','STAR','FACT','READY','STORM','FLAME','STONE','CREEK','LIGHT','SHINE','OCEAN','PEARL','BLOOM','PLAIN','SWIFT','CROWN'];
+      var word = words[(seed + block * 5) % words.length];
+      var num = ((seed * 19 + block * 37) % 90) + 10;
+      var expiresHour = (block + 1) * 4;
+      var expiresLabel = pad2(expiresHour % 24) + ':00';
+      return { code: word + '-' + num, expiresLabel: expiresLabel, block: block };
+    }
+
+    function currentStudentCode() {
+      return fourHourCodeInfo(new Date()).code;
+    }
+
+    function normalizeCode(code) {
+      return String(code || '').toUpperCase().replace(/\s+/g, '').replace(/[^A-Z0-9-]/g, '');
+    }
+
+    function isReservedExampleCode(code) {
+      var clean = normalizeCode(code);
+      for (var i = 0; i < RESERVED_EXAMPLE_CODES.length; i++) {
+        if (clean === RESERVED_EXAMPLE_CODES[i]) return true;
+      }
+      return false;
+    }
+
+    function safeJsonParse(value, fallback) {
+      try { return JSON.parse(value); } catch (e) { return fallback; }
+    }
+
+    function loadJson(key, fallback) {
+      try {
+        var raw = localStorage.getItem(key);
+        if (!raw) return fallback;
+        return safeJsonParse(raw, fallback);
+      } catch (e) {
+        return fallback;
+      }
+    }
+
+    function saveJson(key, value) {
+      try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch (e) { showToast('Could not save locally.'); return false; }
+    }
+
+    function saveResults() {
+      appState.resultsSaved = saveJson(RESULTS_KEY, appState.results);
+    }
+
+    function loadConfig() {
+      var cfg = loadJson(CONFIG_KEY, null);
+      if (!cfg || typeof cfg !== 'object') {
+        cfg = { assessmentName: 'Multiplication Mastery Check', customCode: '', updatedAt: new Date().toISOString() };
+      }
+      if (!cfg.assessmentName) cfg.assessmentName = 'Multiplication Mastery Check';
+      if (!cfg.customCode) cfg.customCode = '';
+      cfg.conditions = normalizeConditions(cfg.conditions);
+      return cfg;
+    }
+
+    function saveConfig() {
+      appState.config.assessmentName = String(el.assessmentName.value || 'Multiplication Mastery Check').trim();
+      appState.config.customCode = normalizeCode(el.customCode.value || '');
+      if (isReservedExampleCode(appState.config.customCode)) {
+        appState.config.customCode = '';
+        el.customCode.value = '';
+        showToast('The sample code is reserved and was not saved.');
+      }
+      appState.config.conditions = normalizeConditions({mode:el.assessmentMode.value,input:el.inputMethod.value,hideTimer:el.hideTimer.checked,mixed:el.includeMixed.checked});
+      appState.config.updatedAt = new Date().toISOString();
+      saveJson(CONFIG_KEY, appState.config);
+      renderConfig();
+      showToast('Saved.');
+    }
+
+    function renderConfig() {
+      var codeInfo = fourHourCodeInfo(new Date());
+      el.dailyCodeLabel.textContent = codeInfo.code;
+      if (el.codeWindowLabel) {
+        el.codeWindowLabel.textContent = 'Valid until ' + codeInfo.expiresLabel + ' Bangkok time. A new code is created every 4 hours.';
+      }
+      el.assessmentName.value = appState.config.assessmentName || '';
+      el.customCode.value = normalizeCode(appState.config.customCode || '');
+      el.studentCodeHint.textContent = 'Ask your teacher for the code';
+      var c=normalizeConditions(appState.config.conditions);el.assessmentMode.value=c.mode;el.inputMethod.value=c.input;el.hideTimer.checked=c.hideTimer;el.includeMixed.checked=c.mixed;
+    }
+
+    function isCodeAccepted(code) {
+      var clean = normalizeCode(code);
+      var configured = normalizeCode(appState.config.customCode || '');
+      if (!clean) return false;
+      if (isReservedExampleCode(clean)) return false;
+      if (configured && clean === configured) return true;
+      if (clean === currentStudentCode()) return true;
+      return false;
+    }
+
+    function getAttemptKey(code) {
+      return (activeTeacher?activeTeacher.key:'')+'|'+normalizeName(el.studentName.value).toLowerCase()+'|'+normalizeCode(code)+'|'+String(appState.config.assessmentName||'').toLowerCase();
+    }
+
+    function openTeacherUnlock(targetScreen) {
+      appState.pendingTeacherTarget = targetScreen || 'teacherScreen';
+      el.teacherUnlockError.textContent = '';
+      el.teacherUnlockError.classList.remove('show');
+      el.teacherPassphrase.value = '';
+      el.teacherUnlockModal.classList.remove('hidden');
+      window.setTimeout(function () { el.teacherPassphrase.focus(); }, 30);
+    }
+
+    function closeTeacherUnlock() {
+      el.teacherUnlockModal.classList.add('hidden');
+      el.teacherPassphrase.value = '';
+      el.teacherUnlockError.textContent = '';
+      el.teacherUnlockError.classList.remove('show');
+    }
+
+    function showTeacherUnlockError(message) {
+      el.teacherUnlockError.textContent = message;
+      el.teacherUnlockError.classList.add('show');
+    }
+
+    function hexFromBuffer(buffer) {
+      var bytes = new Uint8Array(buffer);
+      var out = '';
+      for (var i = 0; i < bytes.length; i++) {
+        var hex = bytes[i].toString(16);
+        if (hex.length < 2) hex = '0' + hex;
+        out += hex;
+      }
+      return out;
+    }
+
+    function hashTeacherPassphrase(passphrase) {
+      if (!window.crypto || !window.crypto.subtle || typeof TextEncoder === 'undefined') {
+        return Promise.reject(new Error('Crypto unavailable'));
+      }
+      var encoder = new TextEncoder();
+      var input = encoder.encode(TEACHER_PASS_SALT + '|' + String(passphrase || ''));
+      return window.crypto.subtle.digest('SHA-256', input).then(function (hash) {
+        return hexFromBuffer(hash);
+      });
+    }
+
+    function verifyTeacherPassphrase() {
+      var passphrase = String(el.teacherPassphrase.value || '');
+      if (!passphrase) { showTeacherUnlockError('Please enter the teacher passphrase.'); return; }
+      hashTeacherPassphrase(passphrase).then(function (hash) {
+        if (hash === TEACHER_PASS_HASH) {
+          unlockTeacherArea(appState.pendingTeacherTarget || 'teacherScreen');
+        } else {
+          showTeacherUnlockError('That passphrase did not work.');
+        }
+      }).catch(function (e) {
+        showTeacherUnlockError('Teacher lock requires HTTPS or localhost.');
+      });
+    }
+
+    function unlockTeacherArea(targetScreen) {
+      appState.teacherUnlocked = true;
+      closeTeacherUnlock();
+      resetTeacherAutoLock();
+      el.teacherBtn.textContent = 'Save & Exit';
+      el.teacherBtn.className = 'btn warning';
+      if (targetScreen === 'resumeSession') { restoreSession(); return; }
+      if (targetScreen === 'continueAssessment') { continueAssessment(true); return; }
+      if (targetScreen === 'endAssessment') { finishAssessment('Teacher ended the check.'); return; }
+      if (targetScreen === 'resultScreen' && appState.latestResult) {
+        renderResult(appState.latestResult);
+        showScreen('resultScreen');
+      } else {
+        renderHistory();
+        showScreen('teacherScreen');
+      }
+      showToast('Teacher area unlocked.');
+    }
+
+    function lockTeacherArea() {
+      appState.teacherUnlocked = false;
+      if (appState.teacherLockTimerId) {
+        window.clearTimeout(appState.teacherLockTimerId);
+        appState.teacherLockTimerId = null;
+      }
+      el.teacherBtn.textContent = 'Teacher';
+      el.teacherBtn.className = 'btn secondary';
+      if (!appState.session) showScreen('entryScreen');
+      showToast('Teacher area locked.');
+    }
+
+    function resetTeacherAutoLock() {
+      if (appState.teacherLockTimerId) window.clearTimeout(appState.teacherLockTimerId);
+      appState.teacherLockTimerId = window.setTimeout(function () {
+        if (appState.teacherUnlocked) lockTeacherArea();
+      }, TEACHER_AUTO_LOCK_MS);
+    }
+
+    function requireTeacherAccess(targetScreen) {
+      if (appState.teacherUnlocked) {
+        resetTeacherAutoLock();
+        if (targetScreen === 'resumeSession') { restoreSession(); return; }
+        if (targetScreen === 'continueAssessment') { continueAssessment(true); return; }
+        if (targetScreen === 'endAssessment') { finishAssessment('Teacher ended the check.'); return; }
+        if (targetScreen === 'resultScreen') {
+          if (appState.latestResult) { renderResult(appState.latestResult); showScreen('resultScreen'); }
+        } else {
+          renderHistory();
+          showScreen('teacherScreen');
+        }
+        return;
+      }
+      openTeacherUnlock(targetScreen);
+    }
+
+    function showScreen(id) {
+      var screens = ['entryScreen','testScreen','completeScreen','resultScreen','teacherScreen','breakScreen'];
+      for (var i = 0; i < screens.length; i++) {
+        if (el[screens[i]]) el[screens[i]].classList.toggle('active', screens[i] === id);
+      }
+    }
+
+    function showError(message) {
+      el.entryError.textContent = message;
+      el.entryError.classList.add('show');
+    }
+
+    function clearError() {
+      el.entryError.textContent = '';
+      el.entryError.classList.remove('show');
+    }
+
+    function showToast(message) {
+      el.toast.textContent = message;
+      el.toast.classList.add('show');
+      window.setTimeout(function () { el.toast.classList.remove('show'); }, 1800);
+    }
+
+    function shuffle(items) {
+      var arr = items.slice();
+      for (var i = arr.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = tmp;
+      }
+      return arr;
+    }
+
+
+    function selectBandQuestions(band,count,isExtra) {
+      var s=appState.session;
+      var previous=s.questionResults.filter(function(q){return q.phase==='band'&&q.bandId===band.id;});
+      return FactGroups.select(band,count,previous);
+    }
+
+
+
+    var countdownTimerId=null;
+
+    function hideCountdown() {
+      if (countdownTimerId) { window.clearInterval(countdownTimerId); countdownTimerId = null; }
+      el.countdownOverlay.classList.remove('active');
+      el.countdownOverlay.setAttribute('aria-hidden', 'true');
+    }
+
+
+    function startAssessment() {
+      clearError();
+      if (routeError || !activeTeacher) { showError(routeError || 'Missing class link.'); return; }
+      var studentName = normalizeName(el.studentName.value);
+      if (!studentName) { showError('Please enter your name.'); el.studentName.focus(); return; }
+      var code = normalizeCode(el.teacherCode.value);
+      if (!isCodeAccepted(code)) { showError('Please check the teacher code.'); return; }
+      if (loadJson(SESSION_KEY,null)) { showError('Resume or end the saved check before starting another.'); return; }
+      appState.sessionId = null;
+      var key = getAttemptKey(code);
+      var existing = appState.attempts[key];
+      if (existing && (existing.status === 'completed' || existing.status === 'in_progress' || existing.status === 'abandoned')) {
+        showError('This student has already used this assessment code on this device. Ask your teacher for a new code to reassess.');
+        return;
+      }
+      appState.finishing = false;
+      appState.currentQuestion = null;
+      appState.session = {
+        id: 'ffc-' + Date.now() + '-' + Math.random().toString(36).slice(2, 9),
+        appVersion: APP_VERSION,
+        studentName: studentName,
+        code: code,
+        assessmentName: appState.config.assessmentName,
+        teacherKey: activeTeacher.key,
+        attemptKey: key,
+        startedAt: new Date().toISOString(),
+        startMs: Date.now(),
+        conditions: normalizeConditions(appState.config.conditions),
+        pendingExtras: [], stage: 'initial', breaks: [], interruptions: [], activeMs: 0,
+        startingBand: 'Unscored introduction',
+        phase: 'warmup',
+        currentBandIndex: -1,
+        currentBandId: 'Warm-up',
+        blockHadExtras: false,
+        blockQueue: shuffle(WARMUP),
+        questionResults: [],
+        bandResults: [],
+        passedBandIds: [],
+        failedBandIds: [],
+        latestVerdict: '',
+        finalReason: ''
+      };
+      appState.session.maxQuestions = FactGroups.budget(appState.session.conditions.mixed);
+      persistSession();
+      appState.attempts[key] = { status: 'in_progress', startedAt: appState.session.startedAt };
+      saveJson(ATTEMPTS_KEY, appState.attempts);
+      el.testStudentLabel.textContent = studentName;
+      showScreen('testScreen');
+      renderBandTrack();
+      appState.session.nextBlock={warmup:true};
+      showBreak('Introduction', 'Four unscored questions to try the controls. Wrong answers here will not affect your results.');
+    }
+
+    function renderBandTrack() {
+      el.bandTrack.textContent = appState.session ? (appState.session.phase==='warmup'?'Unscored introduction':BANDS[appState.session.currentBandIndex].label) : '';
+    }
+
+    function clearAnswerTimers() {
+      if (appState.idleSubmitId) {
+        window.clearTimeout(appState.idleSubmitId);
+        appState.idleSubmitId = null;
+      }
+      if (appState.autoSubmitId) {
+        window.clearTimeout(appState.autoSubmitId);
+        appState.autoSubmitId = null;
+      }
+    }
+
+    function clearQuestionTimers() {
+      clearAnswerTimers();
+      if (appState.questionTimerId) {
+        window.clearTimeout(appState.questionTimerId);
+        appState.questionTimerId = null;
+      }
+      if (appState.nextQuestionId) {
+        window.clearTimeout(appState.nextQuestionId);
+        appState.nextQuestionId = null;
+      }
+      if (appState.timerIntervalId) {
+        window.clearInterval(appState.timerIntervalId);
+        appState.timerIntervalId = null;
+      }
+      hideCountdown();
+    }
+
+    function shouldFinishForLimits() {
+      var s=appState.session;
+      return s.questionResults.length>=s.maxQuestions;
+    }
+
+    function presentNextQuestion() {
+      var s=appState.session;if(!s||appState.finishing||s.paused)return;
+      clearQuestionTimers();appState.inputLocked=false;appState.currentQuestion=null;
+      el.answerInput.value='';el.answerInput.className='answer-input';setStatus('','');
+      if(!s.blockQueue.length){completeCurrentBlock();return;}
+      if(shouldFinishForLimits()){finishAssessment('Allocated question budget exhausted; remaining evidence is incomplete.');return;}
+      var q=s.blockQueue.shift();appState.currentQuestion=q;s.pendingQuestion=q;
+      persistSession();
+      appState.questionStartedAt=Date.now();el.problemText.textContent=q.display;
+      el.qNumber.textContent=s.phase==='warmup'?String(s.questionResults.filter(function(a){return a.phase==='warmup';}).length+1):String(s.questionResults.filter(function(a){return a.phase==='band';}).length+1);
+      el.qTotal.textContent=s.phase==='warmup'?' of 4 introductory questions':' · '+BANDS[s.currentBandIndex].label;
+      el.timerFill.parentElement.hidden=s.conditions.hideTimer||s.conditions.mode==='untimed';
+      el.submitAnswerBtn.hidden=false;
+      startQuestionTimer();
+    }
+
+    function startQuestionTimer() {
+      var seconds=responseSeconds();if(!seconds)return;
+      var start=Date.now();
+      appState.questionTimerId=window.setTimeout(handleTimeout,seconds*1000);
+      appState.timerIntervalId=window.setInterval(function(){
+        var remaining=Math.max(0,seconds-(Date.now()-start)/1000);
+        el.timerFill.style.width=(remaining/seconds*100)+'%';
+      },100);
+      el.timerFill.style.width='100%';el.timerFill.className='timer-fill';
+    }
+
+    function handleTimeout() { recordAnswer('',true,false); }
+
+    function setStatus(text, kind) {
+      el.statusLine.textContent = text || '';
+      el.statusLine.className = 'status-line' + (kind ? ' ' + kind : '');
+    }
+
+    function handleKey(value) {
+      if (!appState.session || appState.inputLocked || !appState.currentQuestion) return;
+      var current = el.answerInput.value;
+      if (value === 'clear') {
+        el.answerInput.value = '';
+        clearAnswerTimers();
+        return;
+      }
+      if (value === 'backspace') {
+        el.answerInput.value = current.slice(0, -1);
+        clearAnswerTimers();
+        return;
+      }
+      if (!/^[0-9]$/.test(value)) return;
+      var correctLength = String(appState.currentQuestion.answer).length;
+      if (current.length >= Math.max(3, correctLength)) return;
+      el.answerInput.value = current + value;
+    }
+
+
+    function shouldEndCurrentBandEarly() {
+      var s=appState.session;if(!s||s.phase!=='band'||s.blockHadExtras)return false;
+      return evaluateBandAnswers(getCurrentBandAnswers(),false,BANDS[s.currentBandIndex])==='fail';
+    }
+
+    function submitAnswer() {
+      if(!el.answerInput.value)return;
+      recordAnswer(el.answerInput.value,false,false);
+    }
+
+    function completeCurrentBlock() {
+      var s=appState.session;if(!s||appState.finishing)return;
+      if(s.phase==='warmup') {s.nextBlock={index:0,extra:false};showBreak('Introduction complete','Ready to assess your multiplication facts.');return;}
+      var band=BANDS[s.currentBandIndex],answers=getCurrentBandAnswers();
+      var verdict=evaluateBandAnswers(answers,s.blockHadExtras,band);
+      if(verdict==='extra') {if(s.pendingExtras.indexOf(s.currentBandIndex)<0)s.pendingExtras.push(s.currentBandIndex);verdict='incomplete';}
+      s.bandResults=s.bandResults.filter(function(r){return r.bandId!==band.id;});
+      s.bandResults.push(makeBandSummary(band,answers,verdict));
+      var next=null;
+      if(s.stage==='initial'&&s.currentBandIndex<6)next={index:s.currentBandIndex+1,extra:false};
+      else if(s.pendingExtras.length){s.stage='extras';next={index:s.pendingExtras.shift(),extra:true};}
+      else if(s.conditions.mixed&&band.id!=='H'){s.stage='mixed';next={index:7,extra:false};}
+      if(!next){finishAssessment('Completed the selected fact groups.');return;}
+      s.nextBlock=next;
+      var recent=s.bandResults.slice(-2);
+      s.needsTeacherCheck=recent.length===2&&recent.every(function(r){return r.verdict==='fail'||r.verdict==='incomplete';});
+      showBreak('Section complete',s.needsTeacherCheck?'Please ask your teacher whether to continue, take a break, or finish.':'Next: '+BANDS[next.index].label+'.'+(s.activeMs/1000>=BREAK_SUGGEST_SEC?' You have been working for a while; this is a good place for a break.':''));
+    }
+
+    function hasQuestionBudget(count) {var s=appState.session;return !!s&&s.maxQuestions-s.questionResults.length>=count;}
+
+    function beginBand(index,extra) {
+      var s=appState.session,band=BANDS[index],count=extra?band.extraSize:band.blockSize;
+      if(!hasQuestionBudget(count)){finishAssessment('Insufficient budget for a complete fact group.');return;}
+      s.phase='band';s.currentBandIndex=index;s.currentBandId=band.id;s.blockHadExtras=!!extra;
+      s.blockQueue=selectBandQuestions(band,count,extra);s.paused=false;renderBandTrack();presentNextQuestion();
+    }
+
+    function getCurrentBandAnswers() {
+      var s = appState.session;
+      var answers = [];
+      for (var i = 0; i < s.questionResults.length; i++) {
+        if (s.questionResults[i].phase === 'band' && s.questionResults[i].bandId === s.currentBandId) answers.push(s.questionResults[i]);
+      }
+      return answers;
+    }
+
+
+
+    function evaluateBandAnswers(answers,hadExtras,band) {
+      return FactGroups.assess(band,answers,hadExtras,isStandard(appState.session.conditions));
+    }
+
+    function makeBandSummary(band,answers,verdict) {
+      return {bandId:band.id,label:band.label,questions:answers.length,
+        correct:answers.filter(function(a){return a.correct;}).length,
+        fluent:answers.filter(function(a){return a.category==='fluent';}).length,
+        slow:answers.filter(function(a){return a.correct&&a.category!=='fluent';}).length,
+        wrong:answers.filter(function(a){return !a.correct&&!a.timeout&&!a.skipped;}).length,
+        timeout:answers.filter(function(a){return a.timeout;}).length,
+        skipped:answers.filter(function(a){return a.skipped;}).length,
+        tables:band.tables.filter(function(t){return answers.some(function(a){return a.table===t;});}),
+        verdict:verdict};
+    }
+
+    function finishAssessment(reason) {
+      var s = appState.session;
+      if (!s || appState.finishing) return;
+      appState.finishing = true;
+      clearQuestionTimers();
+      s.finalReason = reason;
+      s.completedAt = new Date().toISOString();
+      closeBreak();
+      s.durationSec = Math.round((Date.now() - s.startMs) / 1000);
+      delete s.pendingQuestion;
+      var result = buildFinalResult(s);
+      appState.latestResult = result;
+      appState.results.unshift(result);
+      saveResults();
+      if(appState.resultsSaved)saveJson(SESSION_KEY,null);
+      else {s.completedResult=result;persistSession();}
+      appState.attempts[s.attemptKey] = { status: 'completed', completedAt: result.completedAt };
+      saveJson(ATTEMPTS_KEY, appState.attempts);
+      appState.session = null;
+      appState.currentQuestion = null;
+      renderResult(result);
+      renderHistory();
+      showScreen('resultScreen');
+      sendResults();
+    }
+
+    function buildFinalResult(s) {
+      var q=s.questionResults.filter(function(a){return a.phase==='band';});
+      var bands=BANDS.map(function(b){
+        var answers=q.filter(function(a){return a.bandId===b.id;});
+        var recorded=s.bandResults.filter(function(r){return r.bandId===b.id;})[0];
+        return recorded&&recorded.questions===answers.length?recorded:makeBandSummary(b,answers,answers.length?'incomplete':'not_assessed');
+      });
+      var missed={},timedOut={};q.forEach(function(a){if(!a.correct&&!a.timeout&&!a.skipped)missed[a.familyKey]=a.fact;if(a.timeout)timedOut[a.familyKey]=a.fact;});
+      function labels(verdicts){return bands.filter(function(b){return verdicts.indexOf(b.verdict)>=0;}).map(function(b){return b.label;}).join('; ');}
+      var correct=q.filter(function(a){return a.correct;}).length;
+      var fluent=q.filter(function(a){return a.category==='fluent';}).length;
+      return {assessmentId:s.id,teacherKey:s.teacherKey,submissionStatus:PREVIEW_MODE?'preview':'pending',
+        appVersion:APP_VERSION,schemaVersion:3,studentName:s.studentName,code:s.code,assessmentName:s.assessmentName,
+        startedAt:s.startedAt,completedAt:s.completedAt,durationSec:s.durationSec,activeSec:Math.round(s.activeMs/1000),
+        conditions:s.conditions,breaks:s.breaks,interruptions:s.interruptions,introductionResponses:s.questionResults.filter(function(a){return a.phase==='warmup';}),
+        startingBand:'Independent fact groups',highestAttemptedBand:s.currentBandId,
+        verifiedBand:labels(['pass'])||'None demonstrated',verifiedLabel:isStandard(s.conditions)?'Fluent recall under standard conditions':'Standard fluency not assessed',
+        developingBand:labels(['slow','fail'])||'None identified',developingLabel:'See accuracy, fluency and evidence for each fact group below.',
+        totalQuestions:q.length,countedQuestions:s.questionResults.length,maxQuestions:s.maxQuestions,
+        correct:correct,accuracy:q.length?Math.round(correct/q.length*100):0,fluent:fluent,slow:correct-fluent,
+        wrong:q.filter(function(a){return !a.correct&&!a.timeout&&!a.skipped;}).length,
+        timeout:q.filter(function(a){return a.timeout;}).length,skipped:q.filter(function(a){return a.skipped;}).length,
+        missedFacts:objectValues(missed),timedOutFacts:objectValues(timedOut),finalReason:s.finalReason,
+        recommendedPractice:makeRecommendation(bands,objectValues(missed)),bandResults:bands,questionResults:q};
+    }
+
+    function objectValues(obj) {
+      var values = [];
+      for (var key in obj) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) values.push(obj[key]);
+      }
+      values.sort();
+      return values;
+    }
+
+    function verdictLabel(verdict) {
+      return {pass:'Accurate and fluent',slow:'Accurate; fluency developing',accuracy_only:'Accurate; standard fluency not assessed',fail:'Difficulty observed',incomplete:'Incomplete evidence',not_assessed:'Not assessed'}[verdict]||'Unknown';
+    }
+
+    function makeRecommendation(bands,missedFacts) {
+      var lines=['A sampled snapshot of multiplication facts, not a permanent level.'];
+      ['pass','slow','accuracy_only','fail','incomplete','not_assessed'].forEach(function(v){var labels=bands.filter(function(b){return b.verdict===v;}).map(function(b){return b.label;});if(labels.length)lines.push(verdictLabel(v)+': '+labels.join('; ')+'.');});
+      if(bands.every(function(b){return b.verdict==='pass';}))lines.push('Demonstrated the assessed multiplication facts through 12. This check does not assess beyond that range.');
+      if(missedFacts.length)lines.push('Incorrect responses: '+missedFacts.join(', ')+'.');
+      return lines.join(' ');
+    }
+
+    function renderResult(result) {
+      el.resultMeta.textContent = result.studentName + ' — ' + result.code + ' — ' + formatDate(result.completedAt) + ' · '+result.appVersion+' · '+conditionsText(result.conditions);
+      if(result.breaks&&result.breaks.length)el.resultMeta.textContent+=' · Started '+formatDate(result.startedAt)+'; '+result.breaks.length+' section pauses';
+      el.verifiedLevel.textContent = result.schemaVersion===3?result.verifiedBand:result.verifiedLabel;
+      el.verifiedDesc.textContent = result.verifiedLabel;
+      el.developingLevel.textContent = result.schemaVersion===3?result.developingBand:result.developingLabel;
+      el.developingDesc.textContent = result.developingLabel;
+      el.accuracyStat.textContent = result.correct + '/' + result.totalQuestions + ' (' + result.accuracy + '%)';
+      el.fluentStat.textContent = String(result.fluent);
+      el.slowStat.textContent = String(result.slow);
+      el.missedStat.textContent = result.wrong+' incorrect; '+result.timeout+' unanswered; '+(result.skipped||0)+' skipped';
+      el.recommendationText.textContent = result.recommendedPractice + (result.finalReason ? ' Ended: ' + result.finalReason : '');
+      renderTags(el.missedTags, result.missedFacts, 'bad', 'No missed facts recorded.');
+      renderTags(el.timeoutTags, result.timedOutFacts, 'warn', 'No timeouts recorded.');
+      renderBandSummary(result.bandResults,result.schemaVersion===3);
+      renderSendStatus();
+    }
+
+    function renderTags(container, items, cls, emptyText) {
+      if (!items || !items.length) {
+        container.innerHTML = '<span class="muted small">' + escapeHtml(emptyText) + '</span>';
+        return;
+      }
+      var html = '';
+      for (var i = 0; i < items.length; i++) html += '<span class="tag ' + cls + '">' + escapeHtml(items[i]) + '</span>';
+      container.innerHTML = html;
+    }
+
+    function renderBandSummary(bands,modern) {
+      var html='<table><thead><tr><th>Fact group</th><th>Accuracy</th><th>Fluent</th><th>No response</th><th>Skipped</th><th>Tables sampled</th><th>Result</th></tr></thead><tbody>';
+      (bands||[]).forEach(function(b){html+='<tr><td>'+escapeHtml(b.label)+'</td><td>'+b.correct+'/'+b.questions+'</td><td>'+b.fluent+'</td><td>'+b.timeout+'</td><td>'+(b.skipped||0)+'</td><td>'+escapeHtml((b.tables||[]).join(', '))+'</td><td>'+escapeHtml(modern?verdictLabel(b.verdict):({pass:'Demonstrated (legacy)',fail:'Needs practice (legacy)',incomplete:'Incomplete evidence',not_assessed:'Not assessed'}[b.verdict]||b.verdict))+'</td></tr>';});
+      el.bandSummary.innerHTML=html+'</tbody></table><p class="muted small">'+(modern?'Scroll the table sideways on small screens. Introduction, breaks and interrupted questions are excluded. Groups are assessed independently. Correct but slower responses demonstrate accuracy, not fluent recall. Accommodated timing and teacher-recorded responses do not earn standard fluency verdicts.':'Earlier assessment rules; this result has not been rescored.')+'</p>';
+    }
+
+    function formatDate(iso) {
+      var d = new Date(iso);
+      if (isNaN(d.getTime())) return String(iso || '');
+      return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()) + ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+    }
+
+    function formatDuration(sec) {
+      var m = Math.floor(sec / 60);
+      var s = sec % 60;
+      if (m <= 0) return s + ' sec';
+      return m + ' min ' + s + ' sec';
+    }
+
+    function copySummary() {
+      var r = appState.latestResult;
+      if (!r) return;
+      var lines = [];
+      lines.push('FactFlow Check Result');
+      lines.push('Student: ' + r.studentName);
+      lines.push('Assessment: ' + r.assessmentName);
+      lines.push('Code: ' + r.code);
+      lines.push('Date: ' + formatDate(r.completedAt));
+      lines.push('Version: '+r.appVersion+'; '+conditionsText(r.conditions));
+      lines.push('Started: '+formatDate(r.startedAt)+'; elapsed: '+formatDuration(r.durationSec||0)+'; active response time: '+formatDuration(r.activeSec||0));
+      lines.push('Pauses: '+(r.breaks||[]).length+'; interruptions: '+(r.interruptions||[]).length+'; skipped: '+(r.skipped||0));
+      lines.push('Fluent recall demonstrated: ' + r.verifiedBand + ' - ' + r.verifiedLabel);
+      lines.push('Areas needing attention: ' + r.developingBand + ' - ' + r.developingLabel);
+      lines.push('Accuracy: ' + r.correct + '/' + r.totalQuestions + ' (' + r.accuracy + '%)');
+      lines.push('Fluent: ' + r.fluent);
+      lines.push('Slow/not fluent: ' + r.slow);
+      lines.push('Missed/timeouts: ' + (r.wrong + r.timeout));
+      lines.push('Missed facts: ' + (r.missedFacts.length ? r.missedFacts.join(', ') : 'None'));
+      lines.push('Snapshot: ' + r.recommendedPractice);
+      lines.push('Ended: ' + (r.finalReason || ''));
+      (r.bandResults || []).forEach(function (band) { lines.push(band.label + ': ' + (r.schemaVersion===3?verdictLabel(band.verdict):({pass:'Demonstrated (legacy)',fail:'Needs practice (legacy)',incomplete:'Incomplete evidence',not_assessed:'Not assessed'}[band.verdict]||band.verdict))+'; '+band.correct+'/'+band.questions+' correct; '+band.fluent+' fluent; tables sampled: '+(band.tables||[]).join(', ')); });
+      copyText(lines.join('\n'));
+    }
+
+    function copyText(text) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { showToast('Summary copied.'); }, function () { fallbackCopy(text); });
+      } else {
+        fallbackCopy(text);
+      }
+    }
+
+    function fallbackCopy(text) {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try { if (!document.execCommand('copy')) throw new Error('Copy refused'); showToast('Summary copied.'); } catch (e) { showToast('Copy failed.'); }
+      document.body.removeChild(ta);
+    }
+
+    function renderHistory() {
+      var results = (appState.results || []).concat(appState.legacyResults||[]);
+      if (!results.length) {
+        el.historyTable.innerHTML = '<tbody><tr><td class="muted">No saved results yet.</td></tr></tbody>';
+        return;
+      }
+      var html = '<thead><tr><th>Date</th><th>Student</th><th>Code</th><th>Fluent recall</th><th>Areas needing attention</th><th>Accuracy</th><th>Q</th><th>Delivery</th></tr></thead><tbody>';
+      for (var i = 0; i < results.length; i++) {
+        var r = results[i];
+        html += '<tr><td>' + escapeHtml(formatDate(r.completedAt)) + '</td><td>' + escapeHtml(r.studentName || 'Student') + '</td><td>' + escapeHtml(r.code) + '</td><td>' + escapeHtml(r.schemaVersion===3?r.verifiedBand:r.verifiedLabel) + '</td><td>' + escapeHtml(r.schemaVersion===3?r.developingBand:r.developingLabel) + '</td><td>' + r.accuracy + '%</td><td>' + r.totalQuestions + '</td><td><button type="button" class="btn secondary" data-result-index="' + i + '">' + (r.submissionStatus === 'sent' ? 'View sent result' : r.submissionStatus === 'pending' ? 'View unsent result' : r.submissionStatus==='preview'?'View preview result':'View saved result') + '</button></td></tr>';
+      }
+      html += '</tbody>';
+      el.historyTable.innerHTML = html;
+    }
+
+    function clearSavedResults() {
+      if (appState.session||loadJson(SESSION_KEY,null)){showToast('Resume or end the active check first.');return;}
+      if (hasPendingResults()) { showToast('Send all pending results before clearing them.'); return; }
+      if (!window.confirm('Clear all saved FactFlow Check results and attempt locks on this device?')) return;
+      appState.results = [];
+      appState.attempts = {};
+      saveJson(RESULTS_KEY, appState.results);
+      saveJson(ATTEMPTS_KEY, appState.attempts);
+      renderHistory();
+      showToast('Results cleared.');
+    }
+
+    function escapeHtml(value) {
+      return String(value == null ? '' : value).replace(/[&<>"']/g, function (ch) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
+      });
+    }
+
+    function normalizeName(name) {
+      return String(name || '').trim().replace(/\s+/g, ' ').split(' ').map(function (w) {
+        return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+      }).join(' ');
+    }
+
+    function hasPendingResults() {
+      return appState.results.some(function (result) { return result.submissionStatus === 'pending'; });
+    }
+
+    function renderSendStatus() {
+      var r = appState.latestResult;
+      if (!r) return;
+      var sending = appState.sendingId === r.assessmentId && !!r.assessmentId;
+      el.retryResultsBtn.hidden = r.submissionStatus !== 'pending';
+      if(r.submissionStatus==='preview'){el.sendStatus.textContent=appState.resultsSaved===false?'Not saved on this device. Download or copy this result before leaving.':'Preview result saved on this device only. Download or copy for your records.';return;}
+      el.retryResultsBtn.disabled = PREVIEW_MODE || !!appState.sendingId || !!routeError;
+      el.studentViewBtn.disabled = sending;
+      if(PREVIEW_MODE){el.sendStatus.textContent='Earlier saved result; delivery is disabled in this preview.';return;}
+      el.sendStatus.textContent = sending ? 'Sending results…' : r.submissionStatus === 'sent' ? '✓ Results sent' : r.submissionStatus === 'pending' ? (r.submissionError || 'Not sent yet. Retry when connected.') : 'Saved result from an earlier version; delivery status unknown.';
+      if (appState.resultsSaved === false && r.submissionStatus === 'pending') {
+        el.sendStatus.textContent += ' Could not save on this device. Keep this page open and copy the result before leaving.';
+      }
+    }
+
+    function sendResults() {
+      var r = appState.latestResult;
+      if (!r || r.submissionStatus !== 'pending' || appState.sendingId || PREVIEW_MODE) return Promise.resolve();
+      var teacher = Object.prototype.hasOwnProperty.call(TEACHERS, r.teacherKey) ? TEACHERS[r.teacherKey] : null;
+      if (routeError || !teacher || !teacher.url || !teacher.spreadsheetId) {
+        r.submissionError = 'Cannot send: check the class link and teacher setup.';
+        renderSendStatus();
+        return Promise.resolve();
+      }
+      var payload = Object.assign({}, r, {
+        app: 'FactFlowCheck', schemaVersion: r.schemaVersion||2,
+        expectedSpreadsheetId: teacher.spreadsheetId
+      });
+      delete payload.submissionStatus;
+      delete payload.submissionError;
+      appState.sendingId = r.assessmentId;
+      renderSendStatus();
+      var controller = new AbortController();
+      var timer = window.setTimeout(function () { controller.abort(); }, 20000);
+      return fetch(teacher.url, {
+        method: 'POST', headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify(payload), signal: controller.signal
+      }).then(function (resp) {
+        if (!resp.ok) throw new Error('Server returned HTTP ' + resp.status + '.');
+        return resp.json();
+      }).then(function (data) {
+        if (!data || data.ok !== true || data.receiver !== 'factflow-check-v2' ||
+            data.assessmentId !== r.assessmentId || data.spreadsheetId !== teacher.spreadsheetId) {
+          throw new Error(data && data.error ? data.error : 'The receiver did not confirm this result and class. Ask your teacher to update it.');
+        }
+        r.submissionStatus = 'sent';
+        delete r.submissionError;
+      }).catch(function (error) {
+        r.submissionStatus = 'pending';
+        r.submissionError = 'Not sent. ' + (error.name === 'AbortError' ? 'Connection timed out.' : error.message) + ' Use Retry sending or Copy result.';
+      }).then(function () {
+        window.clearTimeout(timer);
+        appState.sendingId = null;
+        saveResults();
+        renderSendStatus();
+        renderHistory();
+      });
+    }
+
+    function bindEvents() {
+      el.teacherBtn.addEventListener('click', function () {
+        if(appState.session){showToast('Finish this section to access teacher controls.');return;}
+        if (appState.teacherUnlocked) { saveConfig(); lockTeacherArea(); }
+        else { requireTeacherAccess('teacherScreen'); }
+      });
+      el.beginBtn.addEventListener('click', startAssessment);
+      el.continueBtn.addEventListener('click',function(){continueAssessment(false);});
+      el.endSessionBtn.addEventListener('click',function(){requireTeacherAccess('endAssessment');});
+      el.resumeSessionBtn.addEventListener('click',function(){requireTeacherAccess('resumeSession');});
+      el.repeatIntroBtn.addEventListener('click',repeatIntroduction);
+      el.submitAnswerBtn.addEventListener('click',submitAnswer);
+      el.skipQuestionBtn.addEventListener('click',function(){recordAnswer('',false,true);});
+      el.downloadResultBtn.addEventListener('click',downloadResult);
+      document.addEventListener('visibilitychange',function(){if(document.hidden)interruptQuestion('Page hidden');});
+      el.retryResultsBtn.addEventListener('click', sendResults);
+      el.copyResultsBtn.addEventListener('click', copySummary);
+      el.historyTable.addEventListener('click', function (event) {
+        var button = event.target.closest('[data-result-index]');
+        if (!button || !appState.teacherUnlocked) return;
+        var result = appState.results.concat(appState.legacyResults||[])[Number(button.getAttribute('data-result-index'))];
+        if (result) { appState.latestResult = result; renderResult(result); showScreen('resultScreen'); }
+      });
+      el.showTeacherResultBtn.addEventListener('click', function () { if (appState.latestResult) { renderResult(appState.latestResult); showScreen('resultScreen'); } });
+      el.studentViewBtn.addEventListener('click', function () { resetEntryForNewCheck(); });
+      el.cancelTeacherUnlockBtn.addEventListener('click', closeTeacherUnlock);
+      el.unlockTeacherBtn.addEventListener('click', verifyTeacherPassphrase);
+      el.teacherPassphrase.addEventListener('keydown', function (evt) {
+        if (evt.key === 'Enter') { evt.preventDefault(); verifyTeacherPassphrase(); }
+        else if (evt.key === 'Escape') { evt.preventDefault(); closeTeacherUnlock(); }
+      });
+      el.generateCodeBtn.addEventListener('click', function () { el.customCode.value = makeRandomCode(); saveConfig(); });
+      el.clearResultsBtn.addEventListener('click', clearSavedResults);
+      var keys = document.querySelectorAll('.key-btn');
+      for (var i = 0; i < keys.length; i++) {
+        keys[i].addEventListener('click', function () { handleKey(this.getAttribute('data-key')); });
+      }
+      document.addEventListener('keydown', function (evt) {
+        if (evt.key === 'Enter' && !appState.session && el.entryScreen.classList.contains('active')) {
+          evt.preventDefault();
+          el.beginBtn.click();
+          return;
+        }
+        if (!appState.session||appState.session.paused||!el.teacherUnlockModal.classList.contains('hidden')) return;
+        if(evt.key==='Enter'){evt.preventDefault();submitAnswer();return;}
+        if (/^[0-9]$/.test(evt.key)) { evt.preventDefault(); handleKey(evt.key); }
+        else if (evt.key === 'Backspace') { evt.preventDefault(); handleKey('backspace'); }
+        else if (evt.key === 'Delete' || evt.key === 'Escape') { evt.preventDefault(); handleKey('clear'); }
+      });
+      el.teacherCode.addEventListener('input', function () { el.teacherCode.value = normalizeCode(el.teacherCode.value); clearError(); });
+      window.addEventListener('storage', handleStorageEvent);
+      window.addEventListener('beforeunload', function (evt) {
+        if (hasPendingResults()&&!PREVIEW_MODE) {
+          evt.preventDefault();
+          evt.returnValue = 'There are results that have not been sent yet.';
+          return evt.returnValue;
+        }
+        if (appState.session && !appState.finishing) {
+          interruptQuestion('Page closed or refreshed');
+          persistSession();
+        }
+      });
+    }
+
+    function makeRandomCode() {
+      var words = ['RIVER','MAPLE','NORTH','BRAVE','CLOUD','TIGER','LEAF','STAR','FACT','READY','MANGO','EAGLE','STORM','FLAME','STONE','CREEK','LIGHT','SHINE','OCEAN','PEARL','BLOOM','PLAIN','SWIFT','CROWN'];
+      var word = words[Math.floor(Math.random() * words.length)];
+      var num = Math.floor(Math.random() * 90) + 10;
+      return word + '-' + num;
+    }
+
+    function handleStorageEvent(evt) {
+      if (!evt || !evt.key) return;
+      if (appState.session) return;
+      if (evt.key === RESULTS_KEY) {
+        appState.results = loadJson(RESULTS_KEY, []);
+        renderHistory();
+      } else if (evt.key === ATTEMPTS_KEY) {
+        appState.attempts = loadJson(ATTEMPTS_KEY, {});
+      } else if (evt.key === CONFIG_KEY) {
+        appState.config = loadConfig();
+        renderConfig();
+      }
+    }
+
+    function resetEntryForNewCheck() {
+      clearQuestionTimers();
+      appState.session = null;
+      appState.currentQuestion = null;
+      appState.finishing = false;
+      el.teacherCode.value = '';
+      el.studentName.value = '';
+      clearError();
+      showScreen('entryScreen');
+    }
+
+    function normalizeConditions(value) {
+      var c=value||{};
+      return {mode:['standard','extended','untimed'].indexOf(c.mode)>=0?c.mode:'standard',input:c.input==='teacher'?'teacher':'student',hideTimer:!!c.hideTimer,mixed:c.mixed!==false};
+    }
+    function isStandard(conditions) {var c=normalizeConditions(conditions);return c.mode==='standard'&&c.input==='student';}
+    function responseSeconds(){var mode=appState.session.conditions.mode;return mode==='untimed'?0:mode==='extended'?20:TIMEOUT_SEC;}
+    function conditionsText(conditions) {
+      if(!conditions)return 'Legacy assessment conditions';
+      var c=normalizeConditions(conditions);
+      return (c.mode==='standard'?'10 seconds per question':c.mode==='extended'?'20 seconds per question':'Untimed')+
+        '; '+(c.input==='teacher'?'teacher records spoken answers':'student keypad/keyboard')+
+        '; '+(isStandard(c)?'standard fluency: under 4 seconds':'accuracy only; standard fluency not assessed')+
+        (c.hideTimer?'; visual countdown hidden':'');
+    }
+    function persistSession() {
+      if(!appState.session)return;
+      var ok=saveJson(SESSION_KEY,appState.session);
+      el.sessionWarning.hidden=ok;
+      el.sessionWarning.textContent=ok?'':'Progress could not be saved on this device. Keep this page open and download the result when finished.';
+    }
+    function recordAnswer(raw,timeout,skipped) {
+      var s=appState.session,q=appState.currentQuestion;
+      if(!s||!q||s.paused||appState.inputLocked||appState.finishing)return;
+      var ms=Date.now()-appState.questionStartedAt,seconds=responseSeconds();
+      if(seconds&&ms>=seconds*1000){timeout=true;skipped=false;raw='';ms=seconds*1000;}
+      if(timeout){raw='';ms=seconds*1000;}
+      appState.inputLocked=true;clearQuestionTimers();
+      var correct=!timeout&&!skipped&&/^\d+$/.test(raw)&&Number(raw)===q.answer;
+      s.questionResults.push({questionNumber:s.questionResults.length+1,phase:s.phase,bandId:s.currentBandId,
+        a:q.a,b:q.b,table:q.table,fact:q.display,familyKey:q.familyKey,answer:q.answer,response:raw,
+        correct:correct,timeout:timeout,skipped:skipped,responseTimeMs:ms,
+        category:correct?(isStandard(s.conditions)&&ms<FLUENT_MS?'fluent':'known_slow'):'not_secure',retest:false});
+      s.activeMs+=ms;delete s.pendingQuestion;appState.currentQuestion=null;
+      if(shouldEndCurrentBandEarly())s.blockQueue=[];
+      persistSession();
+      el.problemText.textContent='';el.answerInput.value='';
+      appState.nextQuestionId=window.setTimeout(presentNextQuestion,180);
+    }
+    function showBreak(title,message) {
+      var s=appState.session;if(!s)return;
+      clearQuestionTimers();appState.currentQuestion=null;appState.inputLocked=true;s.paused=true;
+      el.problemText.textContent='';el.answerInput.value='';
+      if(!s.breaks.length||s.breaks[s.breaks.length-1].endedAt)s.breaks.push({startedAt:new Date().toISOString(),reason:title});
+      el.breakTitle.textContent=title;el.breakMessage.textContent=message;
+      el.conditionsLabel.textContent=conditionsText(s.conditions);
+      el.repeatIntroBtn.hidden=s.phase!=='warmup'||s.needsTeacherCheck;
+      el.continueBtn.textContent=s.needsTeacherCheck?'Teacher: continue':'Continue';
+      showScreen('breakScreen');el.breakTitle.focus();persistSession();
+    }
+    function closeBreak() {
+      var s=appState.session;if(!s||!s.breaks.length)return;
+      var last=s.breaks[s.breaks.length-1];if(!last.endedAt)last.endedAt=new Date().toISOString();
+    }
+    function continueAssessment(approved) {
+      var s=appState.session;if(!s||!s.paused)return;
+      if(s.needsTeacherCheck&&!approved){requireTeacherAccess('continueAssessment');return;}
+      closeBreak();s.paused=false;s.needsTeacherCheck=false;
+      appState.teacherUnlocked=false;el.teacherBtn.textContent='Teacher';el.teacherBtn.className='btn secondary';
+      showScreen('testScreen');
+      var next=s.nextBlock;delete s.nextBlock;
+      if(next&&next.warmup){s.phase='warmup';s.currentBandId='Introduction';s.blockQueue=shuffle(WARMUP);renderBandTrack();presentNextQuestion();}
+      else if(next)beginBand(next.index,next.extra);
+      else {renderBandTrack();presentNextQuestion();}
+    }
+    function repeatIntroduction() {
+      var s=appState.session;if(!s||s.phase!=='warmup'||!s.paused)return;
+      s.questionResults=s.questionResults.filter(function(q){return q.phase!=='warmup';});
+      s.nextBlock={warmup:true};continueAssessment(false);
+    }
+    function interruptQuestion(reason) {
+      var s=appState.session;if(!s||s.paused||appState.finishing)return;
+      clearQuestionTimers();
+      var q=s.pendingQuestion;
+      if(q){
+        s.interruptions.push({at:new Date().toISOString(),reason:reason,fact:q.display,bandId:s.currentBandId,familyKey:q.familyKey,table:q.table,a:q.a,b:q.b});
+        if(s.phase==='warmup')s.blockQueue.unshift(q);
+        else {
+          var band=BANDS[s.currentBandIndex],used=s.questionResults.filter(function(a){return a.phase==='band'&&a.bandId===band.id;}).concat(s.blockQueue,s.interruptions.filter(function(a){return a.bandId===band.id;}));
+          try{s.blockQueue.unshift(FactGroups.select(band,1,used)[0]);}
+          catch(e){s.replacementUnavailable=true;}
+        }
+        delete s.pendingQuestion;
+      }
+      s.needsTeacherCheck=true;
+      showBreak('Check paused',s.replacementUnavailable?'An interrupted question could not be replaced with a new fact. This group may have incomplete evidence. Ask your teacher to continue.':'No answer was scored for the interruption. Ask your teacher to resume with a replacement question.');
+    }
+    function restoreSession() {
+      var saved=loadJson(SESSION_KEY,null);
+      if(!saved||saved.appVersion!==APP_VERSION||saved.teacherKey!==activeTeacher.key){showError('This saved check cannot be resumed in this version or class.');return;}
+      if(!['questionResults','bandResults','blockQueue','pendingExtras','breaks','interruptions'].every(function(k){return Array.isArray(saved[k]);})||typeof saved.id!=='string'||!Number.isInteger(saved.currentBandIndex)||saved.currentBandIndex< -1||saved.currentBandIndex>7){showError('The saved progress is damaged. Keep this browser data and ask for help recovering it.');return;}
+      saved.conditions=normalizeConditions(saved.conditions);saved.maxQuestions=FactGroups.budget(saved.conditions.mixed);
+      appState.session=saved;appState.finishing=false;el.testStudentLabel.textContent=saved.studentName;el.recoveryNotice.hidden=true;
+      if(saved.pendingQuestion){saved.paused=false;interruptQuestion('Recovered after refresh');}
+      else {saved.needsTeacherCheck=false;showBreak('Resume saved check','Started '+formatDate(saved.startedAt)+'. Continue only as part of the same supervised assessment; dates and breaks are recorded.');}
+    }
+    function downloadResult() {
+      var r=appState.latestResult;if(!r)return;
+      var blob=new Blob([JSON.stringify(r,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),link=document.createElement('a');
+      link.href=url;link.download='FactFlow-Check-'+r.assessmentId+'.json';link.click();
+      window.setTimeout(function(){URL.revokeObjectURL(url);},1000);
+    }
+
+    function init() {
+      cacheDom();
+      appState.config = loadConfig();
+      appState.results = loadJson(RESULTS_KEY, []);
+      appState.legacyResults=loadJson('factflowBeta.results.v1',[]);
+      appState.attempts = loadJson(ATTEMPTS_KEY, {});
+      renderConfig();
+      renderHistory();
+      bindEvents();
+      if (routeError) { showError(routeError); el.beginBtn.disabled = true; }
+      var pending = appState.results.filter(function (result) { return result.submissionStatus === 'pending'; });
+      if (pending.length && !routeError) {
+        appState.latestResult = pending[0];
+        renderResult(pending[0]);
+        showScreen('resultScreen');
+      }
+
+      var saved=loadJson(SESSION_KEY,null);
+      if(saved&&!routeError){
+        if(saved.completedResult){appState.latestResult=saved.completedResult;if(!appState.results.some(function(r){return r.assessmentId===saved.id;}))appState.results.unshift(saved.completedResult);saveResults();if(appState.resultsSaved)saveJson(SESSION_KEY,null);renderResult(saved.completedResult);showScreen('resultScreen');}
+        else if(!appState.results.some(function(r){return r.assessmentId===saved.id;})){el.recoveryNotice.hidden=false;el.recoveryText.textContent='A check for '+saved.studentName+' is saved. Your teacher can resume it.';}
+        else saveJson(SESSION_KEY,null);
+      }
+
+      // Show teacher badge when resolved from ?t= param or default
+      if (activeTeacher) {
+        el.teacherBadgeName.textContent = activeTeacher.name;
+        el.teacherBadge.style.display = '';
+      }
+    }
+
+    init();
+  })();
+  </script>
+</body>
+</html>
