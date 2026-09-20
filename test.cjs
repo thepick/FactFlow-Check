@@ -22,12 +22,12 @@ function load(search = '?t=IP5/8', saved = new Map(), liveDelivery = false) {
   return Object.assign(context,{saved,timers,advance(ms){now+=ms;},drain(){for(const [id,t] of timers){if(t.ms<1000){timers.delete(id);t.fn();}}}});
 }
 function answer(i, correct=true, retest=false) {return {phase:'band',bandId:'B',fact:'3 x 4',familyKey:String(i),correct,category:correct?'fluent':'not_secure',timeout:false,retest};}
-function session(c,conditions={}) {return {id:'ffc-test-1',appVersion:'3.0.0-preview',studentName:'Test Student',teacherKey:'IP5/8',code:'TEST-10',assessmentName:'Snapshot',attemptKey:'test',startedAt:new Date().toISOString(),startMs:c.Date.now(),phase:'warmup',currentBandIndex:-1,currentBandId:'Introduction',blockQueue:c.api.WARMUP.slice(),questionResults:[],bandResults:[],conditions:c.api.normalizeConditions(conditions),maxQuestions:c.FactGroups.budget(conditions.mixed!==false),pendingExtras:[],stage:'initial',breaks:[],interruptions:[],activeMs:0};}
+function session(c,conditions={}) {return {id:'ffc-test-1',appVersion:'3.0.0-preview',studentName:'Test Student',teacherKey:'IP5/8',code:'TEST-10',assessmentName:'Snapshot',attemptKey:'test',startedAt:new Date().toISOString(),startMs:c.Date.now(),phase:'warmup',currentBandIndex:-1,currentBandId:'Introduction',blockQueue:c.api.WARMUP.slice(),questionResults:[],bandResults:[],conditions:c.api.normalizeConditions(conditions),maxQuestions:c.FactGroups.budget(),pendingExtras:[],stage:'initial',breaks:[],interruptions:[],activeMs:0};}
 
 
 async function run() {
   const c=load('?t=IP5/8',new Map(),true),a=c.api,engine=require('./assessment.js');
-  assert.equal(engine.budget(true),102);assert.equal(engine.budget(false),84);
+  assert.equal(engine.budget(true),102);assert.equal(engine.budget(false),102);
   // Every generated sample covers all component tables and has no reversed duplicates.
   for(let seed=0;seed<100;seed++) for(const g of engine.groups) {
     let state=seed+1;const random=()=>((state=(state*1664525+1013904223)>>>0)/4294967296);
@@ -71,7 +71,7 @@ async function run() {
   for(const conditions of [{mode:'extended'},{mode:'untimed'},{input:'teacher'}]){
     const r=simulate('slow',conditions);assert.equal(r.fluent,0);assert.ok(r.bandResults.every(b=>b.verdict==='accuracy_only'));
   }
-  assert.equal(simulate('perfect',{mixed:false}).bandResults[7].verdict,'not_assessed');
+  const oldSettings=simulate('perfect',{mixed:false});assert.equal(oldSettings.bandResults[7].verdict,'pass');assert.equal(oldSettings.bandResults[7].questions,18);assert.equal(oldSettings.conditions.mixed,true);assert.match(oldSettings.bandResults[7].label,/Final challenge/);
   // Ending during an extra block must include the new evidence, not its stale initial summary.
   const partial=load(),ps=session(partial);partial.api.appState.session=ps;
   ps.bandResults=[{bandId:'A',label:engine.groups[0].label,questions:8,correct:6,fluent:6,slow:0,wrong:0,timeout:2,skipped:0,tables:[2,5,10],verdict:'incomplete'}];
