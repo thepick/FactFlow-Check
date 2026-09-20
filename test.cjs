@@ -5,7 +5,7 @@ const vm = require('node:vm');
 const html = fs.readFileSync(__dirname + '/index.html', 'utf8').replace(/\r\n/g, '\n');
 const source = [...html.matchAll(/<script[^>]*>([\s\S]*?)<\/script>/g)].map(m => m[1]).find(s => s.includes('var BANDS'));
 const receiverSource = fs.readFileSync(__dirname + '/factflow-apps-script.gs', 'utf8');
-const names = 'appState,el,BANDS,WARMUP,evaluateBandAnswers,buildFinalResult,beginBand,presentNextQuestion,submitAnswer,handleTimeout,hasPendingResults,sendResults,init,renderResult,clearSavedResults,continueAssessment,restoreSession,interruptQuestion,repeatIntroduction,startAssessment,normalizeConditions,recordAnswer';
+const names = 'appState,el,BANDS,WARMUP,evaluateBandAnswers,buildFinalResult,beginBand,presentNextQuestion,submitAnswer,handleTimeout,hasPendingResults,sendResults,init,renderResult,clearSavedResults,continueAssessment,restoreSession,interruptQuestion,repeatIntroduction,startAssessment,normalizeConditions,recordAnswer,handleKey';
 function load(search = '?t=IP5/8', saved = new Map(), liveDelivery = false) {
   let now = Date.parse('2026-09-20T03:00:00Z'), nextTimer = 0;
   const timers = new Map(), elements = new Map();
@@ -79,6 +79,12 @@ async function run() {
   const pr=partial.api.buildFinalResult(ps);assert.equal(pr.bandResults[0].questions,10);assert.equal(pr.bandResults[0].verdict,'incomplete');
   // Preview never submits even an old pending result.
   const isolated=load();let calls=0;isolated.fetch=()=>{calls++;throw Error('Must not send');};isolated.api.appState.latestResult=Object.assign({},fullResult,{submissionStatus:'pending'});await isolated.api.sendResults();assert.equal(calls,0);
+  // Automatic keyboard/keypad entry preserves valid prefixes and cancels stale timers.
+  function entry(answerValue){const e=load();e.api.appState.session=session(e);e.api.presentNextQuestion();e.api.appState.currentQuestion.answer=answerValue;return e;}
+  const auto=entry(144);auto.api.handleKey('1');assert.equal(auto.api.appState.autoSubmitId,null);auto.api.handleKey('4');assert.equal(auto.api.appState.autoSubmitId,null);auto.api.handleKey('4');assert.equal(auto.timers.get(auto.api.appState.autoSubmitId).ms,120);auto.advance(1500);auto.drain();assert.equal(auto.api.appState.session.questionResults[0].correct,true);
+  const wrong=entry(24);wrong.api.handleKey('7');assert.equal(wrong.timers.get(wrong.api.appState.autoSubmitId).ms,500);wrong.api.handleKey('backspace');assert.equal(wrong.api.appState.autoSubmitId,null);wrong.drain();assert.equal(wrong.api.appState.session.questionResults.length,0);wrong.api.handleKey('2');wrong.api.handleKey('4');wrong.api.handleKey('clear');wrong.drain();assert.equal(wrong.api.appState.session.questionResults.length,0);
+  const longer=entry(144);longer.api.handleKey('9');assert.equal(longer.timers.get(longer.api.appState.autoSubmitId).ms,700);longer.drain();assert.equal(longer.api.appState.session.questionResults[0].correct,false);
+  const once=entry(8);once.api.handleKey('8');once.api.submitAnswer();once.drain();assert.equal(once.api.appState.session.questionResults.length,1);
   // Deadline enforcement also applies if a backgrounded timer callback runs late.
   const timed=load();timed.api.appState.session=session(timed);timed.api.presentNextQuestion();
   timed.api.el.answerInput.value=String(timed.api.appState.currentQuestion.answer);timed.advance(10001);timed.api.submitAnswer();

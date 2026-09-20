@@ -242,7 +242,7 @@
         <div class="problem-area" aria-live="polite">
           <div class="problem-text" id="problemText">Ready?</div>
         </div>
-        <p class="muted small center">Type or tap your answer, then press Enter or Submit.</p>
+        <p class="muted small center">Type or tap your answer. It submits automatically.</p>
         <div class="answer-wrap">
           <input id="answerInput" class="answer-input" inputmode="none" readonly autocomplete="off" maxlength="3" placeholder="?" aria-label="Answer">
         </div>
@@ -924,15 +924,30 @@
       }
       if (value === 'backspace') {
         el.answerInput.value = current.slice(0, -1);
-        clearAnswerTimers();
+        scheduleAutoSubmit();
         return;
       }
       if (!/^[0-9]$/.test(value)) return;
       var correctLength = String(appState.currentQuestion.answer).length;
       if (current.length >= Math.max(3, correctLength)) return;
       el.answerInput.value = current + value;
+      scheduleAutoSubmit();
     }
 
+
+    function scheduleAutoSubmit() {
+      clearAnswerTimers();
+      if(!appState.currentQuestion||appState.inputLocked)return;
+      var input=el.answerInput.value;
+      if(!input)return;
+      var correct=String(appState.currentQuestion.answer);
+      // Preserve the original entry behaviour: allow a valid partial answer to finish.
+      var delay=input.length>=correct.length?120:correct.indexOf(input)!==0?(correct.length>=3?700:500):0;
+      if(delay)appState.autoSubmitId=window.setTimeout(function(){
+        appState.autoSubmitId=null;
+        if(!appState.inputLocked&&el.answerInput.value)submitAnswer();
+      },delay);
+    }
 
     function shouldEndCurrentBandEarly() {
       var s=appState.session;if(!s||s.phase!=='band'||s.blockHadExtras)return false;

@@ -17,7 +17,7 @@ An independent, supervised snapshot of multiplication accuracy and fluent recall
 
 ## Timing and evidence
 
-Standard conditions allow ten seconds per question. A correct submitted response strictly under four seconds counts as fluent. Type or tap the answer, then press Enter or Submit; the app does not use the correct answer's length to decide when to submit. Response time includes entering and submitting the answer.
+Standard conditions allow ten seconds per question. A correct submitted response strictly under four seconds counts as fluent. Type or tap the answer; it submits automatically using the original entry behaviour. A full-length answer submits after 120 ms; a shorter nonmatching answer submits after a short pause (500–700 ms), while a matching partial answer waits for the remaining digits or the question deadline. Enter and Submit remain optional. Backspace and Clear cancel pending submission. Response time includes the submission delay.
 
 Teacher-selected extended (20-second), untimed, or teacher-recorded oral responses assess accuracy only. They never earn standard fluency verdicts. Hiding the visual countdown does not extend the deadline. These settings apply to the next assessment on that device.
 
