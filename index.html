@@ -1326,6 +1326,11 @@
           el.beginBtn.click();
           return;
         }
+        if (evt.key === 'Enter' && appState.session && appState.session.paused && el.breakScreen.classList.contains('active') && el.teacherUnlockModal.classList.contains('hidden')) {
+          evt.preventDefault();
+          if (!evt.repeat) continueAssessment(false);
+          return;
+        }
         if (!appState.session||appState.session.paused||!el.teacherUnlockModal.classList.contains('hidden')) return;
         if(evt.key==='Enter'){evt.preventDefault();submitAnswer();return;}
         if (/^[0-9]$/.test(evt.key)) { evt.preventDefault(); handleKey(evt.key); }
