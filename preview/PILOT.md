@@ -38,7 +38,7 @@ For each supervised check, record:
 1. Review pilot observations with Michael. Software tests are complete; the human pilot is not.
 2. Apply any agreed changes and run the regression and browser checks.
 3. Deploy the schema-3-compatible receiver to both existing class endpoints. Keep URLs, owners and access settings unchanged. Verify receipts and class routing.
-4. Confirm new records use Check v3 / Check Raw v3, while legacy and practice records still use their own tabs.
+4. Confirm new records use FactFlow Quiz / FactFlow Quiz Raw, while legacy and practice records still use their own tabs.
 5. Set PREVIEW_MODE to false, give the release a non-preview version, and update preview-only notices.
 6. Publish the approved classroom app. Retain the previous release in Git for rollback.
 

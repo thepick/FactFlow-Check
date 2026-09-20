@@ -19,3 +19,11 @@ The new receiver supports schema 2 and schema 3. Schema 3 records are separated 
 Preview-only results are not queued for automatic later submission. Export them during the pilot. Promoting the app does not retroactively change or rescore those results.
 
 Run node test.cjs before deployment. Use PILOT.md to review classroom observations and future releases. The existing teacher passphrase remains unchanged; classroom codes and passphrase protection are not strong authentication.
+
+## Verified rollout — 21 September 2026
+
+- Live and preview interfaces are named FactFlow Quiz. The preview does not submit results.
+- Both class receivers calculate teacher-only whole-percentage grades with equal level weights and a 60% accuracy / 40% fluency split.
+- IP5/9 runs the renamed-tab receiver. Its current report is FactFlow Quiz; its obsolete Check and Raw Data tabs were removed at the teacher's request. FactFlow practice tabs were preserved. FactFlow Quiz Raw is created when the first live quiz result arrives.
+- IP5/8 retains Check v3 / Check Raw v3 tab names until its receiver is upgraded.
+- GitHub Pages deploys the static app. Apps Script receiver code must be deployed separately; pushing this repository does not update Google deployments.
