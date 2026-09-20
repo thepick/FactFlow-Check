@@ -1,59 +1,61 @@
-# FactFlow Check
+# FactFlow Check 3.0 preview
 
-FactFlow Check is an independent, supervised assessment of multiplication fact accuracy and fluency. It gives teachers a snapshot of the student's skills at the time of testing. FactFlow is a separate practice app: Check neither reads practice progress nor changes it.
+An independent, supervised snapshot of multiplication accuracy and fluent recall. FactFlow practice remains separate. This release is a classroom pilot, not a validated diagnostic instrument or a permanent student level.
 
-## Version 2.8.0
+## What changed
 
-- Retest successes cannot replace incorrect first responses when deciding whether a band is demonstrated.
-- Results distinguish Demonstrated, Needs practice, Incomplete evidence, and Not assessed.
-- Failed submissions remain saved on the device across reloads. Retry sending uses the same assessment ID.
-- The shared Google Sheets receiver acknowledges the exact assessment and destination spreadsheet, prevents duplicate retry rows, and keeps older retries from replacing newer snapshots.
-- Unknown class links stop with an error instead of silently using another class.
+- Named fact groups: 2s, 5s & 10s; 3s & 4s; 6s; 7s; 8s; 9s; 11s & 12s; Mixed facts: 2–12.
+- Every group is assessed independently. Difficulty in one group does not block later groups.
+- Four unscored 1-times-table examples teach the controls without priming scored facts.
+- Eight initial questions per group; uncertain accuracy is revisited after all initial groups. Up to four extra unique facts per group, or three for a single table (there are only eleven unique facts from ×2 to ×12).
+- Optional mixed recall: eighteen questions covering all eleven tables.
+- Interrupted displays and repeated introductions are outside the scored budget; they are recorded separately where applicable.
+- No repeated-fact retests or fast-track awards. Within a group, a reversed fact is the same fact.
+- A computed maximum of 102 counted questions (98 scored), including every extra and mixed recall; 78 counted (74 scored) when initial evidence is clear. Without mixed recall the maximum is 84 counted.
+- Every section ends at a blank break screen. Two successive groups showing difficulty or incomplete evidence require a teacher check-in. The teacher can continue or finish with honest coverage labels.
+- No total-time failure. After 400 seconds of active response time, the section screen suggests a break. The per-question deadline still applies.
 
-## Assessment
+## Timing and evidence
 
-The assessment starts with six warm-up questions. A strong warm-up verifies Band A and starts the fast-track path: six-question gateways for B–G, with four extra questions when needed. Otherwise, each standard band starts with eight questions and may add four. Band H uses 18 mixed questions.
+Standard conditions allow ten seconds per question. A correct submitted response strictly under four seconds counts as fluent. Type or tap the answer, then press Enter or Submit; the app does not use the correct answer's length to decide when to submit. Response time includes entering and submitting the answer.
 
-| Band | Facts |
-| --- | --- |
-| A | 2s, 5s, 10s |
-| B | 3s, 4s |
-| C | 6s |
-| D | 7s |
-| E | 8s |
-| F | 9s |
-| G | 11s, 12s |
-| H | Mixed 2–12 |
+Teacher-selected extended (20-second), untimed, or teacher-recorded oral responses assess accuracy only. They never earn standard fluency verdicts. Hiding the visual countdown does not extend the deadline. These settings apply to the next assessment on that device.
 
-Each question allows ten seconds. Correct responses under four seconds are fluent; four to eight seconds are known but slow; later correct responses are not fluent. Wrong answers and timeouts are recorded separately.
+Provisional criteria, subject to the pilot:
 
-First responses and extra questions determine accuracy and fluency thresholds. Retests can confirm repeated difficulty, but successful retests do not increase the scoring sample. Displayed totals include retests. Retests cannot consume the question budget reserved for the rest of the current block.
+| Sample | Accuracy | Fluent responses for standard fluency |
+| --- | --- | --- |
+| Initial 8 questions | At least 7 | At least 5 |
+| Extended 11 questions | At least 10 | At least 7 |
+| Extended 12 questions | At least 10 | At least 7 |
+| Mixed 18 questions | At least 16 | At least 12 |
 
-The check stops at 60 questions, or at the time limit (400 seconds, after at least 12 responses), or when it has enough evidence to stop the climb. The existing band order and thresholds are retained. The standard path can exhaust its budget before higher bands; those bands are explicitly **Not assessed**, never assumed weak.
+Correct but slower responses demonstrate accuracy, not fluency. Actual wrong answers can establish difficulty. A timeout or skip is separately recorded; if the missing responses could change the accuracy decision, the result remains incomplete. After at least six questions, a group can end early only when actual incorrect answers make the accuracy threshold mathematically unreachable even with all remaining questions correct. An interruption does not score an answer.
 
-## Reading the snapshot
+These are operational criteria, not population norms. Eight sampled questions do not certify every fact in a group. The report identifies sampled tables, conditions, missing evidence, dates, and the assessment ceiling.
 
-- **Demonstrated:** the sampled band met the accuracy and fluency criteria.
-- **Needs practice:** sufficient evidence was collected and the criteria were not met.
-- **Incomplete evidence:** the band was started but could not be resolved before a limit.
-- **Not assessed:** no band questions were administered.
+## Pilot workflow
 
-The result lists every band, the highest contiguous demonstrated band, observed difficulty, missed facts, and the reason the assessment ended. No difficulty identified in the assessed bands does not imply that all facts have been mastered. This sampled snapshot supports teacher judgment; it is not a permanent mastery label.
+1. Open the preview using your class link. The standard classroom page remains version 2.8.0.
+2. In Teacher Tools, choose response conditions, answer method, visual countdown, and whether to include mixed recall. Save & Exit. Settings are local to this browser/device.
+3. Enter the student's name and teacher code. Complete or repeat the introduction, then continue through blank section screens.
+4. At teacher check-ins, decide whether to continue, rest, or end. Check does not assume unassessed groups are weak.
+5. Download the JSON result and/or copy the readable summary. Preview results are saved locally only; no Google requests are made by the preview.
+6. After a refresh, use Teacher: resume saved check. A visible interrupted fact is replaced with an unused fact; if none is available, evidence remains incomplete. A teacher must authorise resumption. Dates and interruptions are retained. Prefer the same supervised sitting; cross-day resumes are explicitly dated.
+7. Clearing browser data removes local results and progress. Export results before doing so. A persistent warning appears if local storage fails.
 
-## Classroom workflow
+The existing teacher passphrase and code workflow are retained; they are classroom controls, not secure authentication. Do not use another student's name to resume a saved check. Complete or end it first.
 
-1. Share the correct class link, such as `https://ffc.mtomlinson.ca/?t=IP5/9`.
-2. Students enter their name and the teacher's code, then complete the supervised check.
-3. Results send automatically. **Results sent** appears only after an exact receiver acknowledgment.
-4. If sending fails, use **Retry sending** or **Copy result**. Pending results stay saved after Done or reload; Teacher Tools also lets you reopen saved results. Copying does not mark a result as sent.
-5. The teacher's **Check** sheet shows the latest snapshot per normalized student name. Hidden **Raw Data** retains each distinct assessment and its complete JSON evidence. Practice remains in separate **FactFlow Practice** and **Practice Raw Data** tabs.
+## Results and compatibility
 
-Use distinct names for students with the same name: the summary still matches normalized names. The local attempt barrier still allows one attempt per code/assessment/device; shared devices need a fresh code or a teacher-cleared lock. Custom codes are device-local. These classroom barriers are not secure authentication.
+Reports separate accurate/fluent, accurate/fluency developing, accurate/standard fluency not assessed, difficulty observed, incomplete evidence, and not assessed. A strength in 9s can be shown even if 7s were difficult. All scores exclude the introduction; interruptions and pauses are separately recorded. Older local reports are displayed using their original verdicts and never rescored.
 
-Teacher Tools uses the existing passphrase (default `strawberry`). Clearing results is blocked while any result is pending. Older locally saved results remain viewable, with delivery status marked unknown; their original verdicts are not retroactively rescored.
+The receiver accepts legacy schema 2 and new schema 3. New results go into separate `Check v3` and hidden `Check Raw v3` tabs so old and new criteria do not overwrite each other. Conditions, version, dates, coverage, accuracy-only groups, and response gaps are retained. Practice tabs and practice logic are unchanged. The preview deliberately does not send results, even if an old receiver is installed.
 
-## Setup and checks
+## Validation
 
-See [SETUP-GUIDE.md](SETUP-GUIDE.md). **Deploy the updated shared receiver before publishing this app.** The receiver shipped here and in FactFlow is the same code; use either copy, not both in one Apps Script project.
+Run `node test.cjs`. No dependencies or real Google requests are needed. Tests cover strong, slow, uneven, wrong, timed-out, skipped, accommodated, maximum-budget, optional-mixed, interrupted and refreshed paths; 100 generated samples per group; storage failures; exact receipts; duplicate/stale retries; receiver validation; and legacy/practice separation.
 
-Run `node test.cjs` for the dependency-free regression check. It tests both adaptive paths, scoring, interrupted coverage, routing, offline recovery, receipts, safe retries, and separation from practice reporting without contacting Google.
+A real Edge browser check additionally covers the full 78-question route, teacher settings, keyboard submission, a 74/74 scored result, mobile layout, zero preview POST requests, and refresh recovery.
+
+See [PILOT.md](PILOT.md) for acceptance criteria and [SETUP-GUIDE.md](SETUP-GUIDE.md) for promotion. Real-student pilot observations remain to be collected before making this the default.

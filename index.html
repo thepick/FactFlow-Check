@@ -11,6 +11,8 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <title>FactFlow Check</title>
   <style>
+    [hidden] { display:none !important; }
+    select { font:inherit; padding:12px; max-width:100%; }
     :root {
       --font-body: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       --bg: #f7f6f2;
@@ -209,10 +211,20 @@
         </div>
         <div class="error" id="entryError"></div>
         <button class="btn" type="button" id="beginBtn">Begin Check</button>
-        <p class="muted small center">This check uses a one-code-per-attempt lock on this device.</p>
+        <p class="muted small center">Each student can use this code once per assessment on this device.</p>
+        <div class="notice" id="recoveryNotice" hidden><p id="recoveryText"></p><button class="btn secondary" id="resumeSessionBtn" type="button">Teacher: resume saved check</button></div>
       </div>
     </section>
 
+    <p class="notice" role="status">Preview for classroom pilot · Results stay on this device. Copy or download them for your records.</p>
+    <p class="error show" id="sessionWarning" role="alert" hidden></p>
+    <section class="screen" id="breakScreen">
+      <div class="panel grid center"><h2 id="breakTitle" tabindex="-1">Section complete</h2><p id="breakMessage"></p>
+      <p id="conditionsLabel" class="muted"></p><p>No question is visible. Take a break if you need one.</p>
+      <div class="row" style="justify-content:center"><button class="btn" type="button" id="continueBtn">Continue</button>
+      <button class="btn secondary" type="button" id="repeatIntroBtn">Repeat introduction</button>
+      <button class="btn secondary" type="button" id="endSessionBtn">Teacher: end check</button></div></div>
+    </section>
     <section class="screen" id="testScreen">
       <div class="panel">
         <div class="countdown-overlay" id="countdownOverlay" aria-live="assertive" aria-hidden="true">
@@ -230,6 +242,7 @@
         <div class="problem-area" aria-live="polite">
           <div class="problem-text" id="problemText">Ready?</div>
         </div>
+        <p class="muted small center">Type or tap your answer, then press Enter or Submit.</p>
         <div class="answer-wrap">
           <input id="answerInput" class="answer-input" inputmode="none" readonly autocomplete="off" maxlength="3" placeholder="?" aria-label="Answer">
         </div>
@@ -247,6 +260,7 @@
           <button class="key-btn" type="button" data-key="0">0</button>
           <button class="key-btn action" type="button" data-key="backspace">Back</button>
         </div>
+        <div class="row" style="justify-content:center"><button class="btn secondary" id="submitAnswerBtn" type="button">Submit answer</button><button class="btn secondary" id="skipQuestionBtn" type="button">Skip</button></div>
         <div class="status-line" id="statusLine" aria-live="polite"></div>
       </div>
     </section>
@@ -270,13 +284,13 @@
         </div>
         <div class="result-cards">
           <div class="result-card verified">
-            <div class="label">Highest demonstrated band</div>
-            <div class="value" id="verifiedLevel">-</div>
+            <div class="label">Fluent recall demonstrated</div>
+            <div class="value" style="font-size:1.25rem" id="verifiedLevel">-</div>
             <p class="muted small" id="verifiedDesc"></p>
           </div>
           <div class="result-card developing">
-            <div class="label">Needs practice</div>
-            <div class="value" id="developingLevel">-</div>
+            <div class="label">Areas needing attention</div>
+            <div class="value" style="font-size:1.25rem" id="developingLevel">-</div>
             <p class="muted small" id="developingDesc"></p>
           </div>
         </div>
@@ -284,7 +298,7 @@
           <div class="stat"><div class="label">Accuracy</div><div class="value" id="accuracyStat">-</div></div>
           <div class="stat"><div class="label">Fluent</div><div class="value" id="fluentStat">-</div></div>
           <div class="stat"><div class="label">Slow</div><div class="value" id="slowStat">-</div></div>
-          <div class="stat"><div class="label">Missed</div><div class="value" id="missedStat">-</div></div>
+          <div class="stat"><div class="label">Response gaps</div><div class="value" id="missedStat">-</div></div>
         </div>
         <div class="grid">
           <h3>Assessment snapshot</h3>
@@ -296,13 +310,13 @@
             <div class="tag-list" id="missedTags"></div>
           </div>
           <div class="grid">
-            <h3>Timed out facts</h3>
+            <h3>No response in time</h3>
             <div class="tag-list" id="timeoutTags"></div>
           </div>
         </div>
         <div class="grid">
-          <h3>Band summary</h3>
-          <div id="bandSummary" role="region" aria-label="Band assessment details" tabindex="0"></div>
+          <h3>Fact group summary</h3>
+          <div id="bandSummary" role="region" aria-label="Fact group assessment details" tabindex="0"></div>
         </div>
         <div class="row" style="justify-content:center;gap:10px;">
           <span id="sendStatus" class="send-status" role="status" aria-live="polite"></span>
@@ -310,6 +324,7 @@
         <div class="row" style="justify-content:center;gap:10px;">
           <button class="btn" type="button" id="retryResultsBtn">Retry sending</button>
           <button class="btn secondary" type="button" id="copyResultsBtn">Copy result</button>
+          <button class="btn secondary" type="button" id="downloadResultBtn">Download result</button>
           <button class="btn secondary" type="button" id="studentViewBtn">Done</button>
         </div>
       </div>
@@ -327,8 +342,13 @@
           <label for="assessmentName">Assessment name</label>
           <input id="assessmentName" type="text" maxlength="60" placeholder="Example: Term 1 Multiplication Check">
         </div>
+        <div class="field"><label for="assessmentMode">Response conditions for the next student</label>
+          <select id="assessmentMode"><option value="standard">Standard: 10 seconds per question; fluent under 4 seconds</option><option value="extended">Extended: 20 seconds; accuracy only</option><option value="untimed">Untimed: accuracy only</option></select></div>
+        <div class="field"><label for="inputMethod">Answer method</label><select id="inputMethod"><option value="student">Student keypad or keyboard</option><option value="teacher">Teacher records spoken answers (accuracy only)</option></select></div>
+        <div class="field"><label><input type="checkbox" id="hideTimer"> Hide visual countdown</label><label><input type="checkbox" id="includeMixed"> Include mixed recall (2–12)</label></div>
+        <p class="muted small">These settings are saved on this device. Extended, untimed, and teacher-recorded checks cannot earn standard fluency verdicts. Only change settings before a check.</p>
         <div class="notice">
-          <p class="small muted">Results are sent to the Google Sheet configured for your class in the <code>TEACHERS</code> object near the top of the .html file. Each teacher shares their own link: <code>ffc.mtomlinson.ca/?t=KEY</code>. See SETUP-GUIDE.md for details.</p>
+          <p class="small muted">This preview keeps results locally. Download each completed result before clearing this browser. Existing classroom results are preserved separately.</p>
         </div>
         <div class="notice">
           <div class="row" style="justify-content:space-between;align-items:center;">
@@ -371,6 +391,7 @@
   </div>
   <div class="toast" id="toast" aria-live="polite"></div>
 
+  <script src="assessment.js"></script>
   <script>
   /* ╔══════════════════════════════════════════════════════════════╗
      ║              FACTFLOW CHECK — TEACHER SETUP               ║
@@ -417,42 +438,22 @@
   (function () {
     'use strict';
 
-    var APP_VERSION = '2.8.0';
-    var RESULTS_KEY = 'factflowBeta.results.v1';
-    var ATTEMPTS_KEY = 'factflowBeta.attempts.v1';
-    var CONFIG_KEY = 'factflowBeta.config.v1';
+    var APP_VERSION = '3.0.0-preview';
+    var RESULTS_KEY = 'factflowCheck.results.v3';
+    var ATTEMPTS_KEY = 'factflowCheck.attempts.v3';
+    var CONFIG_KEY = 'factflowCheck.config.v3';
     var TIMEOUT_SEC = 10;
-    var MAX_TEST_SEC = 400;
-    var MAX_QUESTIONS = 60;
-    var MIN_QUESTIONS = 12;
-    var FAST_TRACK_BLOCK_SIZE = 6;
+    var BREAK_SUGGEST_SEC = 400;
+    var PREVIEW_MODE = true;
+    var SESSION_KEY = 'factflowCheck.session.v3|' + (activeTeacher ? activeTeacher.key : 'invalid');
     var FLUENT_MS = 4000;
-    var SLOW_MS = 8000;
-    var AUTO_SUBMIT_MS = 120;
-    var IDLE_SUBMIT_SHORT_MS = 500;
-    var IDLE_SUBMIT_LONG_MS = 700;
-    var MAX_RETESTS_PER_BAND = 4;
-    var EARLY_FAIL_MIN_BAND_ANSWERS = 6;
     var TEACHER_PASS_SALT = 'ffc-teacher-lock-v1';
     var TEACHER_PASS_HASH = '99691dcd1e9a5a4c574211307202ecd2caea10dc19f8962772935960184ff11d';
     var TEACHER_AUTO_LOCK_MS = 15 * 60 * 1000;
     var RESERVED_EXAMPLE_CODES = ['SAMPLE-00'];
 
-    var WARMUP = [
-      makeFact(2, 4), makeFact(5, 6), makeFact(10, 7),
-      makeFact(3, 3), makeFact(4, 2), makeFact(2, 9)
-    ];
-
-    var BANDS = [
-      { id: 'A', label: '2s, 5s, 10s', tables: [2, 5, 10], blockSize: 8, extraSize: 4 },
-      { id: 'B', label: '3s, 4s', tables: [3, 4], blockSize: 8, extraSize: 4 },
-      { id: 'C', label: '6s', tables: [6], blockSize: 8, extraSize: 4 },
-      { id: 'D', label: '7s', tables: [7], blockSize: 8, extraSize: 4 },
-      { id: 'E', label: '8s', tables: [8], blockSize: 8, extraSize: 4 },
-      { id: 'F', label: '9s', tables: [9], blockSize: 8, extraSize: 4 },
-      { id: 'G', label: '11s, 12s', tables: [11, 12], blockSize: 8, extraSize: 4 },
-      { id: 'H', label: 'Mixed 2-12', tables: [2,3,4,5,6,7,8,9,10,11,12], blockSize: 18, extraSize: 0 }
-    ];
+    var WARMUP = [makeFact(1,2),makeFact(1,5),makeFact(1,10),makeFact(1,3)];
+    var BANDS = FactGroups.groups;
 
     var el = {};
     var appState = {
@@ -485,7 +486,9 @@
         'assessmentName','customCode','generateCodeBtn','dailyCodeLabel',
         'codeWindowLabel','clearResultsBtn','historyTable','teacherUnlockModal','teacherPassphrase','teacherUnlockError',
         'cancelTeacherUnlockBtn','unlockTeacherBtn','toast','countdownOverlay','countdownLabel','countdownValue',
-        'teacherBadge','teacherBadgeName','retryResultsBtn','copyResultsBtn'
+        'teacherBadge','teacherBadgeName','retryResultsBtn','copyResultsBtn','downloadResultBtn',
+        'breakScreen','breakTitle','breakMessage','conditionsLabel','continueBtn','repeatIntroBtn','endSessionBtn',
+        'assessmentMode','inputMethod','hideTimer','includeMixed','recoveryNotice','recoveryText','resumeSessionBtn','sessionWarning','submitAnswerBtn','skipQuestionBtn'
       ];
       for (var i = 0; i < ids.length; i++) el[ids[i]] = document.getElementById(ids[i]);
     }
@@ -509,13 +512,7 @@
       return y + 'x' + x;
     }
 
-    function reverseFact(fact) {
-      return makeFact(fact.b, fact.a);
-    }
 
-    function cloneFact(fact) {
-      return makeFact(fact.a, fact.b);
-    }
 
     function pad2(n) {
       return n < 10 ? '0' + n : String(n);
@@ -584,6 +581,7 @@
       }
       if (!cfg.assessmentName) cfg.assessmentName = 'Multiplication Mastery Check';
       if (!cfg.customCode) cfg.customCode = '';
+      cfg.conditions = normalizeConditions(cfg.conditions);
       return cfg;
     }
 
@@ -595,6 +593,7 @@
         el.customCode.value = '';
         showToast('The sample code is reserved and was not saved.');
       }
+      appState.config.conditions = normalizeConditions({mode:el.assessmentMode.value,input:el.inputMethod.value,hideTimer:el.hideTimer.checked,mixed:el.includeMixed.checked});
       appState.config.updatedAt = new Date().toISOString();
       saveJson(CONFIG_KEY, appState.config);
       renderConfig();
@@ -610,6 +609,7 @@
       el.assessmentName.value = appState.config.assessmentName || '';
       el.customCode.value = normalizeCode(appState.config.customCode || '');
       el.studentCodeHint.textContent = 'Ask your teacher for the code';
+      var c=normalizeConditions(appState.config.conditions);el.assessmentMode.value=c.mode;el.inputMethod.value=c.input;el.hideTimer.checked=c.hideTimer;el.includeMixed.checked=c.mixed;
     }
 
     function isCodeAccepted(code) {
@@ -623,7 +623,7 @@
     }
 
     function getAttemptKey(code) {
-      return normalizeCode(code) + '|' + String(appState.config.assessmentName || '').toLowerCase();
+      return (activeTeacher?activeTeacher.key:'')+'|'+normalizeName(el.studentName.value).toLowerCase()+'|'+normalizeCode(code)+'|'+String(appState.config.assessmentName||'').toLowerCase();
     }
 
     function openTeacherUnlock(targetScreen) {
@@ -689,6 +689,9 @@
       resetTeacherAutoLock();
       el.teacherBtn.textContent = 'Save & Exit';
       el.teacherBtn.className = 'btn warning';
+      if (targetScreen === 'resumeSession') { restoreSession(); return; }
+      if (targetScreen === 'continueAssessment') { continueAssessment(true); return; }
+      if (targetScreen === 'endAssessment') { finishAssessment('Teacher ended the check.'); return; }
       if (targetScreen === 'resultScreen' && appState.latestResult) {
         renderResult(appState.latestResult);
         showScreen('resultScreen');
@@ -721,6 +724,9 @@
     function requireTeacherAccess(targetScreen) {
       if (appState.teacherUnlocked) {
         resetTeacherAutoLock();
+        if (targetScreen === 'resumeSession') { restoreSession(); return; }
+        if (targetScreen === 'continueAssessment') { continueAssessment(true); return; }
+        if (targetScreen === 'endAssessment') { finishAssessment('Teacher ended the check.'); return; }
         if (targetScreen === 'resultScreen') {
           if (appState.latestResult) { renderResult(appState.latestResult); showScreen('resultScreen'); }
         } else {
@@ -733,7 +739,7 @@
     }
 
     function showScreen(id) {
-      var screens = ['entryScreen','testScreen','completeScreen','resultScreen','teacherScreen'];
+      var screens = ['entryScreen','testScreen','completeScreen','resultScreen','teacherScreen','breakScreen'];
       for (var i = 0; i < screens.length; i++) {
         if (el[screens[i]]) el[screens[i]].classList.toggle('active', screens[i] === id);
       }
@@ -766,91 +772,16 @@
       return arr;
     }
 
-    function getBandIndex(id) {
-      for (var i = 0; i < BANDS.length; i++) {
-        if (BANDS[i].id === id) return i;
-      }
-      return -1;
+
+    function selectBandQuestions(band,count,isExtra) {
+      var s=appState.session;
+      var previous=s.questionResults.filter(function(q){return q.phase==='band'&&q.bandId===band.id;});
+      return FactGroups.select(band,count,previous);
     }
 
-    function generateBandPool(band) {
-      var pool = [];
-      var seen = {};
-      for (var i = 0; i < band.tables.length; i++) {
-        var table = band.tables[i];
-        for (var n = 2; n <= 12; n++) {
-          var fact = makeFact(table, n);
-          if (!seen[fact.familyKey]) {
-            seen[fact.familyKey] = true;
-            pool.push(fact);
-          }
-        }
-      }
-      return pool;
-    }
 
-    function selectBandQuestions(band, count, isExtra) {
-      var pool = generateBandPool(band);
-      var session = appState.session;
-      var used = {};
-      if (session) {
-        for (var i = 0; i < session.questionResults.length; i++) used[session.questionResults[i].familyKey] = true;
-        for (i = 0; i < session.blockQueue.length; i++) used[session.blockQueue[i].familyKey] = true;
-      }
-      // Shuffle the full pool, then pick unique facts that haven't been used
-      var shuffled = shuffle(pool);
-      var picked = [];
-      for (i = 0; i < shuffled.length && picked.length < count; i++) {
-        if (!used[shuffled[i].familyKey]) {
-          used[shuffled[i].familyKey] = true;
-          picked.push(shuffled[i]);
-        }
-      }
-      // If we still need more (pool exhausted), pick from the full pool allowing repeats
-      if (picked.length < count) {
-        var remaining = shuffle(pool);
-        for (i = 0; i < remaining.length && picked.length < count; i++) {
-          if (!used[remaining[i].familyKey]) {
-            used[remaining[i].familyKey] = true;
-            picked.push(remaining[i]);
-          }
-        }
-      }
-      // Final safety net: if STILL short (very unlikely), allow any fact
-      if (picked.length < count) {
-        var all = shuffle(pool);
-        for (i = 0; i < all.length && picked.length < count; i++) {
-          picked.push(all[i]);
-        }
-      }
-      return smoothQuestionOrder(picked);
-    }
 
-    function smoothQuestionOrder(questions) {
-      var remaining = questions.slice();
-      var ordered = [];
-      var lastFamily = '';
-      while (remaining.length) {
-        var chosenIndex = 0;
-        for (var i = 0; i < remaining.length; i++) {
-          if (remaining[i].familyKey !== lastFamily) { chosenIndex = i; break; }
-        }
-        var fact = remaining.splice(chosenIndex, 1)[0];
-        if (Math.random() < 0.35) fact = reverseFact(fact);
-        ordered.push(fact);
-        lastFamily = fact.familyKey;
-      }
-      return ordered;
-    }
-
-    var countdownTimerId = null;
-
-    function showCountdown(value, label) {
-      el.countdownValue.textContent = String(value);
-      el.countdownLabel.textContent = label || 'Get ready';
-      el.countdownOverlay.classList.add('active');
-      el.countdownOverlay.setAttribute('aria-hidden', 'false');
-    }
+    var countdownTimerId=null;
 
     function hideCountdown() {
       if (countdownTimerId) { window.clearInterval(countdownTimerId); countdownTimerId = null; }
@@ -858,26 +789,6 @@
       el.countdownOverlay.setAttribute('aria-hidden', 'true');
     }
 
-    function runCountdown(onDone) {
-      var remaining = 3;
-      el.answerInput.disabled = true;
-      showCountdown(remaining, 'Get ready');
-
-      countdownTimerId = window.setInterval(function () {
-        remaining--;
-        if (remaining > 0) {
-          showCountdown(remaining, 'Get ready');
-          return;
-        }
-        if (remaining === 0) {
-          showCountdown('Go!', '');
-          return;
-        }
-        hideCountdown();
-        el.answerInput.disabled = false;
-        onDone();
-      }, 1000);
-    }
 
     function startAssessment() {
       clearError();
@@ -886,11 +797,12 @@
       if (!studentName) { showError('Please enter your name.'); el.studentName.focus(); return; }
       var code = normalizeCode(el.teacherCode.value);
       if (!isCodeAccepted(code)) { showError('Please check the teacher code.'); return; }
+      if (loadJson(SESSION_KEY,null)) { showError('Resume or end the saved check before starting another.'); return; }
       appState.sessionId = null;
       var key = getAttemptKey(code);
       var existing = appState.attempts[key];
       if (existing && (existing.status === 'completed' || existing.status === 'in_progress' || existing.status === 'abandoned')) {
-        showError('This code has already been used on this device. Ask your teacher for a new code.');
+        showError('This student has already used this assessment code on this device. Ask your teacher for a new code to reassess.');
         return;
       }
       appState.finishing = false;
@@ -905,45 +817,34 @@
         attemptKey: key,
         startedAt: new Date().toISOString(),
         startMs: Date.now(),
-        startingBand: 'Warm-up -> Band A',
+        conditions: normalizeConditions(appState.config.conditions),
+        pendingExtras: [], stage: 'initial', breaks: [], interruptions: [], activeMs: 0,
+        startingBand: 'Unscored introduction',
         phase: 'warmup',
         currentBandIndex: -1,
         currentBandId: 'Warm-up',
         blockHadExtras: false,
         blockQueue: shuffle(WARMUP),
-        retestQueue: [],
-        retestFamilyState: {},
-        retestCountInBand: 0,
         questionResults: [],
         bandResults: [],
         passedBandIds: [],
         failedBandIds: [],
         latestVerdict: '',
-        finalReason: '',
-        fastTrack: false,
-        currentBlockMode: 'standard'
+        finalReason: ''
       };
+      appState.session.maxQuestions = FactGroups.budget(appState.session.conditions.mixed);
+      persistSession();
       appState.attempts[key] = { status: 'in_progress', startedAt: appState.session.startedAt };
       saveJson(ATTEMPTS_KEY, appState.attempts);
       el.testStudentLabel.textContent = studentName;
       showScreen('testScreen');
       renderBandTrack();
-      runCountdown(function () { presentNextQuestion(); });
+      appState.session.nextBlock={warmup:true};
+      showBreak('Introduction', 'Four unscored questions to try the controls. Wrong answers here will not affect your results.');
     }
 
     function renderBandTrack() {
-      var html = '';
-      var session = appState.session;
-      for (var i = 0; i < BANDS.length; i++) {
-        var cls = 'band-dot';
-        if (session) {
-          if (session.currentBandIndex === i) cls += ' current';
-          if (session.passedBandIds.indexOf(BANDS[i].id) !== -1) cls += ' passed';
-          if (session.failedBandIds.indexOf(BANDS[i].id) !== -1) cls += ' failed';
-        }
-        html += '<span class="' + cls + '"></span>';
-      }
-      el.bandTrack.innerHTML = html;
+      el.bandTrack.textContent = appState.session ? (appState.session.phase==='warmup'?'Unscored introduction':BANDS[appState.session.currentBandIndex].label) : '';
     }
 
     function clearAnswerTimers() {
@@ -975,103 +876,38 @@
     }
 
     function shouldFinishForLimits() {
-      var s = appState.session;
-      if (!s) return false;
-      if (s.questionResults.length >= MAX_QUESTIONS) return true;
-      if ((Date.now() - s.startMs) / 1000 >= MAX_TEST_SEC && s.questionResults.length >= MIN_QUESTIONS) return true;
-      return false;
+      var s=appState.session;
+      return s.questionResults.length>=s.maxQuestions;
     }
 
     function presentNextQuestion() {
-      var s = appState.session;
-      if (!s || appState.finishing) return;
-      clearQuestionTimers();
-      appState.inputLocked = false;
-      el.answerInput.value = '';
-      el.answerInput.className = 'answer-input';
-      setStatus('', '');
-      if (s.blockQueue.length === 0) {
-        completeCurrentBlock();
-        return;
-      }
-      if (shouldFinishForLimits()) {
-        finishAssessment('Question or time limit reached.');
-        return;
-      }
-      var dueRetest = getDueRetest();
-      var q = dueRetest || s.blockQueue.shift();
-      appState.currentQuestion = q;
-      appState.questionStartedAt = Date.now();
-      el.problemText.textContent = q.display;
-      el.qNumber.textContent = String(s.questionResults.length + 1);
-      el.qTotal.textContent = ' of up to ' + MAX_QUESTIONS;
+      var s=appState.session;if(!s||appState.finishing||s.paused)return;
+      clearQuestionTimers();appState.inputLocked=false;appState.currentQuestion=null;
+      el.answerInput.value='';el.answerInput.className='answer-input';setStatus('','');
+      if(!s.blockQueue.length){completeCurrentBlock();return;}
+      if(shouldFinishForLimits()){finishAssessment('Allocated question budget exhausted; remaining evidence is incomplete.');return;}
+      var q=s.blockQueue.shift();appState.currentQuestion=q;s.pendingQuestion=q;
+      persistSession();
+      appState.questionStartedAt=Date.now();el.problemText.textContent=q.display;
+      el.qNumber.textContent=s.phase==='warmup'?String(s.questionResults.filter(function(a){return a.phase==='warmup';}).length+1):String(s.questionResults.filter(function(a){return a.phase==='band';}).length+1);
+      el.qTotal.textContent=s.phase==='warmup'?' of 4 introductory questions':' · '+BANDS[s.currentBandIndex].label;
+      el.timerFill.parentElement.hidden=s.conditions.hideTimer||s.conditions.mode==='untimed';
+      el.submitAnswerBtn.hidden=false;
       startQuestionTimer();
     }
 
-    function getDueRetest() {
-      var s = appState.session;
-      if (!s || !s.retestQueue.length || !hasQuestionBudget(s.blockQueue.length + 1)) return null;
-      for (var i = 0; i < s.retestQueue.length; i++) {
-        if (s.questionResults.length >= s.retestQueue[i].dueAfter) {
-          var item = s.retestQueue.splice(i, 1)[0];
-          if (s.retestFamilyState) s.retestFamilyState[item.fact.familyKey] = 'served';
-          var fact = reverseFact(item.fact);
-          fact.isRetest = true;
-          return fact;
-        }
-      }
-      return null;
-    }
-
     function startQuestionTimer() {
-      var start = Date.now();
-      appState.questionTimerId = window.setTimeout(function () { handleTimeout(); }, TIMEOUT_SEC * 1000);
-      appState.timerIntervalId = window.setInterval(function () {
-        var elapsed = (Date.now() - start) / 1000;
-        var remaining = Math.max(0, TIMEOUT_SEC - elapsed);
-        var pct = Math.max(0, Math.min(100, (remaining / TIMEOUT_SEC) * 100));
-        el.timerFill.style.width = pct + '%';
-        el.timerFill.classList.toggle('warn', remaining <= 4 && remaining > 2);
-        el.timerFill.classList.toggle('danger', remaining <= 2);
-      }, 100);
-      el.timerFill.style.width = '100%';
-      el.timerFill.className = 'timer-fill';
+      var seconds=responseSeconds();if(!seconds)return;
+      var start=Date.now();
+      appState.questionTimerId=window.setTimeout(handleTimeout,seconds*1000);
+      appState.timerIntervalId=window.setInterval(function(){
+        var remaining=Math.max(0,seconds-(Date.now()-start)/1000);
+        el.timerFill.style.width=(remaining/seconds*100)+'%';
+      },100);
+      el.timerFill.style.width='100%';el.timerFill.className='timer-fill';
     }
 
-    function handleTimeout() {
-      if (appState.inputLocked || !appState.currentQuestion) return;
-      appState.inputLocked = true;
-      clearQuestionTimers();
-      var s = appState.session;
-      var q = appState.currentQuestion;
-      var answer = q.answer;
-      var result = {
-        questionNumber: s.questionResults.length + 1,
-        phase: s.phase,
-        bandId: s.currentBandId,
-        fact: q.display,
-        familyKey: q.familyKey,
-        answer: answer,
-        response: '',
-        correct: false,
-        timeout: true,
-        responseTimeMs: TIMEOUT_SEC * 1000,
-        category: 'not_secure',
-        reversed: q.a > q.b,
-        retest: !!q.isRetest
-      };
-      s.questionResults.push(result);
-      if (shouldQueueRetest(s, q)) {
-        s.retestFamilyState[q.familyKey] = 'pending';
-        s.retestCountInBand += 1;
-        s.retestQueue.push({ fact: cloneFact(q), dueAfter: s.questionResults.length + 2 });
-      }
-      if (shouldEndCurrentBandEarly()) {
-        appState.nextQuestionId = window.setTimeout(function () { failCurrentBandEarly('Enough evidence gathered.'); }, 120);
-        return;
-      }
-      appState.nextQuestionId = window.setTimeout(function () { presentNextQuestion(); }, 120);
-    }
+    function handleTimeout() { recordAnswer('',true,false); }
 
     function setStatus(text, kind) {
       el.statusLine.textContent = text || '';
@@ -1089,251 +925,51 @@
       if (value === 'backspace') {
         el.answerInput.value = current.slice(0, -1);
         clearAnswerTimers();
-        scheduleAutoSubmit();
         return;
       }
       if (!/^[0-9]$/.test(value)) return;
       var correctLength = String(appState.currentQuestion.answer).length;
       if (current.length >= Math.max(3, correctLength)) return;
       el.answerInput.value = current + value;
-      scheduleAutoSubmit();
     }
 
-    function scheduleAutoSubmit() {
-      clearAnswerTimers();
-      if (!appState.currentQuestion || appState.inputLocked) return;
-      var input = el.answerInput.value;
-      if (!input) return;
-      var correct = String(appState.currentQuestion.answer);
-      if (input.length >= correct.length) {
-        appState.autoSubmitId = window.setTimeout(function () {
-          appState.autoSubmitId = null;
-          if (!appState.inputLocked && el.answerInput.value) submitAnswer();
-        }, AUTO_SUBMIT_MS);
-        return;
-      }
-      if (correct.indexOf(input) !== 0) {
-        var delay = correct.length >= 3 ? IDLE_SUBMIT_LONG_MS : IDLE_SUBMIT_SHORT_MS;
-        appState.idleSubmitId = window.setTimeout(function () {
-          appState.idleSubmitId = null;
-          if (!appState.inputLocked && el.answerInput.value) submitAnswer();
-        }, delay);
-      }
-    }
-
-    function shouldQueueRetest(session, question) {
-      if (!session || !question) return false;
-      if (session.phase !== 'band') return false;
-      if (question.isRetest) return false;
-      if (!session.retestFamilyState) session.retestFamilyState = {};
-      if (!session.retestCountInBand) session.retestCountInBand = 0;
-      if (session.retestFamilyState[question.familyKey]) return false;
-      if (session.retestCountInBand >= MAX_RETESTS_PER_BAND) return false;
-      return true;
-    }
 
     function shouldEndCurrentBandEarly() {
-      var s = appState.session;
-      if (!s || s.phase !== 'band' || s.currentBandIndex < 0) return false;
-      var answers = getCurrentBandAnswers();
-      if (answers.length < EARLY_FAIL_MIN_BAND_ANSWERS) return false;
-      var correct = 0;
-      var timeout = 0;
-      var insecure = 0;
-      for (var i = 0; i < answers.length; i++) {
-        if (answers[i].correct) correct++;
-        if (answers[i].timeout) timeout++;
-        if (!answers[i].correct || answers[i].timeout) insecure++;
-      }
-      if (correct <= 2) return true;
-      if (timeout >= 3) return true;
-      if (insecure >= 5 && countRepeatedWeakness(answers) >= 2) return true;
-      return false;
-    }
-
-    function failCurrentBandEarly(reason) {
-      var s = appState.session;
-      if (!s || appState.finishing) return;
-      if (s.phase !== 'band' || s.currentBandIndex < 0) {
-        finishAssessment(reason || 'Enough evidence gathered.');
-        return;
-      }
-      var band = BANDS[s.currentBandIndex];
-      var answers = getCurrentBandAnswers();
-      s.blockQueue = [];
-      s.retestQueue = [];
-      s.bandResults.push(makeBandSummary(band, answers, 'fail'));
-      s.latestVerdict = 'fail';
-      if (s.failedBandIds.indexOf(band.id) === -1) s.failedBandIds.push(band.id);
-      renderBandTrack();
-      finishAssessment(reason || 'Enough evidence gathered.');
+      var s=appState.session;if(!s||s.phase!=='band'||s.blockHadExtras)return false;
+      return evaluateBandAnswers(getCurrentBandAnswers(),false,BANDS[s.currentBandIndex])==='fail';
     }
 
     function submitAnswer() {
-      var s = appState.session;
-      var q = appState.currentQuestion;
-      if (!s || !q || appState.inputLocked || appState.finishing) return;
-      appState.inputLocked = true;
-      clearQuestionTimers();
-      var raw = String(el.answerInput.value || '');
-      var responseTimeMs = Date.now() - appState.questionStartedAt;
-      var correct = raw !== '' && parseInt(raw, 10) === q.answer;
-      var category = 'not_secure';
-      if (correct && responseTimeMs < FLUENT_MS) category = 'fluent';
-      else if (correct && responseTimeMs <= SLOW_MS) category = 'known_slow';
-      else if (correct) category = 'not_fluent';
-      var result = {
-        questionNumber: s.questionResults.length + 1,
-        phase: s.phase,
-        bandId: s.currentBandId,
-        fact: q.display,
-        familyKey: q.familyKey,
-        answer: q.answer,
-        response: raw,
-        correct: correct,
-        timeout: false,
-        responseTimeMs: responseTimeMs,
-        category: category,
-        reversed: q.a > q.b,
-        retest: !!q.isRetest
-      };
-      s.questionResults.push(result);
-      if (!correct && shouldQueueRetest(s, q)) {
-        s.retestFamilyState[q.familyKey] = 'pending';
-        s.retestCountInBand += 1;
-        s.retestQueue.push({ fact: cloneFact(q), dueAfter: s.questionResults.length + 2 });
-      }
-      if (correct) {
-        el.answerInput.classList.add('good');
-      } else {
-        el.answerInput.classList.add('bad');
-      }
-      var nextDelay = correct ? 120 : 120;
-      if (shouldEndCurrentBandEarly()) {
-        setStatus('Enough evidence gathered.', 'warn');
-        appState.nextQuestionId = window.setTimeout(function () { failCurrentBandEarly('Enough evidence gathered.'); }, nextDelay);
-        return;
-      }
-      appState.nextQuestionId = window.setTimeout(function () { presentNextQuestion(); }, nextDelay);
+      if(!el.answerInput.value)return;
+      recordAnswer(el.answerInput.value,false,false);
     }
 
     function completeCurrentBlock() {
-      var s = appState.session;
-      if (!s || appState.finishing) return;
-      if (s.phase === 'warmup') {
-        if (isWarmupFastTrackReady()) {
-          s.fastTrack = true;
-          var warmSummary = makeWarmupBandASummary();
-          s.bandResults.push(warmSummary);
-          s.latestVerdict = 'pass';
-          if (s.passedBandIds.indexOf('A') === -1) s.passedBandIds.push('A');
-          renderBandTrack();
-          beginBand(1);
-          return;
-        }
-        beginBand(0);
-        return;
-      }
-      var band = BANDS[s.currentBandIndex];
-      var answers = getCurrentBandAnswers();
-      var verdict = evaluateBandAnswers(answers, s.blockHadExtras, band);
-      if (verdict === 'extra') {
-        var extraNeeded = band.extraSize;
-        if (!hasQuestionBudget(extraNeeded)) {
-          finishAssessment('Question limit reached before extra questions.');
-          return;
-        }
-        s.blockHadExtras = true;
-        s.currentBlockMode = 'extra';
-        s.blockQueue = selectBandQuestions(band, extraNeeded, true);
-        setStatus('A few more questions.', 'warn');
-        appState.nextQuestionId = window.setTimeout(function () { presentNextQuestion(); }, 200);
-        return;
-      }
-      var summary = makeBandSummary(band, answers, verdict);
-      s.bandResults.push(summary);
-      s.latestVerdict = verdict;
-      if (verdict === 'pass') {
-        if (s.passedBandIds.indexOf(band.id) === -1) s.passedBandIds.push(band.id);
-        if (s.currentBandIndex >= BANDS.length - 1) {
-          finishAssessment('Completed all bands.');
-          return;
-        }
-        beginBand(s.currentBandIndex + 1);
-        return;
-      }
-      if (verdict === 'fail' && s.failedBandIds.indexOf(band.id) === -1) s.failedBandIds.push(band.id);
-      finishAssessment(verdict === 'incomplete' ? 'Not enough evidence to finish this band.' : 'Enough evidence gathered.');
+      var s=appState.session;if(!s||appState.finishing)return;
+      if(s.phase==='warmup') {s.nextBlock={index:0,extra:false};showBreak('Introduction complete','Ready to assess your multiplication facts.');return;}
+      var band=BANDS[s.currentBandIndex],answers=getCurrentBandAnswers();
+      var verdict=evaluateBandAnswers(answers,s.blockHadExtras,band);
+      if(verdict==='extra') {if(s.pendingExtras.indexOf(s.currentBandIndex)<0)s.pendingExtras.push(s.currentBandIndex);verdict='incomplete';}
+      s.bandResults=s.bandResults.filter(function(r){return r.bandId!==band.id;});
+      s.bandResults.push(makeBandSummary(band,answers,verdict));
+      var next=null;
+      if(s.stage==='initial'&&s.currentBandIndex<6)next={index:s.currentBandIndex+1,extra:false};
+      else if(s.pendingExtras.length){s.stage='extras';next={index:s.pendingExtras.shift(),extra:true};}
+      else if(s.conditions.mixed&&band.id!=='H'){s.stage='mixed';next={index:7,extra:false};}
+      if(!next){finishAssessment('Completed the selected fact groups.');return;}
+      s.nextBlock=next;
+      var recent=s.bandResults.slice(-2);
+      s.needsTeacherCheck=recent.length===2&&recent.every(function(r){return r.verdict==='fail'||r.verdict==='incomplete';});
+      showBreak('Section complete',s.needsTeacherCheck?'Please ask your teacher whether to continue, take a break, or finish.':'Next: '+BANDS[next.index].label+'.'+(s.activeMs/1000>=BREAK_SUGGEST_SEC?' You have been working for a while; this is a good place for a break.':''));
     }
 
-    function getWarmupAnswers() {
-      var s = appState.session;
-      var answers = [];
-      if (!s) return answers;
-      for (var i = 0; i < s.questionResults.length; i++) {
-        if (s.questionResults[i].phase === 'warmup') answers.push(s.questionResults[i]);
-      }
-      return answers;
-    }
+    function hasQuestionBudget(count) {var s=appState.session;return !!s&&s.maxQuestions-s.questionResults.length>=count;}
 
-    function isWarmupFastTrackReady() {
-      var answers = getWarmupAnswers();
-      if (answers.length < WARMUP.length) return false;
-      var correct = 0;
-      var fluent = 0;
-      var timeout = 0;
-      for (var i = 0; i < answers.length; i++) {
-        if (answers[i].correct) correct++;
-        if (answers[i].category === 'fluent') fluent++;
-        if (answers[i].timeout) timeout++;
-      }
-      return correct === answers.length && fluent >= answers.length - 1 && timeout === 0;
-    }
-
-    function makeWarmupBandASummary() {
-      var answers = getWarmupAnswers();
-      var summary = makeBandSummary(BANDS[0], answers, 'pass');
-      summary.label = BANDS[0].label + ' (verified from warm-up)';
-      summary.fastTrack = true;
-      return summary;
-    }
-
-    function hasQuestionBudget(count) {
-      var s = appState.session;
-      if (!s) return false;
-      return (MAX_QUESTIONS - s.questionResults.length) >= count;
-    }
-
-    function getInitialBlockSize(index) {
-      var s = appState.session;
-      var band = BANDS[index];
-      if (!band) return 0;
-      if (band.id === 'H') return band.blockSize;
-      if (s && s.fastTrack && index > 0) return FAST_TRACK_BLOCK_SIZE;
-      return band.blockSize;
-    }
-
-    function beginBand(index) {
-      var s = appState.session;
-      if (!s || appState.finishing) return;
-      if (index < 0 || index >= BANDS.length) { finishAssessment('Completed all bands.'); return; }
-      var band = BANDS[index];
-      var blockSize = getInitialBlockSize(index);
-      if (!hasQuestionBudget(blockSize)) {
-        finishAssessment('Question limit reached before the next full band could begin.');
-        return;
-      }
-      s.phase = 'band';
-      s.currentBandIndex = index;
-      s.currentBandId = band.id;
-      s.blockHadExtras = false;
-      s.currentBlockMode = (s.fastTrack && index > 0 && band.id !== 'H') ? 'gateway' : 'standard';
-      s.retestQueue = [];
-      s.retestFamilyState = {};
-      s.retestCountInBand = 0;
-      s.blockQueue = selectBandQuestions(band, blockSize, false);
-      renderBandTrack();
-      presentNextQuestion();
+    function beginBand(index,extra) {
+      var s=appState.session,band=BANDS[index],count=extra?band.extraSize:band.blockSize;
+      if(!hasQuestionBudget(count)){finishAssessment('Insufficient budget for a complete fact group.');return;}
+      s.phase='band';s.currentBandIndex=index;s.currentBandId=band.id;s.blockHadExtras=!!extra;
+      s.blockQueue=selectBandQuestions(band,count,extra);s.paused=false;renderBandTrack();presentNextQuestion();
     }
 
     function getCurrentBandAnswers() {
@@ -1345,80 +981,22 @@
       return answers;
     }
 
-    function countRepeatedWeakness(answers) {
-      var counts = {};
-      var repeated = 0;
-      for (var i = 0; i < answers.length; i++) {
-        if (!answers[i].correct || answers[i].timeout) {
-          counts[answers[i].familyKey] = (counts[answers[i].familyKey] || 0) + 1;
-        }
-      }
-      for (var key in counts) {
-        if (Object.prototype.hasOwnProperty.call(counts, key) && counts[key] >= 2) repeated++;
-      }
-      return repeated;
+
+
+    function evaluateBandAnswers(answers,hadExtras,band) {
+      return FactGroups.assess(band,answers,hadExtras,isStandard(appState.session.conditions));
     }
 
-    function evaluateBandAnswers(answers, hadExtras, band) {
-      var s = appState.session;
-      var repeatedWeakness = countRepeatedWeakness(answers);
-      answers = answers.filter(function (answer) { return !answer.retest; });
-      var n = answers.length;
-      var required = (s && s.fastTrack && band.id !== 'A' && band.id !== 'H') ? FAST_TRACK_BLOCK_SIZE : band.blockSize;
-      if (n < required + (hadExtras ? band.extraSize : 0)) return 'incomplete';
-      var correct = 0;
-      var fluent = 0;
-      var timeout = 0;
-      var slowOrNotFluent = 0;
-      for (var i = 0; i < answers.length; i++) {
-        if (answers[i].correct) correct++;
-        if (answers[i].category === 'fluent') fluent++;
-        if (answers[i].timeout) timeout++;
-        if (answers[i].category === 'known_slow' || answers[i].category === 'not_fluent') slowOrNotFluent++;
-      }
-      if (band.id === 'H') {
-        if (correct >= Math.ceil(n * 0.85) && fluent >= Math.ceil(n * 0.66) && timeout <= 2 && repeatedWeakness < 2) return 'pass';
-        return 'fail';
-      }
-      if (s && s.fastTrack && s.currentBlockMode === 'gateway' && !hadExtras) {
-        if (correct === n && fluent >= n - 1 && timeout === 0 && repeatedWeakness === 0) return 'pass';
-        if (correct >= n - 1 && timeout <= 1 && repeatedWeakness < 2) return 'extra';
-        return 'fail';
-      }
-      if (!hadExtras) {
-        if (correct >= 7 && fluent >= 5 && timeout <= 1 && repeatedWeakness < 2) return 'pass';
-        if (correct <= 4 || timeout >= 3 || repeatedWeakness >= 2) return 'fail';
-        return 'extra';
-      }
-      if (correct >= Math.ceil(n * 0.83) && fluent >= Math.ceil(n * 0.55) && timeout <= 2 && repeatedWeakness < 2 && slowOrNotFluent <= Math.ceil(n * 0.45)) return 'pass';
-      return 'fail';
-    }
-
-    function makeBandSummary(band, answers, verdict) {
-      var correct = 0;
-      var fluent = 0;
-      var timeout = 0;
-      var wrong = 0;
-      var slow = 0;
-      for (var i = 0; i < answers.length; i++) {
-        if (answers[i].correct) correct++;
-        if (answers[i].category === 'fluent') fluent++;
-        if (answers[i].timeout) timeout++;
-        if (!answers[i].correct && !answers[i].timeout) wrong++;
-        if (answers[i].category === 'known_slow' || answers[i].category === 'not_fluent') slow++;
-      }
-      return {
-        bandId: band.id,
-        label: band.label,
-        questions: answers.length,
-        correct: correct,
-        fluent: fluent,
-        slow: slow,
-        wrong: wrong,
-        timeout: timeout,
-        repeatedWeakness: countRepeatedWeakness(answers),
-        verdict: verdict
-      };
+    function makeBandSummary(band,answers,verdict) {
+      return {bandId:band.id,label:band.label,questions:answers.length,
+        correct:answers.filter(function(a){return a.correct;}).length,
+        fluent:answers.filter(function(a){return a.category==='fluent';}).length,
+        slow:answers.filter(function(a){return a.correct&&a.category!=='fluent';}).length,
+        wrong:answers.filter(function(a){return !a.correct&&!a.timeout&&!a.skipped;}).length,
+        timeout:answers.filter(function(a){return a.timeout;}).length,
+        skipped:answers.filter(function(a){return a.skipped;}).length,
+        tables:band.tables.filter(function(t){return answers.some(function(a){return a.table===t;});}),
+        verdict:verdict};
     }
 
     function finishAssessment(reason) {
@@ -1428,11 +1006,15 @@
       clearQuestionTimers();
       s.finalReason = reason;
       s.completedAt = new Date().toISOString();
+      closeBreak();
       s.durationSec = Math.round((Date.now() - s.startMs) / 1000);
+      delete s.pendingQuestion;
       var result = buildFinalResult(s);
       appState.latestResult = result;
       appState.results.unshift(result);
       saveResults();
+      if(appState.resultsSaved)saveJson(SESSION_KEY,null);
+      else {s.completedResult=result;persistSession();}
       appState.attempts[s.attemptKey] = { status: 'completed', completedAt: result.completedAt };
       saveJson(ATTEMPTS_KEY, appState.attempts);
       appState.session = null;
@@ -1444,67 +1026,29 @@
     }
 
     function buildFinalResult(s) {
-      var q = s.questionResults;
-      var total = q.length;
-      var correct = 0;
-      var fluent = 0;
-      var slow = 0;
-      var wrong = 0;
-      var timeout = 0;
-      var missed = {};
-      var timedOut = {};
-      for (var i = 0; i < q.length; i++) {
-        if (q[i].correct) correct++;
-        if (q[i].category === 'fluent') fluent++;
-        if (q[i].category === 'known_slow' || q[i].category === 'not_fluent') slow++;
-        if (!q[i].correct && !q[i].timeout) { wrong++; missed[q[i].familyKey] = q[i].fact; }
-        if (q[i].timeout) { timeout++; timedOut[q[i].familyKey] = q[i].fact; missed[q[i].familyKey] = q[i].fact; }
-      }
-      var bands = BANDS.map(function (band) {
-        var recorded = s.bandResults.filter(function (item) { return item.bandId === band.id; })[0];
-        if (recorded) return recorded;
-        var answers = q.filter(function (answer) { return answer.phase === 'band' && answer.bandId === band.id; });
-        return makeBandSummary(band, answers, answers.length ? 'incomplete' : 'not_assessed');
+      var q=s.questionResults.filter(function(a){return a.phase==='band';});
+      var bands=BANDS.map(function(b){
+        var answers=q.filter(function(a){return a.bandId===b.id;});
+        var recorded=s.bandResults.filter(function(r){return r.bandId===b.id;})[0];
+        return recorded&&recorded.questions===answers.length?recorded:makeBandSummary(b,answers,answers.length?'incomplete':'not_assessed');
       });
-      var verifiedIndex = -1;
-      var developingIndex = -1;
-      for (i = 0; i < bands.length; i++) {
-        if (bands[i].verdict === 'pass' && verifiedIndex === i - 1) verifiedIndex = i;
-        if (bands[i].verdict === 'fail' && developingIndex < 0) developingIndex = i;
-      }
-      var result = {
-        assessmentId: s.id,
-        teacherKey: s.teacherKey,
-        submissionStatus: 'pending',
-        appVersion: APP_VERSION,
-        studentName: s.studentName,
-        code: s.code,
-        assessmentName: s.assessmentName,
-        startedAt: s.startedAt,
-        completedAt: s.completedAt,
-        durationSec: s.durationSec,
-        startingBand: s.startingBand,
-        highestAttemptedBand: s.currentBandId,
-        verifiedBandIndex: verifiedIndex,
-        verifiedBand: verifiedIndex >= 0 ? BANDS[verifiedIndex].id : 'None yet',
-        verifiedLabel: verifiedIndex >= 0 ? BANDS[verifiedIndex].label : 'No band demonstrated yet',
-        developingBand: developingIndex >= 0 ? BANDS[developingIndex].id : 'None identified',
-        developingLabel: developingIndex >= 0 ? BANDS[developingIndex].label : 'See assessment coverage below',
-        totalQuestions: total,
-        correct: correct,
-        accuracy: total ? Math.round((correct / total) * 100) : 0,
-        fluent: fluent,
-        slow: slow,
-        wrong: wrong,
-        timeout: timeout,
-        missedFacts: objectValues(missed),
-        timedOutFacts: objectValues(timedOut),
-        finalReason: s.finalReason,
-        recommendedPractice: makeRecommendation(bands, objectValues(missed)),
-        bandResults: bands,
-        questionResults: q
-      };
-      return result;
+      var missed={},timedOut={};q.forEach(function(a){if(!a.correct&&!a.timeout&&!a.skipped)missed[a.familyKey]=a.fact;if(a.timeout)timedOut[a.familyKey]=a.fact;});
+      function labels(verdicts){return bands.filter(function(b){return verdicts.indexOf(b.verdict)>=0;}).map(function(b){return b.label;}).join('; ');}
+      var correct=q.filter(function(a){return a.correct;}).length;
+      var fluent=q.filter(function(a){return a.category==='fluent';}).length;
+      return {assessmentId:s.id,teacherKey:s.teacherKey,submissionStatus:PREVIEW_MODE?'preview':'pending',
+        appVersion:APP_VERSION,schemaVersion:3,studentName:s.studentName,code:s.code,assessmentName:s.assessmentName,
+        startedAt:s.startedAt,completedAt:s.completedAt,durationSec:s.durationSec,activeSec:Math.round(s.activeMs/1000),
+        conditions:s.conditions,breaks:s.breaks,interruptions:s.interruptions,introductionResponses:s.questionResults.filter(function(a){return a.phase==='warmup';}),
+        startingBand:'Independent fact groups',highestAttemptedBand:s.currentBandId,
+        verifiedBand:labels(['pass'])||'None demonstrated',verifiedLabel:isStandard(s.conditions)?'Fluent recall under standard conditions':'Standard fluency not assessed',
+        developingBand:labels(['slow','fail'])||'None identified',developingLabel:'See accuracy, fluency and evidence for each fact group below.',
+        totalQuestions:q.length,countedQuestions:s.questionResults.length,maxQuestions:s.maxQuestions,
+        correct:correct,accuracy:q.length?Math.round(correct/q.length*100):0,fluent:fluent,slow:correct-fluent,
+        wrong:q.filter(function(a){return !a.correct&&!a.timeout&&!a.skipped;}).length,
+        timeout:q.filter(function(a){return a.timeout;}).length,skipped:q.filter(function(a){return a.skipped;}).length,
+        missedFacts:objectValues(missed),timedOutFacts:objectValues(timedOut),finalReason:s.finalReason,
+        recommendedPractice:makeRecommendation(bands,objectValues(missed)),bandResults:bands,questionResults:q};
     }
 
     function objectValues(obj) {
@@ -1517,33 +1061,32 @@
     }
 
     function verdictLabel(verdict) {
-      return { pass: 'Demonstrated', fail: 'Needs practice', incomplete: 'Incomplete evidence', not_assessed: 'Not assessed' }[verdict] || 'Unknown';
+      return {pass:'Accurate and fluent',slow:'Accurate; fluency developing',accuracy_only:'Accurate; standard fluency not assessed',fail:'Difficulty observed',incomplete:'Incomplete evidence',not_assessed:'Not assessed'}[verdict]||'Unknown';
     }
 
-    function makeRecommendation(bands, missedFacts) {
-      var lines = ['A snapshot of the facts assessed today.'];
-      ['pass', 'fail', 'incomplete', 'not_assessed'].forEach(function (verdict) {
-        var ids = bands.filter(function (band) { return band.verdict === verdict; }).map(function (band) { return band.bandId; });
-        if (ids.length) lines.push(verdictLabel(verdict) + ': ' + ids.join(', ') + '.');
-      });
-      if (missedFacts.length) lines.push('Facts to review: ' + missedFacts.slice(0, 8).join(', ') + '.');
+    function makeRecommendation(bands,missedFacts) {
+      var lines=['A sampled snapshot of multiplication facts, not a permanent level.'];
+      ['pass','slow','accuracy_only','fail','incomplete','not_assessed'].forEach(function(v){var labels=bands.filter(function(b){return b.verdict===v;}).map(function(b){return b.label;});if(labels.length)lines.push(verdictLabel(v)+': '+labels.join('; ')+'.');});
+      if(bands.every(function(b){return b.verdict==='pass';}))lines.push('Demonstrated the assessed multiplication facts through 12. This check does not assess beyond that range.');
+      if(missedFacts.length)lines.push('Incorrect responses: '+missedFacts.join(', ')+'.');
       return lines.join(' ');
     }
 
     function renderResult(result) {
-      el.resultMeta.textContent = result.studentName + ' — ' + result.code + ' — ' + formatDate(result.completedAt);
-      el.verifiedLevel.textContent = result.verifiedBand;
+      el.resultMeta.textContent = result.studentName + ' — ' + result.code + ' — ' + formatDate(result.completedAt) + ' · '+result.appVersion+' · '+conditionsText(result.conditions);
+      if(result.breaks&&result.breaks.length)el.resultMeta.textContent+=' · Started '+formatDate(result.startedAt)+'; '+result.breaks.length+' section pauses';
+      el.verifiedLevel.textContent = result.schemaVersion===3?result.verifiedBand:result.verifiedLabel;
       el.verifiedDesc.textContent = result.verifiedLabel;
-      el.developingLevel.textContent = result.developingBand;
+      el.developingLevel.textContent = result.schemaVersion===3?result.developingBand:result.developingLabel;
       el.developingDesc.textContent = result.developingLabel;
       el.accuracyStat.textContent = result.correct + '/' + result.totalQuestions + ' (' + result.accuracy + '%)';
       el.fluentStat.textContent = String(result.fluent);
       el.slowStat.textContent = String(result.slow);
-      el.missedStat.textContent = String(result.wrong + result.timeout);
+      el.missedStat.textContent = result.wrong+' incorrect; '+result.timeout+' unanswered; '+(result.skipped||0)+' skipped';
       el.recommendationText.textContent = result.recommendedPractice + (result.finalReason ? ' Ended: ' + result.finalReason : '');
       renderTags(el.missedTags, result.missedFacts, 'bad', 'No missed facts recorded.');
       renderTags(el.timeoutTags, result.timedOutFacts, 'warn', 'No timeouts recorded.');
-      renderBandSummary(result.bandResults);
+      renderBandSummary(result.bandResults,result.schemaVersion===3);
       renderSendStatus();
     }
 
@@ -1557,17 +1100,10 @@
       container.innerHTML = html;
     }
 
-    function renderBandSummary(bands) {
-      if (!bands || !bands.length) {
-        el.bandSummary.innerHTML = '<p class="muted">No band summary recorded.</p>';
-        return;
-      }
-      var html = '<table><thead><tr><th>Band</th><th>Score</th><th>Fluent</th><th>Timeout</th><th>Verdict</th></tr></thead><tbody>';
-      for (var i = 0; i < bands.length; i++) {
-        html += '<tr><td>' + escapeHtml(bands[i].bandId + ' - ' + bands[i].label) + '</td><td>' + bands[i].correct + '/' + bands[i].questions + '</td><td>' + bands[i].fluent + '</td><td>' + bands[i].timeout + '</td><td>' + verdictLabel(bands[i].verdict) + '</td></tr>';
-      }
-      html += '</tbody></table>';
-      el.bandSummary.innerHTML = html + '<p class="muted small">Counts include retests. Band decisions use first responses plus any extra questions; retests can confirm a repeated difficulty but cannot replace an incorrect first response.</p>';
+    function renderBandSummary(bands,modern) {
+      var html='<table><thead><tr><th>Fact group</th><th>Accuracy</th><th>Fluent</th><th>No response</th><th>Skipped</th><th>Tables sampled</th><th>Result</th></tr></thead><tbody>';
+      (bands||[]).forEach(function(b){html+='<tr><td>'+escapeHtml(b.label)+'</td><td>'+b.correct+'/'+b.questions+'</td><td>'+b.fluent+'</td><td>'+b.timeout+'</td><td>'+(b.skipped||0)+'</td><td>'+escapeHtml((b.tables||[]).join(', '))+'</td><td>'+escapeHtml(modern?verdictLabel(b.verdict):({pass:'Demonstrated (legacy)',fail:'Needs practice (legacy)',incomplete:'Incomplete evidence',not_assessed:'Not assessed'}[b.verdict]||b.verdict))+'</td></tr>';});
+      el.bandSummary.innerHTML=html+'</tbody></table><p class="muted small">'+(modern?'Scroll the table sideways on small screens. Introduction, breaks and interrupted questions are excluded. Groups are assessed independently. Correct but slower responses demonstrate accuracy, not fluent recall. Accommodated timing and teacher-recorded responses do not earn standard fluency verdicts.':'Earlier assessment rules; this result has not been rescored.')+'</p>';
     }
 
     function formatDate(iso) {
@@ -1592,8 +1128,11 @@
       lines.push('Assessment: ' + r.assessmentName);
       lines.push('Code: ' + r.code);
       lines.push('Date: ' + formatDate(r.completedAt));
-      lines.push('Verified level: ' + r.verifiedBand + ' - ' + r.verifiedLabel);
-      lines.push('Needs practice: ' + r.developingBand + ' - ' + r.developingLabel);
+      lines.push('Version: '+r.appVersion+'; '+conditionsText(r.conditions));
+      lines.push('Started: '+formatDate(r.startedAt)+'; elapsed: '+formatDuration(r.durationSec||0)+'; active response time: '+formatDuration(r.activeSec||0));
+      lines.push('Pauses: '+(r.breaks||[]).length+'; interruptions: '+(r.interruptions||[]).length+'; skipped: '+(r.skipped||0));
+      lines.push('Fluent recall demonstrated: ' + r.verifiedBand + ' - ' + r.verifiedLabel);
+      lines.push('Areas needing attention: ' + r.developingBand + ' - ' + r.developingLabel);
       lines.push('Accuracy: ' + r.correct + '/' + r.totalQuestions + ' (' + r.accuracy + '%)');
       lines.push('Fluent: ' + r.fluent);
       lines.push('Slow/not fluent: ' + r.slow);
@@ -1601,7 +1140,7 @@
       lines.push('Missed facts: ' + (r.missedFacts.length ? r.missedFacts.join(', ') : 'None'));
       lines.push('Snapshot: ' + r.recommendedPractice);
       lines.push('Ended: ' + (r.finalReason || ''));
-      (r.bandResults || []).forEach(function (band) { lines.push('Band ' + band.bandId + ': ' + verdictLabel(band.verdict)); });
+      (r.bandResults || []).forEach(function (band) { lines.push(band.label + ': ' + (r.schemaVersion===3?verdictLabel(band.verdict):({pass:'Demonstrated (legacy)',fail:'Needs practice (legacy)',incomplete:'Incomplete evidence',not_assessed:'Not assessed'}[band.verdict]||band.verdict))+'; '+band.correct+'/'+band.questions+' correct; '+band.fluent+' fluent; tables sampled: '+(band.tables||[]).join(', ')); });
       copyText(lines.join('\n'));
     }
 
@@ -1623,21 +1162,22 @@
     }
 
     function renderHistory() {
-      var results = appState.results || [];
+      var results = (appState.results || []).concat(appState.legacyResults||[]);
       if (!results.length) {
         el.historyTable.innerHTML = '<tbody><tr><td class="muted">No saved results yet.</td></tr></tbody>';
         return;
       }
-      var html = '<thead><tr><th>Date</th><th>Student</th><th>Code</th><th>Verified</th><th>Needs practice</th><th>Accuracy</th><th>Q</th><th>Delivery</th></tr></thead><tbody>';
+      var html = '<thead><tr><th>Date</th><th>Student</th><th>Code</th><th>Fluent recall</th><th>Areas needing attention</th><th>Accuracy</th><th>Q</th><th>Delivery</th></tr></thead><tbody>';
       for (var i = 0; i < results.length; i++) {
         var r = results[i];
-        html += '<tr><td>' + escapeHtml(formatDate(r.completedAt)) + '</td><td>' + escapeHtml(r.studentName || 'Student') + '</td><td>' + escapeHtml(r.code) + '</td><td>' + escapeHtml(r.verifiedBand) + '</td><td>' + escapeHtml(r.developingBand) + '</td><td>' + r.accuracy + '%</td><td>' + r.totalQuestions + '</td><td><button type="button" class="btn secondary" data-result-index="' + i + '">' + (r.submissionStatus === 'sent' ? 'View sent result' : r.submissionStatus === 'pending' ? 'View unsent result' : 'View saved result') + '</button></td></tr>';
+        html += '<tr><td>' + escapeHtml(formatDate(r.completedAt)) + '</td><td>' + escapeHtml(r.studentName || 'Student') + '</td><td>' + escapeHtml(r.code) + '</td><td>' + escapeHtml(r.schemaVersion===3?r.verifiedBand:r.verifiedLabel) + '</td><td>' + escapeHtml(r.schemaVersion===3?r.developingBand:r.developingLabel) + '</td><td>' + r.accuracy + '%</td><td>' + r.totalQuestions + '</td><td><button type="button" class="btn secondary" data-result-index="' + i + '">' + (r.submissionStatus === 'sent' ? 'View sent result' : r.submissionStatus === 'pending' ? 'View unsent result' : r.submissionStatus==='preview'?'View preview result':'View saved result') + '</button></td></tr>';
       }
       html += '</tbody>';
       el.historyTable.innerHTML = html;
     }
 
     function clearSavedResults() {
+      if (appState.session||loadJson(SESSION_KEY,null)){showToast('Resume or end the active check first.');return;}
       if (hasPendingResults()) { showToast('Send all pending results before clearing them.'); return; }
       if (!window.confirm('Clear all saved FactFlow Check results and attempt locks on this device?')) return;
       appState.results = [];
@@ -1669,8 +1209,10 @@
       if (!r) return;
       var sending = appState.sendingId === r.assessmentId && !!r.assessmentId;
       el.retryResultsBtn.hidden = r.submissionStatus !== 'pending';
-      el.retryResultsBtn.disabled = !!appState.sendingId || !!routeError;
+      if(r.submissionStatus==='preview'){el.sendStatus.textContent=appState.resultsSaved===false?'Not saved on this device. Download or copy this result before leaving.':'Preview result saved on this device only. Download or copy for your records.';return;}
+      el.retryResultsBtn.disabled = PREVIEW_MODE || !!appState.sendingId || !!routeError;
       el.studentViewBtn.disabled = sending;
+      if(PREVIEW_MODE){el.sendStatus.textContent='Earlier saved result; delivery is disabled in this preview.';return;}
       el.sendStatus.textContent = sending ? 'Sending results…' : r.submissionStatus === 'sent' ? '✓ Results sent' : r.submissionStatus === 'pending' ? (r.submissionError || 'Not sent yet. Retry when connected.') : 'Saved result from an earlier version; delivery status unknown.';
       if (appState.resultsSaved === false && r.submissionStatus === 'pending') {
         el.sendStatus.textContent += ' Could not save on this device. Keep this page open and copy the result before leaving.';
@@ -1679,7 +1221,7 @@
 
     function sendResults() {
       var r = appState.latestResult;
-      if (!r || r.submissionStatus !== 'pending' || appState.sendingId) return Promise.resolve();
+      if (!r || r.submissionStatus !== 'pending' || appState.sendingId || PREVIEW_MODE) return Promise.resolve();
       var teacher = Object.prototype.hasOwnProperty.call(TEACHERS, r.teacherKey) ? TEACHERS[r.teacherKey] : null;
       if (routeError || !teacher || !teacher.url || !teacher.spreadsheetId) {
         r.submissionError = 'Cannot send: check the class link and teacher setup.';
@@ -1687,7 +1229,7 @@
         return Promise.resolve();
       }
       var payload = Object.assign({}, r, {
-        app: 'FactFlowCheck', schemaVersion: 2,
+        app: 'FactFlowCheck', schemaVersion: r.schemaVersion||2,
         expectedSpreadsheetId: teacher.spreadsheetId
       });
       delete payload.submissionStatus;
@@ -1723,16 +1265,25 @@
 
     function bindEvents() {
       el.teacherBtn.addEventListener('click', function () {
+        if(appState.session){showToast('Finish this section to access teacher controls.');return;}
         if (appState.teacherUnlocked) { saveConfig(); lockTeacherArea(); }
         else { requireTeacherAccess('teacherScreen'); }
       });
       el.beginBtn.addEventListener('click', startAssessment);
+      el.continueBtn.addEventListener('click',function(){continueAssessment(false);});
+      el.endSessionBtn.addEventListener('click',function(){requireTeacherAccess('endAssessment');});
+      el.resumeSessionBtn.addEventListener('click',function(){requireTeacherAccess('resumeSession');});
+      el.repeatIntroBtn.addEventListener('click',repeatIntroduction);
+      el.submitAnswerBtn.addEventListener('click',submitAnswer);
+      el.skipQuestionBtn.addEventListener('click',function(){recordAnswer('',false,true);});
+      el.downloadResultBtn.addEventListener('click',downloadResult);
+      document.addEventListener('visibilitychange',function(){if(document.hidden)interruptQuestion('Page hidden');});
       el.retryResultsBtn.addEventListener('click', sendResults);
       el.copyResultsBtn.addEventListener('click', copySummary);
       el.historyTable.addEventListener('click', function (event) {
         var button = event.target.closest('[data-result-index]');
         if (!button || !appState.teacherUnlocked) return;
-        var result = appState.results[Number(button.getAttribute('data-result-index'))];
+        var result = appState.results.concat(appState.legacyResults||[])[Number(button.getAttribute('data-result-index'))];
         if (result) { appState.latestResult = result; renderResult(result); showScreen('resultScreen'); }
       });
       el.showTeacherResultBtn.addEventListener('click', function () { if (appState.latestResult) { renderResult(appState.latestResult); showScreen('resultScreen'); } });
@@ -1755,7 +1306,8 @@
           el.beginBtn.click();
           return;
         }
-        if (!appState.session) return;
+        if (!appState.session||appState.session.paused||!el.teacherUnlockModal.classList.contains('hidden')) return;
+        if(evt.key==='Enter'){evt.preventDefault();submitAnswer();return;}
         if (/^[0-9]$/.test(evt.key)) { evt.preventDefault(); handleKey(evt.key); }
         else if (evt.key === 'Backspace') { evt.preventDefault(); handleKey('backspace'); }
         else if (evt.key === 'Delete' || evt.key === 'Escape') { evt.preventDefault(); handleKey('clear'); }
@@ -1763,14 +1315,14 @@
       el.teacherCode.addEventListener('input', function () { el.teacherCode.value = normalizeCode(el.teacherCode.value); clearError(); });
       window.addEventListener('storage', handleStorageEvent);
       window.addEventListener('beforeunload', function (evt) {
-        if (hasPendingResults()) {
+        if (hasPendingResults()&&!PREVIEW_MODE) {
           evt.preventDefault();
           evt.returnValue = 'There are results that have not been sent yet.';
           return evt.returnValue;
         }
         if (appState.session && !appState.finishing) {
-          appState.attempts[appState.session.attemptKey] = { status: 'abandoned', abandonedAt: new Date().toISOString() };
-          saveJson(ATTEMPTS_KEY, appState.attempts);
+          interruptQuestion('Page closed or refreshed');
+          persistSession();
         }
       });
     }
@@ -1802,14 +1354,118 @@
       appState.currentQuestion = null;
       appState.finishing = false;
       el.teacherCode.value = '';
+      el.studentName.value = '';
       clearError();
       showScreen('entryScreen');
+    }
+
+    function normalizeConditions(value) {
+      var c=value||{};
+      return {mode:['standard','extended','untimed'].indexOf(c.mode)>=0?c.mode:'standard',input:c.input==='teacher'?'teacher':'student',hideTimer:!!c.hideTimer,mixed:c.mixed!==false};
+    }
+    function isStandard(conditions) {var c=normalizeConditions(conditions);return c.mode==='standard'&&c.input==='student';}
+    function responseSeconds(){var mode=appState.session.conditions.mode;return mode==='untimed'?0:mode==='extended'?20:TIMEOUT_SEC;}
+    function conditionsText(conditions) {
+      if(!conditions)return 'Legacy assessment conditions';
+      var c=normalizeConditions(conditions);
+      return (c.mode==='standard'?'10 seconds per question':c.mode==='extended'?'20 seconds per question':'Untimed')+
+        '; '+(c.input==='teacher'?'teacher records spoken answers':'student keypad/keyboard')+
+        '; '+(isStandard(c)?'standard fluency: under 4 seconds':'accuracy only; standard fluency not assessed')+
+        (c.hideTimer?'; visual countdown hidden':'');
+    }
+    function persistSession() {
+      if(!appState.session)return;
+      var ok=saveJson(SESSION_KEY,appState.session);
+      el.sessionWarning.hidden=ok;
+      el.sessionWarning.textContent=ok?'':'Progress could not be saved on this device. Keep this page open and download the result when finished.';
+    }
+    function recordAnswer(raw,timeout,skipped) {
+      var s=appState.session,q=appState.currentQuestion;
+      if(!s||!q||s.paused||appState.inputLocked||appState.finishing)return;
+      var ms=Date.now()-appState.questionStartedAt,seconds=responseSeconds();
+      if(seconds&&ms>=seconds*1000){timeout=true;skipped=false;raw='';ms=seconds*1000;}
+      if(timeout){raw='';ms=seconds*1000;}
+      appState.inputLocked=true;clearQuestionTimers();
+      var correct=!timeout&&!skipped&&/^\d+$/.test(raw)&&Number(raw)===q.answer;
+      s.questionResults.push({questionNumber:s.questionResults.length+1,phase:s.phase,bandId:s.currentBandId,
+        a:q.a,b:q.b,table:q.table,fact:q.display,familyKey:q.familyKey,answer:q.answer,response:raw,
+        correct:correct,timeout:timeout,skipped:skipped,responseTimeMs:ms,
+        category:correct?(isStandard(s.conditions)&&ms<FLUENT_MS?'fluent':'known_slow'):'not_secure',retest:false});
+      s.activeMs+=ms;delete s.pendingQuestion;appState.currentQuestion=null;
+      if(shouldEndCurrentBandEarly())s.blockQueue=[];
+      persistSession();
+      el.problemText.textContent='';el.answerInput.value='';
+      appState.nextQuestionId=window.setTimeout(presentNextQuestion,180);
+    }
+    function showBreak(title,message) {
+      var s=appState.session;if(!s)return;
+      clearQuestionTimers();appState.currentQuestion=null;appState.inputLocked=true;s.paused=true;
+      el.problemText.textContent='';el.answerInput.value='';
+      if(!s.breaks.length||s.breaks[s.breaks.length-1].endedAt)s.breaks.push({startedAt:new Date().toISOString(),reason:title});
+      el.breakTitle.textContent=title;el.breakMessage.textContent=message;
+      el.conditionsLabel.textContent=conditionsText(s.conditions);
+      el.repeatIntroBtn.hidden=s.phase!=='warmup'||s.needsTeacherCheck;
+      el.continueBtn.textContent=s.needsTeacherCheck?'Teacher: continue':'Continue';
+      showScreen('breakScreen');el.breakTitle.focus();persistSession();
+    }
+    function closeBreak() {
+      var s=appState.session;if(!s||!s.breaks.length)return;
+      var last=s.breaks[s.breaks.length-1];if(!last.endedAt)last.endedAt=new Date().toISOString();
+    }
+    function continueAssessment(approved) {
+      var s=appState.session;if(!s||!s.paused)return;
+      if(s.needsTeacherCheck&&!approved){requireTeacherAccess('continueAssessment');return;}
+      closeBreak();s.paused=false;s.needsTeacherCheck=false;
+      appState.teacherUnlocked=false;el.teacherBtn.textContent='Teacher';el.teacherBtn.className='btn secondary';
+      showScreen('testScreen');
+      var next=s.nextBlock;delete s.nextBlock;
+      if(next&&next.warmup){s.phase='warmup';s.currentBandId='Introduction';s.blockQueue=shuffle(WARMUP);renderBandTrack();presentNextQuestion();}
+      else if(next)beginBand(next.index,next.extra);
+      else {renderBandTrack();presentNextQuestion();}
+    }
+    function repeatIntroduction() {
+      var s=appState.session;if(!s||s.phase!=='warmup'||!s.paused)return;
+      s.questionResults=s.questionResults.filter(function(q){return q.phase!=='warmup';});
+      s.nextBlock={warmup:true};continueAssessment(false);
+    }
+    function interruptQuestion(reason) {
+      var s=appState.session;if(!s||s.paused||appState.finishing)return;
+      clearQuestionTimers();
+      var q=s.pendingQuestion;
+      if(q){
+        s.interruptions.push({at:new Date().toISOString(),reason:reason,fact:q.display,bandId:s.currentBandId,familyKey:q.familyKey,table:q.table,a:q.a,b:q.b});
+        if(s.phase==='warmup')s.blockQueue.unshift(q);
+        else {
+          var band=BANDS[s.currentBandIndex],used=s.questionResults.filter(function(a){return a.phase==='band'&&a.bandId===band.id;}).concat(s.blockQueue,s.interruptions.filter(function(a){return a.bandId===band.id;}));
+          try{s.blockQueue.unshift(FactGroups.select(band,1,used)[0]);}
+          catch(e){s.replacementUnavailable=true;}
+        }
+        delete s.pendingQuestion;
+      }
+      s.needsTeacherCheck=true;
+      showBreak('Check paused',s.replacementUnavailable?'An interrupted question could not be replaced with a new fact. This group may have incomplete evidence. Ask your teacher to continue.':'No answer was scored for the interruption. Ask your teacher to resume with a replacement question.');
+    }
+    function restoreSession() {
+      var saved=loadJson(SESSION_KEY,null);
+      if(!saved||saved.appVersion!==APP_VERSION||saved.teacherKey!==activeTeacher.key){showError('This saved check cannot be resumed in this version or class.');return;}
+      if(!['questionResults','bandResults','blockQueue','pendingExtras','breaks','interruptions'].every(function(k){return Array.isArray(saved[k]);})||typeof saved.id!=='string'||!Number.isInteger(saved.currentBandIndex)||saved.currentBandIndex< -1||saved.currentBandIndex>7){showError('The saved progress is damaged. Keep this browser data and ask for help recovering it.');return;}
+      saved.conditions=normalizeConditions(saved.conditions);saved.maxQuestions=FactGroups.budget(saved.conditions.mixed);
+      appState.session=saved;appState.finishing=false;el.testStudentLabel.textContent=saved.studentName;el.recoveryNotice.hidden=true;
+      if(saved.pendingQuestion){saved.paused=false;interruptQuestion('Recovered after refresh');}
+      else {saved.needsTeacherCheck=false;showBreak('Resume saved check','Started '+formatDate(saved.startedAt)+'. Continue only as part of the same supervised assessment; dates and breaks are recorded.');}
+    }
+    function downloadResult() {
+      var r=appState.latestResult;if(!r)return;
+      var blob=new Blob([JSON.stringify(r,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),link=document.createElement('a');
+      link.href=url;link.download='FactFlow-Check-'+r.assessmentId+'.json';link.click();
+      window.setTimeout(function(){URL.revokeObjectURL(url);},1000);
     }
 
     function init() {
       cacheDom();
       appState.config = loadConfig();
       appState.results = loadJson(RESULTS_KEY, []);
+      appState.legacyResults=loadJson('factflowBeta.results.v1',[]);
       appState.attempts = loadJson(ATTEMPTS_KEY, {});
       renderConfig();
       renderHistory();
@@ -1820,6 +1476,13 @@
         appState.latestResult = pending[0];
         renderResult(pending[0]);
         showScreen('resultScreen');
+      }
+
+      var saved=loadJson(SESSION_KEY,null);
+      if(saved&&!routeError){
+        if(saved.completedResult){appState.latestResult=saved.completedResult;if(!appState.results.some(function(r){return r.assessmentId===saved.id;}))appState.results.unshift(saved.completedResult);saveResults();if(appState.resultsSaved)saveJson(SESSION_KEY,null);renderResult(saved.completedResult);showScreen('resultScreen');}
+        else if(!appState.results.some(function(r){return r.assessmentId===saved.id;})){el.recoveryNotice.hidden=false;el.recoveryText.textContent='A check for '+saved.studentName+' is saved. Your teacher can resume it.';}
+        else saveJson(SESSION_KEY,null);
       }
 
       // Show teacher badge when resolved from ?t= param or default
