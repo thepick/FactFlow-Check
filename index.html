@@ -52,6 +52,8 @@
     .screen.active { display: block; }
     .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; }
     .grid { display: grid; gap: 14px; }
+    .app > *, .grid > * { min-width: 0; }
+    #bandSummary { overflow-x: auto; }
     .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
     .field { display: grid; gap: 5px; }
@@ -181,7 +183,7 @@
       <div class="brand">
         <div class="logo" aria-hidden="true"><img src="app-logo.png" alt=""></div>
         <div>
-          <h1>FactFlow Check <span class="subtitle">Smart placement</span></h1>
+          <h1>FactFlow Check <span class="subtitle">Mastery snapshot</span></h1>
         </div>
       </div>
       <div class="header-actions">
@@ -268,12 +270,12 @@
         </div>
         <div class="result-cards">
           <div class="result-card verified">
-            <div class="label">Verified Level</div>
+            <div class="label">Highest demonstrated band</div>
             <div class="value" id="verifiedLevel">-</div>
             <p class="muted small" id="verifiedDesc"></p>
           </div>
           <div class="result-card developing">
-            <div class="label">Developing Level</div>
+            <div class="label">Needs practice</div>
             <div class="value" id="developingLevel">-</div>
             <p class="muted small" id="developingDesc"></p>
           </div>
@@ -285,7 +287,7 @@
           <div class="stat"><div class="label">Missed</div><div class="value" id="missedStat">-</div></div>
         </div>
         <div class="grid">
-          <h3>Recommendation</h3>
+          <h3>Assessment snapshot</h3>
           <div class="notice" id="recommendationText">-</div>
         </div>
         <div class="two-col">
@@ -300,12 +302,14 @@
         </div>
         <div class="grid">
           <h3>Band summary</h3>
-          <div id="bandSummary"></div>
+          <div id="bandSummary" role="region" aria-label="Band assessment details" tabindex="0"></div>
         </div>
         <div class="row" style="justify-content:center;gap:10px;">
-          <span id="sendStatus" class="send-status"></span>
+          <span id="sendStatus" class="send-status" role="status" aria-live="polite"></span>
         </div>
         <div class="row" style="justify-content:center;gap:10px;">
+          <button class="btn" type="button" id="retryResultsBtn">Retry sending</button>
+          <button class="btn secondary" type="button" id="copyResultsBtn">Copy result</button>
           <button class="btn secondary" type="button" id="studentViewBtn">Done</button>
         </div>
       </div>
@@ -387,36 +391,33 @@
   var TEACHERS = {
     'IP5/9': {
       name: 'Ajarn Michael — IP5/9',
+      spreadsheetId: '1hLfZ0OJ5huE3OKg5w4wLvMLu5ImP2SDHdmtX89C7JJY',
       url: 'https://script.google.com/a/macros/ku.th/s/AKfycbxgXxJFgOHGi39oPEHGybpPByBHhfVeLLQRhI2cy8l78_gHo35D8fYSVzc8jPUQmz1EdA/exec'
     },
     'IP5/8': {
       name: 'Ajarn Jordan — IP5/8',
+      spreadsheetId: '1VYs2dbduN8s5R3YEoOzIqQO2fnHko0YQypd3MYKn3Wg',
       url: 'https://script.google.com/macros/s/AKfycbz1DSGVUh2rCaQBRAnf9SuXiF3Ki6tEXKSRNsoiKt-v8z8-UIMARxclA-YjCaU2fQO2OA/exec'
     }
   };
 
-  // Resolve teacher from ?t= URL parameter
+  // A missing route uses the documented default; an invalid explicit route never does.
   var activeTeacher = null;
+  var routeError = '';
   (function () {
-    var q = window.location.search;
-    if (q) {
-      var m = q.match(/[?&]t=([^&]+)/);
-      if (m) {
-        var key = decodeURIComponent(m[1]);
-        if (TEACHERS[key]) { activeTeacher = Object.assign({}, TEACHERS[key], { key: key }); }
-      }
-    }
-    if (!activeTeacher && TEACHERS[DEFAULT_TEACHER_KEY]) {
-      activeTeacher = Object.assign({}, TEACHERS[DEFAULT_TEACHER_KEY], { key: DEFAULT_TEACHER_KEY });
+    var params = new URLSearchParams(window.location.search);
+    var key = params.has('t') ? String(params.get('t')).trim().toUpperCase() : DEFAULT_TEACHER_KEY;
+    if (Object.prototype.hasOwnProperty.call(TEACHERS, key)) {
+      activeTeacher = Object.assign({}, TEACHERS[key], { key: key });
+    } else {
+      routeError = 'Unknown class link. Ask your teacher for the correct link.';
     }
   })();
-
-  var SUBMIT_URL = activeTeacher ? activeTeacher.url : '';
 
   (function () {
     'use strict';
 
-    var APP_VERSION = '2.7.0';
+    var APP_VERSION = '2.8.0';
     var RESULTS_KEY = 'factflowBeta.results.v1';
     var ATTEMPTS_KEY = 'factflowBeta.attempts.v1';
     var CONFIG_KEY = 'factflowBeta.config.v1';
@@ -484,7 +485,7 @@
         'assessmentName','customCode','generateCodeBtn','dailyCodeLabel',
         'codeWindowLabel','clearResultsBtn','historyTable','teacherUnlockModal','teacherPassphrase','teacherUnlockError',
         'cancelTeacherUnlockBtn','unlockTeacherBtn','toast','countdownOverlay','countdownLabel','countdownValue',
-        'teacherBadge','teacherBadgeName'
+        'teacherBadge','teacherBadgeName','retryResultsBtn','copyResultsBtn'
       ];
       for (var i = 0; i < ids.length; i++) el[ids[i]] = document.getElementById(ids[i]);
     }
@@ -569,21 +570,25 @@
     }
 
     function saveJson(key, value) {
-      try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { showToast('Could not save locally.'); }
+      try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch (e) { showToast('Could not save locally.'); return false; }
+    }
+
+    function saveResults() {
+      appState.resultsSaved = saveJson(RESULTS_KEY, appState.results);
     }
 
     function loadConfig() {
       var cfg = loadJson(CONFIG_KEY, null);
       if (!cfg || typeof cfg !== 'object') {
-        cfg = { assessmentName: 'Multiplication Placement Check', customCode: '', updatedAt: new Date().toISOString() };
+        cfg = { assessmentName: 'Multiplication Mastery Check', customCode: '', updatedAt: new Date().toISOString() };
       }
-      if (!cfg.assessmentName) cfg.assessmentName = 'Multiplication Placement Check';
+      if (!cfg.assessmentName) cfg.assessmentName = 'Multiplication Mastery Check';
       if (!cfg.customCode) cfg.customCode = '';
       return cfg;
     }
 
     function saveConfig() {
-      appState.config.assessmentName = String(el.assessmentName.value || 'Multiplication Placement Check').trim();
+      appState.config.assessmentName = String(el.assessmentName.value || 'Multiplication Mastery Check').trim();
       appState.config.customCode = normalizeCode(el.customCode.value || '');
       if (isReservedExampleCode(appState.config.customCode)) {
         appState.config.customCode = '';
@@ -876,6 +881,7 @@
 
     function startAssessment() {
       clearError();
+      if (routeError || !activeTeacher) { showError(routeError || 'Missing class link.'); return; }
       var studentName = normalizeName(el.studentName.value);
       if (!studentName) { showError('Please enter your name.'); el.studentName.focus(); return; }
       var code = normalizeCode(el.teacherCode.value);
@@ -895,6 +901,7 @@
         studentName: studentName,
         code: code,
         assessmentName: appState.config.assessmentName,
+        teacherKey: activeTeacher.key,
         attemptKey: key,
         startedAt: new Date().toISOString(),
         startMs: Date.now(),
@@ -1003,7 +1010,7 @@
 
     function getDueRetest() {
       var s = appState.session;
-      if (!s || !s.retestQueue.length) return null;
+      if (!s || !s.retestQueue.length || !hasQuestionBudget(s.blockQueue.length + 1)) return null;
       for (var i = 0; i < s.retestQueue.length; i++) {
         if (s.questionResults.length >= s.retestQueue[i].dueAfter) {
           var item = s.retestQueue.splice(i, 1)[0];
@@ -1255,8 +1262,8 @@
         beginBand(s.currentBandIndex + 1);
         return;
       }
-      if (s.failedBandIds.indexOf(band.id) === -1) s.failedBandIds.push(band.id);
-      finishAssessment('Enough evidence gathered.');
+      if (verdict === 'fail' && s.failedBandIds.indexOf(band.id) === -1) s.failedBandIds.push(band.id);
+      finishAssessment(verdict === 'incomplete' ? 'Not enough evidence to finish this band.' : 'Enough evidence gathered.');
     }
 
     function getWarmupAnswers() {
@@ -1354,7 +1361,11 @@
 
     function evaluateBandAnswers(answers, hadExtras, band) {
       var s = appState.session;
+      var repeatedWeakness = countRepeatedWeakness(answers);
+      answers = answers.filter(function (answer) { return !answer.retest; });
       var n = answers.length;
+      var required = (s && s.fastTrack && band.id !== 'A' && band.id !== 'H') ? FAST_TRACK_BLOCK_SIZE : band.blockSize;
+      if (n < required + (hadExtras ? band.extraSize : 0)) return 'incomplete';
       var correct = 0;
       var fluent = 0;
       var timeout = 0;
@@ -1365,12 +1376,11 @@
         if (answers[i].timeout) timeout++;
         if (answers[i].category === 'known_slow' || answers[i].category === 'not_fluent') slowOrNotFluent++;
       }
-      var repeatedWeakness = countRepeatedWeakness(answers);
       if (band.id === 'H') {
         if (correct >= Math.ceil(n * 0.85) && fluent >= Math.ceil(n * 0.66) && timeout <= 2 && repeatedWeakness < 2) return 'pass';
         return 'fail';
       }
-      if (s && s.fastTrack && s.currentBlockMode === 'gateway' && !hadExtras && n <= FAST_TRACK_BLOCK_SIZE) {
+      if (s && s.fastTrack && s.currentBlockMode === 'gateway' && !hadExtras) {
         if (correct === n && fluent >= n - 1 && timeout === 0 && repeatedWeakness === 0) return 'pass';
         if (correct >= n - 1 && timeout <= 1 && repeatedWeakness < 2) return 'extra';
         return 'fail';
@@ -1421,9 +1431,8 @@
       s.durationSec = Math.round((Date.now() - s.startMs) / 1000);
       var result = buildFinalResult(s);
       appState.latestResult = result;
-      appState.resultPending = true;
       appState.results.unshift(result);
-      saveJson(RESULTS_KEY, appState.results);
+      saveResults();
       appState.attempts[s.attemptKey] = { status: 'completed', completedAt: result.completedAt };
       saveJson(ATTEMPTS_KEY, appState.attempts);
       appState.session = null;
@@ -1451,16 +1460,22 @@
         if (!q[i].correct && !q[i].timeout) { wrong++; missed[q[i].familyKey] = q[i].fact; }
         if (q[i].timeout) { timeout++; timedOut[q[i].familyKey] = q[i].fact; missed[q[i].familyKey] = q[i].fact; }
       }
+      var bands = BANDS.map(function (band) {
+        var recorded = s.bandResults.filter(function (item) { return item.bandId === band.id; })[0];
+        if (recorded) return recorded;
+        var answers = q.filter(function (answer) { return answer.phase === 'band' && answer.bandId === band.id; });
+        return makeBandSummary(band, answers, answers.length ? 'incomplete' : 'not_assessed');
+      });
       var verifiedIndex = -1;
-      for (i = 0; i < s.bandResults.length; i++) {
-        if (s.bandResults[i].verdict === 'pass') verifiedIndex = getBandIndex(s.bandResults[i].bandId);
-      }
-      var developingIndex = Math.max(0, Math.min(BANDS.length - 1, verifiedIndex + 1));
-      if (s.bandResults.length) {
-        var lastBand = s.bandResults[s.bandResults.length - 1];
-        if (lastBand.verdict !== 'pass') developingIndex = getBandIndex(lastBand.bandId);
+      var developingIndex = -1;
+      for (i = 0; i < bands.length; i++) {
+        if (bands[i].verdict === 'pass' && verifiedIndex === i - 1) verifiedIndex = i;
+        if (bands[i].verdict === 'fail' && developingIndex < 0) developingIndex = i;
       }
       var result = {
+        assessmentId: s.id,
+        teacherKey: s.teacherKey,
+        submissionStatus: 'pending',
         appVersion: APP_VERSION,
         studentName: s.studentName,
         code: s.code,
@@ -1472,9 +1487,9 @@
         highestAttemptedBand: s.currentBandId,
         verifiedBandIndex: verifiedIndex,
         verifiedBand: verifiedIndex >= 0 ? BANDS[verifiedIndex].id : 'None yet',
-        verifiedLabel: verifiedIndex >= 0 ? BANDS[verifiedIndex].label : 'Starting with Band A',
-        developingBand: developingIndex >= 0 ? BANDS[developingIndex].id : 'A',
-        developingLabel: developingIndex >= 0 ? BANDS[developingIndex].label : BANDS[0].label,
+        verifiedLabel: verifiedIndex >= 0 ? BANDS[verifiedIndex].label : 'No band demonstrated yet',
+        developingBand: developingIndex >= 0 ? BANDS[developingIndex].id : 'None identified',
+        developingLabel: developingIndex >= 0 ? BANDS[developingIndex].label : 'See assessment coverage below',
         totalQuestions: total,
         correct: correct,
         accuracy: total ? Math.round((correct / total) * 100) : 0,
@@ -1485,8 +1500,8 @@
         missedFacts: objectValues(missed),
         timedOutFacts: objectValues(timedOut),
         finalReason: s.finalReason,
-        recommendedPractice: makeRecommendation(verifiedIndex, developingIndex, objectValues(missed)),
-        bandResults: s.bandResults,
+        recommendedPractice: makeRecommendation(bands, objectValues(missed)),
+        bandResults: bands,
         questionResults: q
       };
       return result;
@@ -1501,14 +1516,18 @@
       return values;
     }
 
-    function makeRecommendation(verifiedIndex, developingIndex, missedFacts) {
-      if (verifiedIndex >= BANDS.length - 1) {
-        if (missedFacts.length) return 'Ready for mixed multiplication practice. Review: ' + missedFacts.slice(0, 6).join(', ') + '.';
-        return 'Ready for mixed multiplication and extension work.';
-      }
-      var focus = BANDS[Math.max(0, developingIndex)] || BANDS[0];
-      if (missedFacts.length) return 'Next focus: ' + focus.label + '. Review these facts first: ' + missedFacts.slice(0, 8).join(', ') + '.';
-      return 'Next focus: ' + focus.label + '. Use regular FactFlow practice before the next check.';
+    function verdictLabel(verdict) {
+      return { pass: 'Demonstrated', fail: 'Needs practice', incomplete: 'Incomplete evidence', not_assessed: 'Not assessed' }[verdict] || 'Unknown';
+    }
+
+    function makeRecommendation(bands, missedFacts) {
+      var lines = ['A snapshot of the facts assessed today.'];
+      ['pass', 'fail', 'incomplete', 'not_assessed'].forEach(function (verdict) {
+        var ids = bands.filter(function (band) { return band.verdict === verdict; }).map(function (band) { return band.bandId; });
+        if (ids.length) lines.push(verdictLabel(verdict) + ': ' + ids.join(', ') + '.');
+      });
+      if (missedFacts.length) lines.push('Facts to review: ' + missedFacts.slice(0, 8).join(', ') + '.');
+      return lines.join(' ');
     }
 
     function renderResult(result) {
@@ -1521,10 +1540,11 @@
       el.fluentStat.textContent = String(result.fluent);
       el.slowStat.textContent = String(result.slow);
       el.missedStat.textContent = String(result.wrong + result.timeout);
-      el.recommendationText.textContent = result.recommendedPractice;
+      el.recommendationText.textContent = result.recommendedPractice + (result.finalReason ? ' Ended: ' + result.finalReason : '');
       renderTags(el.missedTags, result.missedFacts, 'bad', 'No missed facts recorded.');
       renderTags(el.timeoutTags, result.timedOutFacts, 'warn', 'No timeouts recorded.');
       renderBandSummary(result.bandResults);
+      renderSendStatus();
     }
 
     function renderTags(container, items, cls, emptyText) {
@@ -1544,10 +1564,10 @@
       }
       var html = '<table><thead><tr><th>Band</th><th>Score</th><th>Fluent</th><th>Timeout</th><th>Verdict</th></tr></thead><tbody>';
       for (var i = 0; i < bands.length; i++) {
-        html += '<tr><td>' + escapeHtml(bands[i].bandId + ' - ' + bands[i].label) + '</td><td>' + bands[i].correct + '/' + bands[i].questions + '</td><td>' + bands[i].fluent + '</td><td>' + bands[i].timeout + '</td><td>' + (bands[i].verdict === 'pass' ? 'Passed' : 'Developing') + '</td></tr>';
+        html += '<tr><td>' + escapeHtml(bands[i].bandId + ' - ' + bands[i].label) + '</td><td>' + bands[i].correct + '/' + bands[i].questions + '</td><td>' + bands[i].fluent + '</td><td>' + bands[i].timeout + '</td><td>' + verdictLabel(bands[i].verdict) + '</td></tr>';
       }
       html += '</tbody></table>';
-      el.bandSummary.innerHTML = html;
+      el.bandSummary.innerHTML = html + '<p class="muted small">Counts include retests. Band decisions use first responses plus any extra questions; retests can confirm a repeated difficulty but cannot replace an incorrect first response.</p>';
     }
 
     function formatDate(iso) {
@@ -1573,13 +1593,15 @@
       lines.push('Code: ' + r.code);
       lines.push('Date: ' + formatDate(r.completedAt));
       lines.push('Verified level: ' + r.verifiedBand + ' - ' + r.verifiedLabel);
-      lines.push('Developing level: ' + r.developingBand + ' - ' + r.developingLabel);
+      lines.push('Needs practice: ' + r.developingBand + ' - ' + r.developingLabel);
       lines.push('Accuracy: ' + r.correct + '/' + r.totalQuestions + ' (' + r.accuracy + '%)');
       lines.push('Fluent: ' + r.fluent);
       lines.push('Slow/not fluent: ' + r.slow);
       lines.push('Missed/timeouts: ' + (r.wrong + r.timeout));
       lines.push('Missed facts: ' + (r.missedFacts.length ? r.missedFacts.join(', ') : 'None'));
-      lines.push('Recommendation: ' + r.recommendedPractice);
+      lines.push('Snapshot: ' + r.recommendedPractice);
+      lines.push('Ended: ' + (r.finalReason || ''));
+      (r.bandResults || []).forEach(function (band) { lines.push('Band ' + band.bandId + ': ' + verdictLabel(band.verdict)); });
       copyText(lines.join('\n'));
     }
 
@@ -1596,7 +1618,7 @@
       ta.value = text;
       document.body.appendChild(ta);
       ta.select();
-      try { document.execCommand('copy'); showToast('Summary copied.'); } catch (e) { showToast('Copy failed.'); }
+      try { if (!document.execCommand('copy')) throw new Error('Copy refused'); showToast('Summary copied.'); } catch (e) { showToast('Copy failed.'); }
       document.body.removeChild(ta);
     }
 
@@ -1606,16 +1628,17 @@
         el.historyTable.innerHTML = '<tbody><tr><td class="muted">No saved results yet.</td></tr></tbody>';
         return;
       }
-      var html = '<thead><tr><th>Date</th><th>Student</th><th>Code</th><th>Verified</th><th>Developing</th><th>Accuracy</th><th>Q</th></tr></thead><tbody>';
+      var html = '<thead><tr><th>Date</th><th>Student</th><th>Code</th><th>Verified</th><th>Needs practice</th><th>Accuracy</th><th>Q</th><th>Delivery</th></tr></thead><tbody>';
       for (var i = 0; i < results.length; i++) {
         var r = results[i];
-        html += '<tr><td>' + escapeHtml(formatDate(r.completedAt)) + '</td><td>' + escapeHtml(r.studentName || 'Student') + '</td><td>' + escapeHtml(r.code) + '</td><td>' + escapeHtml(r.verifiedBand) + '</td><td>' + escapeHtml(r.developingBand) + '</td><td>' + r.accuracy + '%</td><td>' + r.totalQuestions + '</td></tr>';
+        html += '<tr><td>' + escapeHtml(formatDate(r.completedAt)) + '</td><td>' + escapeHtml(r.studentName || 'Student') + '</td><td>' + escapeHtml(r.code) + '</td><td>' + escapeHtml(r.verifiedBand) + '</td><td>' + escapeHtml(r.developingBand) + '</td><td>' + r.accuracy + '%</td><td>' + r.totalQuestions + '</td><td><button type="button" class="btn secondary" data-result-index="' + i + '">' + (r.submissionStatus === 'sent' ? 'View sent result' : r.submissionStatus === 'pending' ? 'View unsent result' : 'View saved result') + '</button></td></tr>';
       }
       html += '</tbody>';
       el.historyTable.innerHTML = html;
     }
 
     function clearSavedResults() {
+      if (hasPendingResults()) { showToast('Send all pending results before clearing them.'); return; }
       if (!window.confirm('Clear all saved FactFlow Check results and attempt locks on this device?')) return;
       appState.results = [];
       appState.attempts = {};
@@ -1637,66 +1660,64 @@
       }).join(' ');
     }
 
-    function sendResults() {
+    function hasPendingResults() {
+      return appState.results.some(function (result) { return result.submissionStatus === 'pending'; });
+    }
+
+    function renderSendStatus() {
       var r = appState.latestResult;
       if (!r) return;
-      var url = SUBMIT_URL;
-      if (!url) {
-        showToast('Cannot send: no submission endpoint.');
-        el.studentViewBtn.disabled = false;
-        return;
+      var sending = appState.sendingId === r.assessmentId && !!r.assessmentId;
+      el.retryResultsBtn.hidden = r.submissionStatus !== 'pending';
+      el.retryResultsBtn.disabled = !!appState.sendingId || !!routeError;
+      el.studentViewBtn.disabled = sending;
+      el.sendStatus.textContent = sending ? 'Sending results…' : r.submissionStatus === 'sent' ? '✓ Results sent' : r.submissionStatus === 'pending' ? (r.submissionError || 'Not sent yet. Retry when connected.') : 'Saved result from an earlier version; delivery status unknown.';
+      if (appState.resultsSaved === false && r.submissionStatus === 'pending') {
+        el.sendStatus.textContent += ' Could not save on this device. Keep this page open and copy the result before leaving.';
       }
-      el.studentViewBtn.disabled = true;
-      el.sendStatus.textContent = 'Sending results\u2026';
-      showToast('Sending results\u2026');
-      var payload = {
-        classCode: activeTeacher ? activeTeacher.key : '',
-        appVersion: r.appVersion,
-        studentName: r.studentName,
-        code: r.code,
-        assessmentName: r.assessmentName,
-        completedAt: r.completedAt,
-        durationSec: r.durationSec,
-        verifiedBand: r.verifiedBand,
-        verifiedLabel: r.verifiedLabel,
-        developingBand: r.developingBand,
-        developingLabel: r.developingLabel,
-        totalQuestions: r.totalQuestions,
-        correct: r.correct,
-        accuracy: r.accuracy,
-        fluent: r.fluent,
-        slow: r.slow,
-        wrong: r.wrong,
-        timeout: r.timeout,
-        missedFacts: r.missedFacts,
-        timedOutFacts: r.timedOutFacts,
-        finalReason: r.finalReason
-      };
-      fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify(payload)
-      }).then(function (resp) { return resp.text(); })
-      .then(function (txt) {
-        var data;
-        try { data = JSON.parse(txt); } catch (e) { data = null; }
-        if (data && data.ok) {
-          appState.resultPending = false;
-          el.sendStatus.textContent = '\u2714 Results sent';
-          showToast('Results sent \u2714');
-        } else {
-          appState.resultPending = false;
-          el.sendStatus.textContent = '\u2718 Server error \u2014 copied to clipboard';
-          copySummary();
-          showToast('Server error. Results copied to clipboard.');
+    }
+
+    function sendResults() {
+      var r = appState.latestResult;
+      if (!r || r.submissionStatus !== 'pending' || appState.sendingId) return Promise.resolve();
+      var teacher = Object.prototype.hasOwnProperty.call(TEACHERS, r.teacherKey) ? TEACHERS[r.teacherKey] : null;
+      if (routeError || !teacher || !teacher.url || !teacher.spreadsheetId) {
+        r.submissionError = 'Cannot send: check the class link and teacher setup.';
+        renderSendStatus();
+        return Promise.resolve();
+      }
+      var payload = Object.assign({}, r, {
+        app: 'FactFlowCheck', schemaVersion: 2,
+        expectedSpreadsheetId: teacher.spreadsheetId
+      });
+      delete payload.submissionStatus;
+      delete payload.submissionError;
+      appState.sendingId = r.assessmentId;
+      renderSendStatus();
+      var controller = new AbortController();
+      var timer = window.setTimeout(function () { controller.abort(); }, 20000);
+      return fetch(teacher.url, {
+        method: 'POST', headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify(payload), signal: controller.signal
+      }).then(function (resp) {
+        if (!resp.ok) throw new Error('Server returned HTTP ' + resp.status + '.');
+        return resp.json();
+      }).then(function (data) {
+        if (!data || data.ok !== true || data.receiver !== 'factflow-check-v2' ||
+            data.assessmentId !== r.assessmentId || data.spreadsheetId !== teacher.spreadsheetId) {
+          throw new Error(data && data.error ? data.error : 'The receiver did not confirm this result and class. Ask your teacher to update it.');
         }
-        el.studentViewBtn.disabled = false;
-      }).catch(function () {
-        appState.resultPending = false;
-        el.sendStatus.textContent = '\u2718 Could not reach server \u2014 copied to clipboard';
-        copySummary();
-        showToast('Could not reach server. Results copied to clipboard.');
-        el.studentViewBtn.disabled = false;
+        r.submissionStatus = 'sent';
+        delete r.submissionError;
+      }).catch(function (error) {
+        r.submissionStatus = 'pending';
+        r.submissionError = 'Not sent. ' + (error.name === 'AbortError' ? 'Connection timed out.' : error.message) + ' Use Retry sending or Copy result.';
+      }).then(function () {
+        window.clearTimeout(timer);
+        appState.sendingId = null;
+        saveResults();
+        renderSendStatus();
+        renderHistory();
       });
     }
 
@@ -1706,6 +1727,14 @@
         else { requireTeacherAccess('teacherScreen'); }
       });
       el.beginBtn.addEventListener('click', startAssessment);
+      el.retryResultsBtn.addEventListener('click', sendResults);
+      el.copyResultsBtn.addEventListener('click', copySummary);
+      el.historyTable.addEventListener('click', function (event) {
+        var button = event.target.closest('[data-result-index]');
+        if (!button || !appState.teacherUnlocked) return;
+        var result = appState.results[Number(button.getAttribute('data-result-index'))];
+        if (result) { appState.latestResult = result; renderResult(result); showScreen('resultScreen'); }
+      });
       el.showTeacherResultBtn.addEventListener('click', function () { if (appState.latestResult) { renderResult(appState.latestResult); showScreen('resultScreen'); } });
       el.studentViewBtn.addEventListener('click', function () { resetEntryForNewCheck(); });
       el.cancelTeacherUnlockBtn.addEventListener('click', closeTeacherUnlock);
@@ -1734,9 +1763,9 @@
       el.teacherCode.addEventListener('input', function () { el.teacherCode.value = normalizeCode(el.teacherCode.value); clearError(); });
       window.addEventListener('storage', handleStorageEvent);
       window.addEventListener('beforeunload', function (evt) {
-        if (appState.resultPending) {
+        if (hasPendingResults()) {
           evt.preventDefault();
-          evt.returnValue = 'Your results are still being sent. Please wait.';
+          evt.returnValue = 'There are results that have not been sent yet.';
           return evt.returnValue;
         }
         if (appState.session && !appState.finishing) {
@@ -1772,7 +1801,6 @@
       appState.session = null;
       appState.currentQuestion = null;
       appState.finishing = false;
-      appState.resultPending = false;
       el.teacherCode.value = '';
       clearError();
       showScreen('entryScreen');
@@ -1786,6 +1814,13 @@
       renderConfig();
       renderHistory();
       bindEvents();
+      if (routeError) { showError(routeError); el.beginBtn.disabled = true; }
+      var pending = appState.results.filter(function (result) { return result.submissionStatus === 'pending'; });
+      if (pending.length && !routeError) {
+        appState.latestResult = pending[0];
+        renderResult(pending[0]);
+        showScreen('resultScreen');
+      }
 
       // Show teacher badge when resolved from ?t= param or default
       if (activeTeacher) {
