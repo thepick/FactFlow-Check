@@ -14,7 +14,7 @@ The TEACHERS map in index.html specifies class code, spreadsheet ID and Apps Scr
 
 The updated factflow-apps-script.gs and FactFlow's factflow-practice-apps-script.gs are identical. Install either complete file in each existing Apps Script project, save, then update the existing deployment to a new version. Keep its endpoint and access settings unchanged. This step is not necessary to use the local-only preview.
 
-The new receiver supports schema 2 and schema 3. Schema 3 records are separated into Check v3 and Check Raw v3; existing Check, Raw Data, FactFlow Practice and Practice Raw Data remain intact. Literal-cell handling, strict spreadsheet routing, assessment IDs, deduplication, stale-result protection and exact acknowledgments are retained. Complete JSON evidence is stored in the hidden raw tab.
+The new receiver supports schema 2 and schema 3. Schema 3 records are separated into FactFlow Quiz and FactFlow Quiz Raw; existing Check, Raw Data, FactFlow Practice and Practice Raw Data remain intact. Literal-cell handling, strict spreadsheet routing, assessment IDs, deduplication, stale-result protection and exact acknowledgments are retained. Complete JSON evidence is stored in the hidden raw tab.
 
 Preview-only results are not queued for automatic later submission. Export them during the pilot. Promoting the app does not retroactively change or rescore those results.
 

@@ -72,4 +72,6 @@ After updating both receivers, run refreshTeacherGrades in the Apps Script edito
 
 The public name is FactFlow Quiz. Existing URLs, repository names, storage keys and receiver identifiers are retained for compatibility, so saved results, active sessions and class links continue to work. New downloads use the FactFlow-Quiz filename prefix.
 
-Current receiver deployments use FactFlow Quiz and hidden FactFlow Quiz Raw tabs, renaming earlier schema-3 tabs in place. Legacy schema-2 clients still use Check / Raw Data separately.
+The current receiver source uses FactFlow Quiz and hidden FactFlow Quiz Raw tabs, renaming earlier schema-3 tabs in place. IP5/9 has this deployment; IP5/8 still uses its previous receiver with Check v3 / Check Raw v3 names and the same teacher-grade formula. Legacy schema-2 clients still use Check / Raw Data separately.
+
+The live tool is [FactFlow Quiz](https://ffc.mtomlinson.ca/). The GitHub repository remains `thepick/FactFlow-Check` to preserve existing repository links. Both the live interface and local-only preview use the FactFlow Quiz name.

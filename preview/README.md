@@ -50,7 +50,7 @@ Automatic class codes use a date/class-seeded mixed schedule and four digits, re
 
 Reports separate accurate/fluent, accurate/fluency developing, accurate/standard fluency not assessed, difficulty observed, incomplete evidence, and not assessed. A strength in 9s can be shown even if 7s were difficult. All scores exclude the introduction; interruptions and pauses are separately recorded. Older local reports are displayed using their original verdicts and never rescored.
 
-The receiver accepts legacy schema 2 and new schema 3. New results go into separate `Check v3` and hidden `Check Raw v3` tabs so old and new criteria do not overwrite each other. Conditions, version, dates, coverage, accuracy-only groups, and response gaps are retained. Practice tabs and practice logic are unchanged. The preview deliberately does not send results, even if an old receiver is installed.
+The receiver accepts legacy schema 2 and new schema 3. New results go into separate `FactFlow Quiz` and hidden `FactFlow Quiz Raw` tabs so old and new criteria do not overwrite each other. Conditions, version, dates, coverage, accuracy-only groups, and response gaps are retained. Practice tabs and practice logic are unchanged. The preview deliberately does not send results, even if an old receiver is installed.
 
 ## Validation
 
