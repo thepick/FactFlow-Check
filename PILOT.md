@@ -11,7 +11,7 @@ For each supervised check, record:
 | Date and assessment ID | From downloaded result |
 | Conditions and input method | Standard / extended / untimed; student / teacher |
 | Controls understood | Whether introduction was repeated or help was needed |
-| Time and fatigue | Section pauses, request to stop, teacher check-ins |
+| Time and fatigue | Ten-second transitions, fatigue, recovery interruptions |
 | Coverage | Groups resolved, incomplete, not assessed; mixed included? |
 | Teacher agreement | Which reported strengths/difficulties match classroom evidence? |
 | Timing concern | Finger counting, typing delay, mistaken submission, distracting countdown |
@@ -26,7 +26,7 @@ For each supervised check, record:
 - Slow correct answers must not be reported as standard fluent recall.
 - Accommodated or teacher-recorded checks must not claim standard fluency.
 - Missing responses must not be confused with actual incorrect responses.
-- A teacher can stop an uncomfortable session without fabricated weaknesses in unassessed groups.
+- Ten-second section countdowns advance once; Continue starts sooner, and hidden pages do not start unseen timed questions.
 - Every constituent table is represented in a completed initial sample.
 - Reports and exports identify conditions, dates, coverage and assessment version.
 - Existing historical results and practice data remain unchanged.

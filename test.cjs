@@ -5,7 +5,7 @@ const vm = require('node:vm');
 const html = fs.readFileSync(__dirname + '/index.html', 'utf8').replace(/\r\n/g, '\n');
 const source = [...html.matchAll(/<script[^>]*>([\s\S]*?)<\/script>/g)].map(m => m[1]).find(s => s.includes('var BANDS'));
 const receiverSource = fs.readFileSync(__dirname + '/factflow-apps-script.gs', 'utf8');
-const names = 'appState,el,BANDS,WARMUP,evaluateBandAnswers,buildFinalResult,beginBand,presentNextQuestion,submitAnswer,handleTimeout,hasPendingResults,sendResults,init,renderResult,clearSavedResults,continueAssessment,restoreSession,interruptQuestion,repeatIntroduction,startAssessment,normalizeConditions,recordAnswer,handleKey';
+const names = 'appState,el,BANDS,WARMUP,evaluateBandAnswers,buildFinalResult,beginBand,presentNextQuestion,submitAnswer,handleTimeout,hasPendingResults,sendResults,init,renderResult,clearSavedResults,continueAssessment,restoreSession,interruptQuestion,repeatIntroduction,startAssessment,normalizeConditions,recordAnswer,handleKey,showBreak,tickSectionCountdown,fourHourCodeInfo';
 function load(search = '?t=IP5/8', saved = new Map(), liveDelivery = false) {
   let now = Date.parse('2026-09-20T03:00:00Z'), nextTimer = 0;
   const timers = new Map(), elements = new Map();
@@ -79,6 +79,22 @@ async function run() {
   const pr=partial.api.buildFinalResult(ps);assert.equal(pr.bandResults[0].questions,10);assert.equal(pr.bandResults[0].verdict,'incomplete');
   // Preview never submits even an old pending result.
   const isolated=load();let calls=0;isolated.fetch=()=>{calls++;throw Error('Must not send');};isolated.api.appState.latestResult=Object.assign({},fullResult,{submissionStatus:'pending'});await isolated.api.sendResults();assert.equal(calls,0);
+  // Shared devices agree on a class/window; date and class vary the mixed code schedule.
+  const other=load('?t=IP5/9'),same=load('?t=IP5/8');let previous=null,wordChanges=new Set();
+  for(let day=1;day<=31;day++){
+    const date=new Date(Date.UTC(2026,8,day,3)),code=a.fourHourCodeInfo(date).code;
+    assert.match(code,/^[A-Z]+-[0-9]{4}$/);assert.equal(code,same.api.fourHourCodeInfo(date).code);
+    assert.notEqual(code,other.api.fourHourCodeInfo(date).code);assert.notEqual(code,previous);previous=code;wordChanges.add(code.split('-')[0]);
+  }
+  assert.ok(wordChanges.size>10);
+  assert.equal(a.fourHourCodeInfo(new Date('2026-09-20T03:00:00Z')).code,a.fourHourCodeInfo(new Date('2026-09-20T04:59:00Z')).code);
+  assert.notEqual(a.fourHourCodeInfo(new Date('2026-09-20T04:59:00Z')).code,a.fourHourCodeInfo(new Date('2026-09-20T05:00:00Z')).code);
+  // Section countdown advances once after ten seconds; Continue can start sooner.
+  function section(){const e=load();e.api.appState.session=session(e);e.api.appState.session.nextBlock={index:0,extra:false};e.api.showBreak('Section complete','Next group');return e;}
+  const countdown=section();assert.match(countdown.api.el.sectionCountdown.textContent,/10 seconds/);countdown.advance(9000);countdown.api.tickSectionCountdown();assert.equal(countdown.api.appState.session.paused,true);assert.match(countdown.api.el.sectionCountdown.textContent,/1 second/);countdown.advance(1000);countdown.api.tickSectionCountdown();assert.equal(countdown.api.appState.session.paused,false);const first=countdown.api.appState.currentQuestion;countdown.api.tickSectionCountdown();assert.equal(countdown.api.appState.currentQuestion,first);
+  const early=section();early.api.continueAssessment(false);early.advance(10000);early.api.tickSectionCountdown();assert.equal(early.api.appState.session.currentBandIndex,0);assert.equal(early.api.appState.session.questionResults.length,0);
+  const hidden=section();hidden.document.hidden=true;hidden.advance(10000);hidden.api.tickSectionCountdown();assert.equal(hidden.api.appState.session.paused,true);hidden.document.hidden=false;hidden.api.tickSectionCountdown();assert.equal(hidden.api.appState.session.paused,false);
+  const interrupted=section();interrupted.api.appState.session.needsTeacherCheck=true;interrupted.advance(10000);interrupted.api.tickSectionCountdown();assert.equal(interrupted.api.appState.session.paused,true);
   // Automatic keyboard/keypad entry preserves valid prefixes and cancels stale timers.
   function entry(answerValue){const e=load();e.api.appState.session=session(e);e.api.presentNextQuestion();e.api.appState.currentQuestion.answer=answerValue;return e;}
   const auto=entry(144);auto.api.handleKey('1');assert.equal(auto.api.appState.autoSubmitId,null);auto.api.handleKey('4');assert.equal(auto.api.appState.autoSubmitId,null);auto.api.handleKey('4');assert.equal(auto.timers.get(auto.api.appState.autoSubmitId).ms,120);auto.advance(1500);auto.drain();assert.equal(auto.api.appState.session.questionResults[0].correct,true);
