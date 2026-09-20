@@ -17,12 +17,12 @@ function load(search = '?t=IP5/8', saved = new Map(), liveDelivery = false) {
     fetch:async()=>{throw Error('Offline');}
   };
   vm.createContext(context);
-  vm.runInContext(source.replace('var PREVIEW_MODE = true;', 'var PREVIEW_MODE = '+(!liveDelivery)+';').replace('    init();', `globalThis.api = {${names}};`),context);
+  vm.runInContext(source.replace(/var PREVIEW_MODE = (?:true|false);/, 'var PREVIEW_MODE = '+(!liveDelivery)+';').replace('    init();', `globalThis.api = {${names}};`),context);
   context.api.init();
   return Object.assign(context,{saved,timers,advance(ms){now+=ms;},drain(){for(const [id,t] of timers){if(t.ms<1000){timers.delete(id);t.fn();}}}});
 }
 function answer(i, correct=true, retest=false) {return {phase:'band',bandId:'B',fact:'3 x 4',familyKey:String(i),correct,category:correct?'fluent':'not_secure',timeout:false,retest};}
-function session(c,conditions={}) {return {id:'ffc-test-1',appVersion:'3.0.0-preview',studentName:'Test Student',teacherKey:'IP5/8',code:'TEST-10',assessmentName:'Snapshot',attemptKey:'test',startedAt:new Date().toISOString(),startMs:c.Date.now(),phase:'warmup',currentBandIndex:-1,currentBandId:'Introduction',blockQueue:c.api.WARMUP.slice(),questionResults:[],bandResults:[],conditions:c.api.normalizeConditions(conditions),maxQuestions:c.FactGroups.budget(),pendingExtras:[],stage:'initial',breaks:[],interruptions:[],activeMs:0};}
+function session(c,conditions={}) {return {id:'ffc-test-1',appVersion:'3.0.0',studentName:'Test Student',teacherKey:'IP5/8',code:'TEST-10',assessmentName:'Snapshot',attemptKey:'test',startedAt:new Date().toISOString(),startMs:c.Date.now(),phase:'warmup',currentBandIndex:-1,currentBandId:'Introduction',blockQueue:c.api.WARMUP.slice(),questionResults:[],bandResults:[],conditions:c.api.normalizeConditions(conditions),maxQuestions:c.FactGroups.budget(),pendingExtras:[],stage:'initial',breaks:[],interruptions:[],activeMs:0};}
 
 
 async function run() {
@@ -118,7 +118,7 @@ async function run() {
   assert.equal(restoredLive.api.appState.session.questionResults.length,0);restoredLive.api.continueAssessment(true);
   assert.notEqual(restoredLive.api.appState.currentQuestion.familyKey,exposed);
   restoredLive.api.el.answerInput.value=String(restoredLive.api.appState.currentQuestion.answer);restoredLive.advance(1500);restoredLive.api.submitAnswer();
-  const checkpoint=JSON.parse(restoredLive.saved.get('factflowCheck.session.v3|IP5/8'));assert.equal(checkpoint.questionResults.length,1);assert.equal(checkpoint.pendingQuestion,undefined);
+  const checkpoint=JSON.parse(restoredLive.saved.get('factflowCheck.session.v3.live|IP5/8'));assert.equal(checkpoint.questionResults.length,1);assert.equal(checkpoint.pendingQuestion,undefined);
   // Repeating the introduction never consumes the scored budget or awards a group.
   const intro=load();intro.api.appState.session=session(intro);intro.api.appState.session.paused=true;intro.api.appState.session.questionResults=[{phase:'warmup'}];intro.api.repeatIntroduction();assert.equal(intro.api.appState.session.questionResults.length,0);
   for(const route of ['?t=TYPO','?t=','?t=__proto__','?t=%ZZ']) {assert.equal(load(route).activeTeacher,null);assert.ok(load(route).routeError);}

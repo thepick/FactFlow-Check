@@ -2,7 +2,7 @@
 
 ## Representative students
 
-Try the preview with students showing emerging recall, uneven strengths, fluent recall, accurate but slower answers, and students using their usual teacher-selected accommodations. Do not manufacture difficulties or change an accommodation to fit a test case. The assessment covers multiplication facts from 2–12; use teacher assessment outside that scope.
+Try the preview with students showing emerging recall, uneven strengths, fluent recall, accurate but slower answers, and students using their usual teacher-selected accommodations. Do not manufacture difficulties or change an accommodation to fit a test case. The assessment covers multiplication facts from 2Ã¢â‚¬â€œ12; use teacher assessment outside that scope.
 
 For each supervised check, record:
 
@@ -35,7 +35,7 @@ For each supervised check, record:
 
 ## Promotion sequence
 
-1. Review pilot observations with Michael. Software tests are complete; the human pilot is not.
+1. Michael approved promotion following his classroom preview and requested revisions. Continue gathering representative student observations; software checks do not validate educational thresholds.
 2. Apply any agreed changes and run the regression and browser checks.
 3. Deploy the schema-3-compatible receiver to both existing class endpoints. Keep URLs, owners and access settings unchanged. Verify receipts and class routing.
 4. Confirm new records use Check v3 / Check Raw v3, while legacy and practice records still use their own tabs.

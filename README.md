@@ -1,13 +1,13 @@
-# FactFlow Check 3.0 preview
+# FactFlow Check 3.0
 
-An independent, supervised snapshot of multiplication accuracy and fluent recall. FactFlow practice remains separate. This release is a classroom pilot, not a validated diagnostic instrument or a permanent student level.
+An independent, supervised snapshot of multiplication accuracy and fluent recall. FactFlow practice remains separate. This is a sampled classroom assessment, not a validated diagnostic instrument or a permanent student level.
 
 ## What changed
 
-- Named fact groups: 2s, 5s & 10s; 3s & 4s; 6s; 7s; 8s; 9s; 11s & 12s; Final challenge: mixed facts 2–12.
+- Named fact groups: 2s, 5s & 10s; 3s & 4s; 6s; 7s; 8s; 9s; 11s & 12s; Final challenge: mixed facts 2Ã¢â‚¬â€œ12.
 - Every group is assessed independently. Difficulty in one group does not block later groups.
 - Four unscored 1-times-table examples teach the controls without priming scored facts.
-- Eight initial questions per group; uncertain accuracy is clarified immediately with more questions from the same group before moving on. Up to four extra unique facts per group, or three for a single table (there are only eleven unique facts from ×2 to ×12).
+- Eight initial questions per group; uncertain accuracy is clarified immediately with more questions from the same group before moving on. Up to four extra unique facts per group, or three for a single table (there are only eleven unique facts from Ãƒâ€”2 to Ãƒâ€”12).
 - Required final challenge: eighteen mixed-recall questions covering all eleven tables, after all other groups and their immediate follow-up questions. It appears in the same report and overall response totals as the other groups.
 - Interrupted displays and repeated introductions are outside the scored budget; they are recorded separately where applicable.
 - No repeated-fact retests or fast-track awards. Within a group, a reversed fact is the same fact.
@@ -17,7 +17,7 @@ An independent, supervised snapshot of multiplication accuracy and fluent recall
 
 ## Timing and evidence
 
-Standard conditions allow ten seconds per question. A correct submitted response strictly under four seconds counts as fluent. Type or tap the answer; it submits automatically using the original entry behaviour. A full-length answer submits after 120 ms; a shorter nonmatching answer submits after a short pause (500–700 ms), while a matching partial answer waits for the remaining digits or the question deadline. Enter and Submit remain optional. Backspace and Clear cancel pending submission. Response time includes the submission delay.
+Standard conditions allow ten seconds per question. A correct submitted response strictly under four seconds counts as fluent. Type or tap the answer; it submits automatically using the original entry behaviour. A full-length answer submits after 120 ms; a shorter nonmatching answer submits after a short pause (500Ã¢â‚¬â€œ700 ms), while a matching partial answer waits for the remaining digits or the question deadline. Enter and Submit remain optional. Backspace and Clear cancel pending submission. Response time includes the submission delay.
 
 Teacher-selected extended (20-second), untimed, or teacher-recorded oral responses assess accuracy only. They never earn standard fluency verdicts. Hiding the visual countdown does not extend the deadline. These settings apply to the next assessment on that device.
 
@@ -34,13 +34,13 @@ Correct but slower responses demonstrate accuracy, not fluency. Actual wrong ans
 
 These are operational criteria, not population norms. Eight sampled questions do not certify every fact in a group. The report identifies sampled tables, conditions, missing evidence, dates, and the assessment ceiling.
 
-## Pilot workflow
+## Classroom workflow
 
-1. Open the preview using your class link. The standard classroom page remains version 2.8.0.
+1. Open FactFlow Check using your existing class link.
 2. In Teacher Tools, choose response conditions, answer method and visual countdown. Save & Exit. Settings are local to this browser/device.
 3. Enter the student's name and teacher code. Complete or repeat the introduction, then continue through blank section screens.
 4. Wait ten seconds between sections or select Continue to start sooner. Difficulty does not block later groups.
-5. Download the JSON result and/or copy the readable summary. Preview results are saved locally only; no Google requests are made by the preview.
+5. Download the JSON result and/or copy the readable summary. Live results are sent automatically to your class spreadsheet. Check for confirmation; use Retry sending if delivery fails.
 6. After a refresh, use Teacher: resume saved check. A visible interrupted fact is replaced with an unused fact; if none is available, evidence remains incomplete. A teacher must authorise resumption. Dates and interruptions are retained. Prefer the same supervised sitting; cross-day resumes are explicitly dated.
 7. Clearing browser data removes local results and progress. Export results before doing so. A persistent warning appears if local storage fails.
 
@@ -50,7 +50,7 @@ Automatic class codes use a date/class-seeded mixed schedule and four digits, re
 
 Reports separate accurate/fluent, accurate/fluency developing, accurate/standard fluency not assessed, difficulty observed, incomplete evidence, and not assessed. A strength in 9s can be shown even if 7s were difficult. All scores exclude the introduction; interruptions and pauses are separately recorded. Older local reports are displayed using their original verdicts and never rescored.
 
-The receiver accepts legacy schema 2 and new schema 3. New results go into separate `Check v3` and hidden `Check Raw v3` tabs so old and new criteria do not overwrite each other. Conditions, version, dates, coverage, accuracy-only groups, and response gaps are retained. Practice tabs and practice logic are unchanged. The preview deliberately does not send results, even if an old receiver is installed.
+The receiver accepts legacy schema 2 and new schema 3. New results go into separate `Check v3` and hidden `Check Raw v3` tabs so old and new criteria do not overwrite each other. Conditions, version, dates, coverage, accuracy-only groups, and response gaps are retained. Practice tabs and practice logic are unchanged. The separate /preview/ page remains local-only. Preview results are never automatically submitted by the live app; live attempt locks and saved sessions are separate.
 
 ## Validation
 
@@ -58,4 +58,4 @@ Run `node test.cjs`. No dependencies or real Google requests are needed. Tests c
 
 A real Edge browser check additionally covers the full 78-question route, teacher settings, keyboard submission, a 74/74 scored result, mobile layout, zero preview POST requests, and refresh recovery.
 
-See [PILOT.md](PILOT.md) for acceptance criteria and [SETUP-GUIDE.md](SETUP-GUIDE.md) for promotion. Real-student pilot observations remain to be collected before making this the default.
+See [PILOT.md](PILOT.md) for acceptance criteria and [SETUP-GUIDE.md](SETUP-GUIDE.md) for promotion. Michael approved promotion after the classroom preview and interface revisions. Continue collecting classroom observations to review the provisional criteria.
