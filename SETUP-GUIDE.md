@@ -1,4 +1,4 @@
-# FactFlow Check 3.0 setup
+# FactFlow Quiz 3.0 setup
 
 Version 3.0 sends completed assessments to the existing class Google Sheets and retains local copies. The separate /preview/ page remains local-only. Live progress and attempt locks use separate storage keys, so pilot sessions cannot block a live check.
 
