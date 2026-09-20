@@ -4,14 +4,14 @@ An independent, supervised snapshot of multiplication accuracy and fluent recall
 
 ## What changed
 
-- Named fact groups: 2s, 5s & 10s; 3s & 4s; 6s; 7s; 8s; 9s; 11s & 12s; Mixed facts: 2–12.
+- Named fact groups: 2s, 5s & 10s; 3s & 4s; 6s; 7s; 8s; 9s; 11s & 12s; Final challenge: mixed facts 2–12.
 - Every group is assessed independently. Difficulty in one group does not block later groups.
 - Four unscored 1-times-table examples teach the controls without priming scored facts.
 - Eight initial questions per group; uncertain accuracy is revisited after all initial groups. Up to four extra unique facts per group, or three for a single table (there are only eleven unique facts from ×2 to ×12).
-- Optional mixed recall: eighteen questions covering all eleven tables.
+- Required final challenge: eighteen mixed-recall questions covering all eleven tables, after the other groups and any follow-up questions. It appears in the same report and overall response totals as the other groups.
 - Interrupted displays and repeated introductions are outside the scored budget; they are recorded separately where applicable.
 - No repeated-fact retests or fast-track awards. Within a group, a reversed fact is the same fact.
-- A computed maximum of 102 counted questions (98 scored), including every extra and mixed recall; 78 counted (74 scored) when initial evidence is clear. Without mixed recall the maximum is 84 counted.
+- A computed maximum of 102 counted questions (98 scored), including every extra and mixed recall; 78 counted (74 scored) when initial evidence is clear.
 - Between-section screens automatically continue after a visible ten-second countdown. Continue starts the next section immediately. No question is visible during the countdown; there is no end-check button on that screen.
 - No total-time failure. The per-question deadline still applies. An interrupted question still requires teacher-authorised recovery; automatic section transitions never start questions while the page is hidden.
 
@@ -37,7 +37,7 @@ These are operational criteria, not population norms. Eight sampled questions do
 ## Pilot workflow
 
 1. Open the preview using your class link. The standard classroom page remains version 2.8.0.
-2. In Teacher Tools, choose response conditions, answer method, visual countdown, and whether to include mixed recall. Save & Exit. Settings are local to this browser/device.
+2. In Teacher Tools, choose response conditions, answer method and visual countdown. Save & Exit. Settings are local to this browser/device.
 3. Enter the student's name and teacher code. Complete or repeat the introduction, then continue through blank section screens.
 4. Wait ten seconds between sections or select Continue to start sooner. Difficulty does not block later groups.
 5. Download the JSON result and/or copy the readable summary. Preview results are saved locally only; no Google requests are made by the preview.
@@ -54,7 +54,7 @@ The receiver accepts legacy schema 2 and new schema 3. New results go into separ
 
 ## Validation
 
-Run `node test.cjs`. No dependencies or real Google requests are needed. Tests cover strong, slow, uneven, wrong, timed-out, skipped, accommodated, maximum-budget, optional-mixed, interrupted and refreshed paths; 100 generated samples per group; storage failures; exact receipts; duplicate/stale retries; receiver validation; and legacy/practice separation.
+Run `node test.cjs`. No dependencies or real Google requests are needed. Tests cover strong, slow, uneven, wrong, timed-out, skipped, accommodated, maximum-budget, mandatory final-challenge, interrupted and refreshed paths; 100 generated samples per group; storage failures; exact receipts; duplicate/stale retries; receiver validation; and legacy/practice separation.
 
 A real Edge browser check additionally covers the full 78-question route, teacher settings, keyboard submission, a 74/74 scored result, mobile layout, zero preview POST requests, and refresh recovery.
 

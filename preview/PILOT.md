@@ -12,7 +12,7 @@ For each supervised check, record:
 | Conditions and input method | Standard / extended / untimed; student / teacher |
 | Controls understood | Whether introduction was repeated or help was needed |
 | Time and fatigue | Ten-second transitions, fatigue, recovery interruptions |
-| Coverage | Groups resolved, incomplete, not assessed; mixed included? |
+| Coverage | Groups resolved, incomplete, not assessed; final challenge completed? |
 | Teacher agreement | Which reported strengths/difficulties match classroom evidence? |
 | Timing concern | Finger counting, typing delay, mistaken submission, distracting countdown |
 | Recovery | Any interruption, refresh, lost progress, or storage warning |
@@ -21,6 +21,7 @@ For each supervised check, record:
 ## Release gates
 
 - A warm-up mistake must not block any scored group.
+- Mixed recall is the required final stage and appears alongside every other group in the report; old settings cannot disable it.
 - A weak group must not block stronger groups later in the assessment.
 - No optional questions may exhaust the allowance needed for selected later groups.
 - Slow correct answers must not be reported as standard fluent recall.

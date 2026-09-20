@@ -345,7 +345,7 @@
         <div class="field"><label for="assessmentMode">Response conditions for the next student</label>
           <select id="assessmentMode"><option value="standard">Standard: 10 seconds per question; fluent under 4 seconds</option><option value="extended">Extended: 20 seconds; accuracy only</option><option value="untimed">Untimed: accuracy only</option></select></div>
         <div class="field"><label for="inputMethod">Answer method</label><select id="inputMethod"><option value="student">Student keypad or keyboard</option><option value="teacher">Teacher records spoken answers (accuracy only)</option></select></div>
-        <div class="field"><label><input type="checkbox" id="hideTimer"> Hide visual countdown</label><label><input type="checkbox" id="includeMixed"> Include mixed recall (2–12)</label></div>
+        <div class="field"><label><input type="checkbox" id="hideTimer"> Hide visual countdown</label></div>
         <p class="muted small">These settings are saved on this device. Extended, untimed, and teacher-recorded checks cannot earn standard fluency verdicts. Only change settings before a check.</p>
         <div class="notice">
           <p class="small muted">This preview keeps results locally. Download each completed result before clearing this browser. Existing classroom results are preserved separately.</p>
@@ -391,7 +391,7 @@
   </div>
   <div class="toast" id="toast" aria-live="polite"></div>
 
-  <script src="assessment.js?v=3.0.0-preview"></script>
+  <script src="assessment.js?v=3.0.0-final-challenge"></script>
   <script>
   /* ╔══════════════════════════════════════════════════════════════╗
      ║              FACTFLOW CHECK — TEACHER SETUP               ║
@@ -487,7 +487,7 @@
         'cancelTeacherUnlockBtn','unlockTeacherBtn','toast','countdownOverlay','countdownLabel','countdownValue',
         'teacherBadge','teacherBadgeName','retryResultsBtn','copyResultsBtn','downloadResultBtn',
         'breakScreen','breakTitle','breakMessage','sectionCountdown','continueBtn','repeatIntroBtn',
-        'assessmentMode','inputMethod','hideTimer','includeMixed','recoveryNotice','recoveryText','resumeSessionBtn','sessionWarning','submitAnswerBtn','skipQuestionBtn'
+        'assessmentMode','inputMethod','hideTimer','recoveryNotice','recoveryText','resumeSessionBtn','sessionWarning','submitAnswerBtn','skipQuestionBtn'
       ];
       for (var i = 0; i < ids.length; i++) el[ids[i]] = document.getElementById(ids[i]);
     }
@@ -599,7 +599,7 @@
         el.customCode.value = '';
         showToast('The sample code is reserved and was not saved.');
       }
-      appState.config.conditions = normalizeConditions({mode:el.assessmentMode.value,input:el.inputMethod.value,hideTimer:el.hideTimer.checked,mixed:el.includeMixed.checked});
+      appState.config.conditions = normalizeConditions({mode:el.assessmentMode.value,input:el.inputMethod.value,hideTimer:el.hideTimer.checked});
       appState.config.updatedAt = new Date().toISOString();
       saveJson(CONFIG_KEY, appState.config);
       renderConfig();
@@ -615,7 +615,7 @@
       el.assessmentName.value = appState.config.assessmentName || '';
       el.customCode.value = normalizeCode(appState.config.customCode || '');
       el.studentCodeHint.textContent = 'Ask your teacher for the code';
-      var c=normalizeConditions(appState.config.conditions);el.assessmentMode.value=c.mode;el.inputMethod.value=c.input;el.hideTimer.checked=c.hideTimer;el.includeMixed.checked=c.mixed;
+      var c=normalizeConditions(appState.config.conditions);el.assessmentMode.value=c.mode;el.inputMethod.value=c.input;el.hideTimer.checked=c.hideTimer;
     }
 
     function isCodeAccepted(code) {
@@ -838,7 +838,7 @@
         latestVerdict: '',
         finalReason: ''
       };
-      appState.session.maxQuestions = FactGroups.budget(appState.session.conditions.mixed);
+      appState.session.maxQuestions = FactGroups.budget();
       persistSession();
       appState.attempts[key] = { status: 'in_progress', startedAt: appState.session.startedAt };
       saveJson(ATTEMPTS_KEY, appState.attempts);
@@ -977,7 +977,7 @@
       var next=null;
       if(s.stage==='initial'&&s.currentBandIndex<6)next={index:s.currentBandIndex+1,extra:false};
       else if(s.pendingExtras.length){s.stage='extras';next={index:s.pendingExtras.shift(),extra:true};}
-      else if(s.conditions.mixed&&band.id!=='H'){s.stage='mixed';next={index:7,extra:false};}
+      else if(band.id!=='H'){s.stage='mixed';next={index:7,extra:false};}
       if(!next){finishAssessment('Completed the selected fact groups.');return;}
       s.nextBlock=next;
       s.needsTeacherCheck=false;
@@ -1386,7 +1386,7 @@
 
     function normalizeConditions(value) {
       var c=value||{};
-      return {mode:['standard','extended','untimed'].indexOf(c.mode)>=0?c.mode:'standard',input:c.input==='teacher'?'teacher':'student',hideTimer:!!c.hideTimer,mixed:c.mixed!==false};
+      return {mode:['standard','extended','untimed'].indexOf(c.mode)>=0?c.mode:'standard',input:c.input==='teacher'?'teacher':'student',hideTimer:!!c.hideTimer,mixed:true};
     }
     function isStandard(conditions) {var c=normalizeConditions(conditions);return c.mode==='standard'&&c.input==='student';}
     function responseSeconds(){var mode=appState.session.conditions.mode;return mode==='untimed'?0:mode==='extended'?20:TIMEOUT_SEC;}
@@ -1487,7 +1487,7 @@
       var saved=loadJson(SESSION_KEY,null);
       if(!saved||saved.appVersion!==APP_VERSION||saved.teacherKey!==activeTeacher.key){showError('This saved check cannot be resumed in this version or class.');return;}
       if(!['questionResults','bandResults','blockQueue','pendingExtras','breaks','interruptions'].every(function(k){return Array.isArray(saved[k]);})||typeof saved.id!=='string'||!Number.isInteger(saved.currentBandIndex)||saved.currentBandIndex< -1||saved.currentBandIndex>7){showError('The saved progress is damaged. Keep this browser data and ask for help recovering it.');return;}
-      saved.conditions=normalizeConditions(saved.conditions);saved.maxQuestions=FactGroups.budget(saved.conditions.mixed);
+      saved.conditions=normalizeConditions(saved.conditions);saved.maxQuestions=FactGroups.budget();
       appState.session=saved;appState.finishing=false;el.testStudentLabel.textContent=saved.studentName;el.recoveryNotice.hidden=true;
       if(saved.pendingQuestion){saved.paused=false;interruptQuestion('Recovered after refresh');}
       else {saved.needsTeacherCheck=false;showBreak('Resume saved check','Started '+formatDate(saved.startedAt)+'. Continue only as part of the same supervised assessment; dates and breaks are recorded.');}

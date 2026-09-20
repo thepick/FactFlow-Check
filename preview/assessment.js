@@ -5,7 +5,7 @@
     ['A', '2s, 5s & 10s', [2,5,10]], ['B', '3s & 4s', [3,4]],
     ['C', '6s', [6]], ['D', '7s', [7]], ['E', '8s', [8]],
     ['F', '9s', [9]], ['G', '11s & 12s', [11,12]],
-    ['H', 'Mixed facts: 2–12', [2,3,4,5,6,7,8,9,10,11,12]]
+    ['H', 'Final challenge: mixed facts 2–12', [2,3,4,5,6,7,8,9,10,11,12]]
   ].map(function (g) { return { id:g[0], label:g[1], tables:g[2], blockSize:g[0]==='H'?18:8,
     extraSize:g[0]==='H'?0:g[2].length===1?3:4 }; });
   function pool(group) {
@@ -32,7 +32,7 @@
     }
     return out;
   }
-  function budget(mixed) {return 4+groups.reduce(function(n,g){return n+(g.id==='H'&&!mixed?0:g.blockSize+g.extraSize);},0);}
+  function budget() {return 4+groups.reduce(function(n,g){return n+g.blockSize+g.extraSize;},0);}
   function assess(group,answers,extra,standard) {
     var n=answers.length, correct=answers.filter(function(a){return a.correct;}).length;
     var wrong=answers.filter(function(a){return !a.correct&&!a.timeout&&!a.skipped;}).length;
