@@ -50,7 +50,7 @@ Automatic class codes use a date/class-seeded mixed schedule and four digits, re
 
 Reports separate accurate/fluent, accurate/fluency developing, accurate/standard fluency not assessed, difficulty observed, incomplete evidence, and not assessed. A strength in 9s can be shown even if 7s were difficult. All scores exclude the introduction; interruptions and pauses are separately recorded. Older local reports are displayed using their original verdicts and never rescored.
 
-The receiver accepts legacy schema 2 and new schema 3. New results go into separate `Check v3` and hidden `Check Raw v3` tabs so old and new criteria do not overwrite each other. Conditions, version, dates, coverage, accuracy-only groups, and response gaps are retained. Practice tabs and practice logic are unchanged. The separate /preview/ page remains local-only. Preview results are never automatically submitted by the live app; live attempt locks and saved sessions are separate.
+The receiver accepts legacy schema 2 and new schema 3. New results go into separate `FactFlow Quiz` and hidden `FactFlow Quiz Raw` tabs so old and new criteria do not overwrite each other. Conditions, version, dates, coverage, accuracy-only groups, and response gaps are retained. Practice tabs and practice logic are unchanged. The separate /preview/ page remains local-only. Preview results are never automatically submitted by the live app; live attempt locks and saved sessions are separate.
 
 ## Validation
 
@@ -62,7 +62,7 @@ See [PILOT.md](PILOT.md) for acceptance criteria and [SETUP-GUIDE.md](SETUP-GUID
 
 ## Teacher-only percentage grade
 
-Check v3 columns W-Z contain Teacher Grade %, Grade Basis, Level-weighted Accuracy %, and Level-weighted Fluency %. The receiver calculates these values; they are never returned to the browser or added to student reports or downloads.
+FactFlow Quiz columns W-Z contain Teacher Grade %, Grade Basis, Level-weighted Accuracy %, and Level-weighted Fluency %. The receiver calculates these values; they are never returned to the browser or added to student reports or downloads.
 
 Each of the eight levels contributes 12.5%, including the final challenge. Average correct/questions across levels and average fluent/questions across levels, then combine 60% accuracy + 40% fluency. All scored responses within each level count, including clarification questions. Wrong, timed-out and skipped responses earn zero; introductions are excluded. Extra questions do not increase a level's weight. This is a classroom scoring convention, not a standardized grade.
 
@@ -70,4 +70,6 @@ Only completed routes receive a grade. A level ended early for clear difficulty 
 
 After updating both receivers, run refreshTeacherGrades in the Apps Script editor to fill existing IP5/8 and IP5/9 summary grade columns from saved schema-3 evidence matched by assessment ID. It updates only these four columns and their formatting. Raw evidence, legacy results and student verdicts remain unchanged. New submissions and retries calculate the grade automatically. The helper is not exposed as a public receiver action. Existing spreadsheet sharing controls access to grades.
 
-The public name is FactFlow Quiz. Existing URLs, repository names, spreadsheet tab names, storage keys and receiver identifiers are retained for compatibility, so saved results, active sessions and class links continue to work. New downloads use the FactFlow-Quiz filename prefix.
+The public name is FactFlow Quiz. Existing URLs, repository names, storage keys and receiver identifiers are retained for compatibility, so saved results, active sessions and class links continue to work. New downloads use the FactFlow-Quiz filename prefix.
+
+Current receiver deployments use FactFlow Quiz and hidden FactFlow Quiz Raw tabs, renaming earlier schema-3 tabs in place. Legacy schema-2 clients still use Check / Raw Data separately.

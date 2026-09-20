@@ -173,7 +173,7 @@ async function run() {
     getRange(row,col,n=1,m=1){assert.ok(col+m-1<=this.columns);return {
       getValues:()=>Array.from({length:n},(_,i)=>Array.from({length:m},(_,j)=>this.rows[row+i-1]?.[col+j-1]??'')),
       getValue:()=>this.rows[row-1]?.[col-1]??'',
-      setValues:values=>{assert.ok(locked);if(failSummary&&this.name==='Check v3'&&row>1)throw Error('Summary unavailable');for(let i=0;i<n;i++){this.rows[row+i-1]??=[];for(let j=0;j<m;j++)this.rows[row+i-1][col+j-1]=values[i][j];}},
+      setValues:values=>{assert.ok(locked);if(failSummary&&this.name==='FactFlow Quiz'&&row>1)throw Error('Summary unavailable');for(let i=0;i<n;i++){this.rows[row+i-1]??=[];for(let j=0;j<m;j++)this.rows[row+i-1][col+j-1]=values[i][j];}},
       sort(){},setNumberFormat(){}
     };}
   }
@@ -200,42 +200,45 @@ async function run() {
   const james=JSON.parse(JSON.stringify(fullResult));
   [[12,9,7],[8,8,8],[6,2,1],[11,7,3],[11,6,4],[6,3,1],[12,9,9],[18,12,11]].forEach(([n,c,f],i)=>Object.assign(james.bandResults[i],{questions:n,correct:c,fluent:f,verdict:i===2||i===5?'fail':'incomplete'}));
   assert.ok(Math.abs(rx.teacherGradeCells(james)[0]-0.5843434343434343)<1e-12);
+  // Existing schema-3 tabs are renamed in place; no duplicate report or lost evidence.
+  sheets.set('Check v3',new Sheet('Check v3'));sheets.set('Check Raw v3',new Sheet('Check Raw v3'));
   const payload=Object.assign({},posted,{completedAt:'2026-09-20T03:00:00Z'});
   assert.equal(rx.handleFactFlowCheck(payload).ok,true);
   assert.equal(flushes,1);assert.equal(locked,false);
-  assert.equal(sheets.get('Check v3').rows[1][22],1);
-  assert.equal(sheets.get('Check v3').rows[0][22],'Teacher Grade %');
+  assert.equal(sheets.has('Check v3'),false);assert.equal(sheets.has('Check Raw v3'),false);
+  assert.equal(sheets.get('FactFlow Quiz').rows[1][22],1);
+  assert.equal(sheets.get('FactFlow Quiz').rows[0][22],'Teacher Grade %');
   assert.equal(Object.hasOwn(rx.handleFactFlowCheck(payload),'grade'),false);
-  sheets.get('Check v3').rows[1][22]='';rx.refreshTeacherGrades();
-  assert.equal(sheets.get('Check v3').rows[1][22],1);
-  assert.equal(JSON.parse(sheets.get('Check Raw v3').rows[1][15]).teacherGrade,undefined);
+  sheets.get('FactFlow Quiz').rows[1][22]='';rx.refreshTeacherGrades();
+  assert.equal(sheets.get('FactFlow Quiz').rows[1][22],1);
+  assert.equal(JSON.parse(sheets.get('FactFlow Quiz Raw').rows[1][15]).teacherGrade,undefined);
   assert.equal(rx.handleFactFlowCheck(payload).ok,true);
-  assert.equal(sheets.get('Check Raw v3').getLastRow(),2);
+  assert.equal(sheets.get('FactFlow Quiz Raw').getLastRow(),2);
   for(const bad of [{schemaVersion:9},{skipped:-1},{conditions:{mode:'extended',input:'student',mixed:true,hideTimer:false}},{bandResults:payload.bandResults.slice(1)},{totalQuestions:99},{accuracy:1}])assert.equal(rx.handleFactFlowCheck(Object.assign({},payload,bad)).ok,false);
   const newer=Object.assign({},payload,{assessmentId:'ffc-newer',completedAt:'2026-09-21T03:00:00Z'});
   assert.equal(rx.handleFactFlowCheck(newer).ok,true);
   assert.equal(rx.handleFactFlowCheck(payload).ok,true);
-  assert.equal(sheets.get('Check v3').rows[1][10],'ffc-newer');
+  assert.equal(sheets.get('FactFlow Quiz').rows[1][10],'ffc-newer');
   failSummary=true;
   const retry=Object.assign({},payload,{assessmentId:'ffc-repair',completedAt:'2026-09-22T03:00:00Z'});
   assert.equal(rx.handleFactFlowCheck(retry).ok,false);failSummary=false;
   assert.equal(rx.handleFactFlowCheck(retry).ok,true);
-  assert.equal(sheets.get('Check Raw v3').getLastRow(),4);
-  assert.equal(sheets.get('Check v3').rows[1][10],'ffc-repair');
+  assert.equal(sheets.get('FactFlow Quiz Raw').getLastRow(),4);
+  assert.equal(sheets.get('FactFlow Quiz').rows[1][10],'ffc-repair');
   failFlush=true;assert.equal(rx.handleFactFlowCheck(retry).ok,false);failFlush=false;
   assert.equal(rx.handleFactFlowCheck(retry).ok,true);
   for(const bad of [{teacherKey:'TYPO'},{correct:50},{expectedSpreadsheetId:'WRONG'},{assessmentId:''},{studentName:''},{missedFacts:[{}]}]) {
     assert.equal(rx.handleFactFlowCheck(Object.assign({},payload,bad)).ok,false);
   }
-  assert.equal(sheets.get('Check Raw v3').getLastRow(),4);
+  assert.equal(sheets.get('FactFlow Quiz Raw').getLastRow(),4);
   const legacy=Object.assign({},payload,{classCode:'IP5/8',schemaVersion:2,totalQuestions:8,correct:8,fluent:8,slow:0,wrong:0,timeout:0,accuracy:100,bandResults:[]});delete legacy.app;delete legacy.teacherKey;delete legacy.assessmentId;
   assert.equal(rx.handleFactFlowCheck(legacy).ok,true);
   assert.equal(rx.handleFactFlowCheck(legacy).ok,true);
-  assert.equal(sheets.get('Raw Data').getLastRow(),2);assert.equal(sheets.get('Check Raw v3').getLastRow(),4);
+  assert.equal(sheets.get('Raw Data').getLastRow(),2);assert.equal(sheets.get('FactFlow Quiz Raw').getLastRow(),4);
   assert.equal(rx.checkCell('=1+1'),"'=1+1");
   const practice=rx.doPost({postData:{contents:JSON.stringify({app:'FactFlowPractice',teacherKey:'IP5/8',roundId:'round-1',studentName:'Practice Student'})}});
   assert.equal(practice.ok,true);assert.equal(practice.receiver,'factflow-practice-v1');assert.ok(practice.spreadsheetId);
-  assert.equal(sheets.get('Raw Data').getLastRow(),2);assert.equal(sheets.get('Check Raw v3').getLastRow(),4);
+  assert.equal(sheets.get('Raw Data').getLastRow(),2);assert.equal(sheets.get('FactFlow Quiz Raw').getLastRow(),4);
   assert.ok(sheets.has('FactFlow Practice'));
   const peer=__dirname+'/../FactFlow/factflow-practice-apps-script.gs';
   if(fs.existsSync(peer))assert.equal(fs.readFileSync(peer,'utf8'),receiverSource);
