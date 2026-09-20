@@ -70,8 +70,8 @@ Only completed routes receive a grade. A level ended early for clear difficulty 
 
 After updating both receivers, run refreshTeacherGrades in the Apps Script editor to fill existing IP5/8 and IP5/9 summary grade columns from saved schema-3 evidence matched by assessment ID. It updates only these four columns and their formatting. Raw evidence, legacy results and student verdicts remain unchanged. New submissions and retries calculate the grade automatically. The helper is not exposed as a public receiver action. Existing spreadsheet sharing controls access to grades.
 
-The public name is FactFlow Quiz. Existing URLs, repository names, storage keys and receiver identifiers are retained for compatibility, so saved results, active sessions and class links continue to work. New downloads use the FactFlow-Quiz filename prefix.
+The public name is FactFlow Quiz. Existing classroom URLs, storage keys and receiver identifiers are retained for compatibility, so saved results, active sessions and class links continue to work. New downloads use the FactFlow-Quiz filename prefix.
 
 The current receiver source uses FactFlow Quiz and hidden FactFlow Quiz Raw tabs, renaming earlier schema-3 tabs in place. IP5/9 has this deployment; IP5/8 still uses its previous receiver with Check v3 / Check Raw v3 names and the same teacher-grade formula. Legacy schema-2 clients still use Check / Raw Data separately.
 
-The live tool is [FactFlow Quiz](https://ffc.mtomlinson.ca/). The GitHub repository remains `thepick/FactFlow-Check` to preserve existing repository links. Both the live interface and local-only preview use the FactFlow Quiz name.
+The live tool is [FactFlow Quiz](https://ffc.mtomlinson.ca/). The GitHub repository is [thepick/FactFlow-Quiz](https://github.com/thepick/FactFlow-Quiz). Both the live interface and local-only preview use the FactFlow Quiz name.
